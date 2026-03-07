@@ -1,0 +1,70 @@
+.app-promo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 50px;
+  background-color: #ffffff; /* Fundo branco novamente */
+  gap: 80px;
+}
+
+.promo-image {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Estilo temporário para a área da imagem do telemóvel */
+.mobile-placeholder {
+  width: 260px;
+  height: 480px;
+  background-color: #f5f8ff;
+  border: 2px dashed #b3cbf2;
+  border-radius: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #6390f0;
+  font-weight: bold;
+  font-size: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.promo-content {
+  flex: 1;
+  max-width: 450px;
+}
+
+.promo-content h2 {
+  font-size: 32px;
+  color: #1a1a1a;
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+.promo-content p {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 40px;
+  line-height: 1.6;
+}
+
+.store-buttons {
+  display: flex;
+  gap: 15px;
+}
+
+.store-btn {
+  background-color: #1a1a1a;
+  color: #ffffff;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.store-btn:hover {
+  background-color: #333333;
+}
