@@ -1,0 +1,85 @@
+.hero-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 80px 50px;
+  background-color: #ffffff;
+  min-height: 60vh;
+}
+
+.hero-content {
+  max-width: 50%;
+}
+
+.hero-title {
+  font-size: 64px;
+  font-weight: 800;
+  color: #1a1a1a;
+  line-height: 1.2;
+  margin-bottom: 20px;
+}
+
+/* O truque para o marcador de texto azul */
+.highlight-text {
+  position: relative;
+  display: inline-block;
+  z-index: 1;
+}
+
+.highlight-text::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 10px;
+  width: 100%;
+  height: 18px;
+  background-color: #b3cbf2; 
+  z-index: -1;
+}
+
+.hero-subtitle {
+  font-size: 18px;
+  color: #666666;
+  margin-bottom: 40px;
+  max-width: 85%;
+  line-height: 1.6;
+}
+
+.btn-how-it-works {
+  background-color: #6390f0;
+  color: #ffffff;
+  border: none;
+  padding: 15px 40px;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-how-it-works:hover {
+  background-color: #4a75d1;
+}
+
+.hero-image {
+  width: 45%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Estilo temporário até colocar a imagem real */
+.image-placeholder {
+  width: 100%;
+  max-width: 500px;
+  height: 350px;
+  background-color: #f5f8ff;
+  border: 2px dashed #b3cbf2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #6390f0;
+  font-size: 20px;
+  font-weight: bold;
+  border-radius: 10px;
+}

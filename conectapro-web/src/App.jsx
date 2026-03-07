@@ -1,17 +1,16 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from 'react';
+import Header from './components/Header';
+import HeroSection from './components/HeroSection';
+import HowItWorks from './components/HowItWorks';
 
 function App() {
   return (
-    <>
-      
-      <div className="card">
-        <h1>ConectaPRO</h1>
-      </div>
-    </>
-  )
+    <div>
+      <Header />
+      <HeroSection />
+      <HowItWorks />
+    </div>
+  );
 }
 
-export default App
+export default App;
