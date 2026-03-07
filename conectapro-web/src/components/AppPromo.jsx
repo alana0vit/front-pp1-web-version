@@ -5,7 +5,7 @@ const AppPromo = () => {
   return (
     <section className="app-promo">
       <div className="promo-image">
-         {/* Substitua a div abaixo pela tag <img> */}
+         {/* Marian, aqui entra a imagem real do mockup do celular com o nosso app. É só trocar essa div pela tag <img>. */}
          <div className="mobile-placeholder">
            📱 Mockup do App
          </div>

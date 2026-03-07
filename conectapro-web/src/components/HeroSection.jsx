@@ -17,12 +17,11 @@ const HeroSection = () => {
       </div>
       
       <div className="hero-image">
-        {/* Placeholder para a imagem. Substitua esta div pela tag <img> */}
+        {/* Marian, quando a gente tiver a ilustração principal pronta, joga ela na pasta "public" e troca essa div inteira pela tag <img> apontando pro arquivo, fechou? */}
         <div className="image-placeholder">
           Ilustração Aqui
         </div>
       </div>
-
     </section>
   );
 };

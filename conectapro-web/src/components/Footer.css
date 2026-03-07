@@ -1,0 +1,131 @@
+.footer-section {
+  padding: 20px 50px 60px 50px;
+  background-color: #ffffff;
+}
+
+.footer-divider {
+  border: 0;
+  height: 1px;
+  background-color: #dbe4f8;
+  margin-bottom: 50px;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  max-width: 1100px;
+  margin: 0 auto;
+  gap: 40px;
+}
+
+.footer-column {
+  flex: 1;
+}
+
+.footer-column h3 {
+  font-size: 20px;
+  color: #1a1a1a;
+  margin-bottom: 25px;
+  font-weight: 700;
+}
+
+.social-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.social-item .icon {
+  font-size: 20px;
+  margin-right: 15px;
+}
+
+.social-item p, .contact-info {
+  color: #333333;
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 15px;
+}
+
+.support-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.support-form input,
+.support-form textarea {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  background-color: #f0f0f0; /* Fundo cinza claro para os inputs */
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+}
+
+.support-form textarea {
+  resize: none;
+}
+
+.btn-send {
+  align-self: flex-end;
+  padding: 10px 30px;
+  background-color: #eef2fa;
+  color: #6390f0;
+  border: none;
+  border-radius: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-send:hover {
+  background-color: #dbe4f8;
+}
+
+/* Estilos do F.A.Q */
+.faq-banner {
+  background-color: #6390f0;
+  color: #ffffff;
+  text-align: center;
+  padding: 50px 20px;
+}
+
+.faq-banner h2 {
+  font-size: 32px;
+  margin-bottom: 15px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.faq-banner p {
+  font-size: 16px;
+  margin-bottom: 30px;
+  font-weight: 500;
+}
+
+.faq-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.btn-light {
+  background-color: #dbe4f8;
+  color: #6390f0;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 25px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btn-light:hover {
+  background-color: #ffffff;
+  transform: translateY(-2px);
+}

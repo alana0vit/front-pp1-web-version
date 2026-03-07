@@ -3,6 +3,7 @@ import Header from './components/Header';
 import HeroSection from './components/HeroSection';
 import HowItWorks from './components/HowItWorks';
 import AppPromo from './components/AppPromo';
+import Footer from './components/Footer';
 
 function App() {
   return (
@@ -10,7 +11,8 @@ function App() {
       <Header />
       <HeroSection />
       <HowItWorks />
-      <AppPromo /> 
+      <AppPromo />
+      <Footer />
     </div>
   );
 }
