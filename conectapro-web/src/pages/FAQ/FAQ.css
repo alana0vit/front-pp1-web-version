@@ -1,0 +1,140 @@
+.faq-page-container {
+  width: 100%;
+  min-height: calc(100vh - 70px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 100px 5% 80px 5%;
+}
+
+.faq-card-horizontal {
+  display: flex;
+  width: 100%;
+  max-width: 1150px;
+  gap: 60px;
+  align-items: center;
+}
+
+
+.faq-visual-side {
+  flex: 1.2;
+}
+
+.faq-pre-title {
+  color: #999;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.faq-main-title {
+  font-size: 38px;
+  font-weight: 800;
+  margin: 15px 0;
+  line-height: 1.1;
+  color: #000;
+}
+
+.faq-main-text {
+  font-size: 15px;
+  color: #555;
+  margin-bottom: 25px;
+  line-height: 1.5;
+}
+
+.faq-image-box img {
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+}
+
+.faq-form-side {
+  flex: 0.8;
+  background: white;
+  padding: 40px;
+  border-radius: 25px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+}
+
+.faq-input-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.faq-input-group label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.faq-input-group input, 
+.faq-input-group select, 
+.faq-input-group textarea {
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.faq-input-group input:focus, 
+.faq-input-group textarea:focus {
+  border-color: #6390f0;
+}
+
+.faq-input-group textarea {
+  height: 120px;
+  resize: none;
+}
+
+.faq-submit-button {
+  width: 100%;
+  background-color: #000;
+  color: #fff;
+  padding: 16px;
+  border-radius: 50px;
+  font-weight: bold;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: opacity 0.2s;
+}
+
+.faq-submit-button:hover {
+  opacity: 0.8;
+}
+
+@media (max-width: 1000px) {
+  .faq-card-horizontal {
+    flex-direction: column;
+    text-align: center;
+  }
+  .faq-input-group label {
+    text-align: center;
+  }
+}
+
+.social-item i, 
+.social-item span.bi {
+  margin-right: 10px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.social-item a {
+  text-decoration: none;
+  color: inherit;
+  vertical-align: middle;
+}

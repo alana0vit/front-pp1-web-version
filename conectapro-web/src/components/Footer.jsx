@@ -11,25 +11,29 @@ const Footer = () => {
           <div className="footer-column">
             <h3>Nossas Redes</h3>
             <div className="social-item">
-              {/* Marian, bora trocar esses emojis pelos ícones oficiais (Insta, Whats, YouTube). Lembra também de colocar as tags <a> com os links reais para os perfis da marca! */}
-              <span className="icon">📸</span>
-              <p>conectaPro_26</p>
+              <span className="bi bi-instagram"></span>
+              <a href="https://www.instagram.com/conectaPro_26" target="_blank" rel="noreferrer">ConectaPro</a>
             </div>
             <div className="social-item">
-              <span className="icon">💬</span>
-              <p>(81) 95555-0000</p>
+              <span className="bi bi-whatsapp"></span>
+              <a href="https://wa.me/5581955550000" target="_blank" rel="noreferrer">(81) 95555-0000</a>
             </div>
             <div className="social-item">
-              <span className="icon">▶️</span>
-              <p>conectaPro_news</p>
+              <span className="bi bi-newspaper"></span>
+              <a href="#news">ConectaPro_News</a>
             </div>
           </div>
 
-          {/* Coluna 2: Contacto */}
           <div className="footer-column">
             <h3>Contato</h3>
-            <p className="contact-info">conectaPro@conectapro.com</p>
-            <p className="contact-info">3333-3333</p>
+            <div className="social-item">
+              <span className="bi bi-envelope"></span>
+              <a href="mailto:conectaPro@conectapro.com">conectaPro@conectapro.com</a>
+            </div>
+            <div className="social-item">
+              <span className="bi bi-telephone"></span>
+              <a href="tel:08133333333">3333-3333</a>
+            </div>
           </div>
 
           {/* Coluna 3: Suporte */}

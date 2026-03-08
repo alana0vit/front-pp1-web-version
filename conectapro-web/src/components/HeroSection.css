@@ -2,24 +2,24 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 80px 50px;
+  padding: 0 10%;
   background-color: #ffffff;
-  min-height: 60vh;
+  min-height: 85vh; 
+  gap: 30px;
 }
 
 .hero-content {
-  max-width: 50%;
+  flex: 1.2;
 }
 
 .hero-title {
-  font-size: 64px;
+  font-size: 80px;
   font-weight: 800;
   color: #1a1a1a;
-  line-height: 1.2;
+  line-height: 1.1;
   margin-bottom: 20px;
 }
 
-/* O truque para o marcador de texto azul */
 .highlight-text {
   position: relative;
   display: inline-block;
@@ -30,56 +30,45 @@
   content: "";
   position: absolute;
   left: 0;
-  bottom: 10px;
+  bottom: 12px;
   width: 100%;
-  height: 18px;
-  background-color: #b3cbf2; 
+  height: 25px;
+  background-color: #6390f0; 
+  opacity: 0.2;
   z-index: -1;
+  border-radius: 2px;
 }
 
 .hero-subtitle {
   font-size: 18px;
-  color: #666666;
+  color: #555;
   margin-bottom: 40px;
-  max-width: 85%;
-  line-height: 1.6;
+  max-width: 450px;
+  line-height: 1.5;
 }
 
 .btn-how-it-works {
-  background-color: #6390f0;
-  color: #ffffff;
+  background-color: #739df0;
+  color: #fff;
   border: none;
-  padding: 15px 40px;
-  border-radius: 30px;
-  font-size: 16px;
+  padding: 14px 35px;
+  border-radius: 25px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 10px rgba(115, 157, 240, 0.3);
 }
 
-.btn-how-it-works:hover {
-  background-color: #4a75d1;
-}
-
-.hero-image {
-  width: 45%;
+.hero-image-container {
+  flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* Estilo temporário até colocar a imagem real */
-.image-placeholder {
+.hero-main-img {
   width: 100%;
-  max-width: 500px;
-  height: 350px;
-  background-color: #f5f8ff;
-  border: 2px dashed #b3cbf2;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #6390f0;
-  font-size: 20px;
-  font-weight: bold;
-  border-radius: 10px;
+  max-width: px;
+  height: auto;
+  object-fit: contain; 
 }

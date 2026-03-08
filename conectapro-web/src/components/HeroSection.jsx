@@ -1,5 +1,6 @@
 import React from 'react';
 import './HeroSection.css';
+import ilustracaoHero from '../assets/banner.png';
 
 const HeroSection = () => {
   return (
@@ -13,14 +14,17 @@ const HeroSection = () => {
         <p className="hero-subtitle">
           Uma plataforma que aproxima clientes e profissionais de diversas áreas, de forma simples e segura.
         </p>
-        <button className="btn-how-it-works">Como funciona?</button>
+        <div className="hero-actions">
+          <button className="btn-how-it-works">Como funciona?</button>
+        </div>
       </div>
       
-      <div className="hero-image">
-        {/* Marian, quando a gente tiver a ilustração principal pronta, joga ela na pasta "public" e troca essa div inteira pela tag <img> apontando pro arquivo, fechou? */}
-        <div className="image-placeholder">
-          Ilustração Aqui
-        </div>
+      <div className="hero-image-container">
+        <img 
+          src={ilustracaoHero} 
+          alt="Banner Principal" 
+          className="hero-main-img" 
+        />
       </div>
     </section>
   );

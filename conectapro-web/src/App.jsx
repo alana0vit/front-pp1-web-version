@@ -5,9 +5,11 @@ import HowItWorks from './components/HowItWorks';
 import AppPromo from './components/AppPromo';
 import Footer from './components/Footer';
 
+import './App.css'; 
+
 function App() {
   return (
-    <div>
+    <div className="App">
       <Header />
       <HeroSection />
       <HowItWorks />
