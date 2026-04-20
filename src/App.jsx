@@ -1,21 +1,40 @@
 import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Login from './pages/Login/Login';
+
+// Componentes Globais
 import Header from './components/Header';
-import HeroSection from './components/HeroSection';
-import HowItWorks from './components/HowItWorks';
-import AppPromo from './components/AppPromo';
 import Footer from './components/Footer';
 
-import './App.css'; 
+// Páginas
+import Home from './pages/Home/Home';
+import Cadastro from './pages/Cadastro/Cadastro';
+import FAQ from './pages/FAQ/FAQ';
+
+// Estilos globais
+import './App.css';
 
 function App() {
   return (
-    <div className="App">
+    <Router>
+      {/* ToastContainer permite que os alertas bonitos apareçam em qualquer tela */}
+      <ToastContainer position="top-right" autoClose={3000} />
+      
       <Header />
-      <HeroSection />
-      <HowItWorks />
-      <AppPromo />
+      
+      <main className="main-content">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/cadastro" element={<Cadastro />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/login" element={<Login />} />
+        </Routes>
+      </main>
+
       <Footer />
-    </div>
+    </Router>
   );
 }
 

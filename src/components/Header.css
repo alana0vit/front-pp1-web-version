@@ -1,63 +1,92 @@
-/* Aqui estamos usando uma fonte genérica ('Segoe UI', etc). Depois precisamos ver qual é a fonte oficial do Figma, importar no nosso index.html e alterar aqui, é nois tamo junto :)*/
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+.header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 50px; 
+    background-color: #ffffff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 50px;
-  background-color: #ffffff;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* Uma sombra leve para separar do resto */
+.logo-img {
+    height: 50px; 
+    width: auto;
+    display: block;
+    cursor: pointer;
+    transform: scale(4); 
+    transform-origin: left center;
 }
 
-.logo {
-  font-size: 24px;
-  font-weight: 800;
-  font-style: italic;
-}
-
-.logo-text {
-  color: #000000;
-}
-
-.logo-highlight {
-  color: #6390f0;
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 40px; 
 }
 
 .nav-menu {
-  display: flex;
-  gap: 30px;
+    display: flex;
+    gap: 30px;
+    align-items: center;
 }
 
 .nav-item {
-  text-decoration: none;
-  color: #333333;
-  font-size: 16px;
-  font-weight: 500;
-  transition: color 0.3s ease;
+    text-decoration: none;
+    color: #495057;
+    font-size: 16px;
+    font-weight: 600;
+    transition: color 0.2s;
 }
 
 .nav-item:hover {
-  color: #6390f0;
+    color: #007bff; 
+}
+
+.auth-buttons {
+    display: flex;
+    gap: 15px;
+    align-items: center;
 }
 
 .btn-login {
-  background-color: #eef2fa;
-  color: #6390f0;
-  border: none;
-  padding: 10px 30px;
-  border-radius: 25px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+    background: none;
+    border: none;
+    color: #007bff;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s;
 }
 
 .btn-login:hover {
-  background-color: #dbe4f8;
+    color: #0056b3;
+}
+
+.btn-cadastro {
+    background-color: #007bff;
+    color: #ffffff;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-cadastro:hover {
+    background-color: #0056b3;
+}
+
+@media (max-width: 768px) {
+    .header-container {
+        padding: 15px 20px;
+    }
+    .auth-buttons {
+        gap: 10px;
+    }
+    .btn-cadastro {
+        padding: 8px 15px;
+    }
 }
