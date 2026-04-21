@@ -55,7 +55,6 @@
     border-radius: 12px;
 }
 
-/* TODO: Unificar os botões principais em um componente global <Button /> no futuro para não repetirmos CSS */
 
 .btn-action {
     margin-top: 1.5rem;

@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+.perfil-cliente-v10 {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  font-family: 'Inter', sans-serif;
+}
+
+.cabecalho-perfil { border-bottom: 1px solid #eee; padding-bottom: 30px; margin-bottom: 40px; }
+.info-topo { display: flex; align-items: center; gap: 30px; }
+
+.foto-wrapper { position: relative; }
+.circulo-avatar {
+  width: 110px; height: 110px; background: #007bff; color: white;
+  border-radius: 50%; display: flex; justify-content: center; align-items: center;
+  font-size: 40px; font-weight: bold; overflow: hidden; border: 4px solid #f8f9fa;
+}
+.circulo-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.botao-camera {
+  position: absolute; bottom: 0; right: 0; background: white; border: 1px solid #ddd;
+  border-radius: 50%; width: 32px; height: 32px; cursor: pointer;
+}
+
+.dados-usuario h1 { font-size: 28px; margin: 5px 0; }
+.etiqueta-membro { background: #e7f1ff; color: #007bff; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+.botao-editar { background: white; border: 1px solid #ddd; padding: 8px 15px; border-radius: 8px; cursor: pointer; margin-top: 10px; }
+
+.grade-conteudo { display: flex; gap: 30px; align-items: stretch; }
+.sessao-ajuda { flex: 1.5; display: flex; flex-direction: column; }
+.sessao-config { flex: 1; display: flex; flex-direction: column; }
+.titulo-sessao { font-size: 18px; margin-bottom: 15px; }
+
+.cartao-ajuda, .cartao-config {
+  background: white; border: 1px solid #f0f0f0; border-radius: 20px; padding: 40px;
+  flex: 1; display: flex; flex-direction: column; box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+}
+
+.cartao-ajuda { text-align: center; justify-content: center; }
+.icone-faq { font-size: 50px; color: #007bff; margin-bottom: 15px; }
+.botao-faq { background: #007bff; color: white; border: none; padding: 12px; border-radius: 50px; font-weight: bold; cursor: pointer; }
+
+.item-linha {
+  display: flex; align-items: center; gap: 15px; padding: 15px;
+  cursor: pointer; transition: 0.2s; border-radius: 12px;
+}
+.item-linha:hover { background: #f0f7ff; transform: translateX(5px); }
+.texto-item { flex: 1; }
+.texto-item strong { display: block; font-size: 14px; }
+.texto-item span { font-size: 12px; color: #999; }
+
+.botao-sair { margin-top: auto; background: none; border: none; color: #ff4d4d; font-weight: bold; cursor: pointer; padding-top: 20px; }

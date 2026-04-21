@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+.pagina-solicitar-servico {
+  background-color: #fff;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Inter', sans-serif;
+}
+
+.container-solicitacao {
+  display: flex;
+  max-width: 1200px;
+  width: 100%;
+  gap: 80px;
+  align-items: center;
+}
+
+.lado-informativo { flex: 1; }
+.tag-ajuda { color: #888; font-weight: 700; font-size: 11px; letter-spacing: 1.5px; margin-bottom: 10px; }
+.titulo-solicitacao { font-size: 42px; font-weight: 700; line-height: 1.1; margin-bottom: 20px; }
+.texto-apoio { color: #666; margin-bottom: 30px; font-size: 16px; }
+.wrapper-imagem img { width: 100%; max-width: 550px; }
+
+.lado-formulario { 
+  flex: 1; 
+  display: flex; 
+  justify-content: center; 
+}
+
+.card-formulario {
+  background: #fff;
+  padding: 50px;
+  border-radius: 40px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.07);
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+}
+
+.campo-formulario { 
+  width: 100%;
+  margin-bottom: 20px; 
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; 
+}
+
+.campo-formulario label { 
+  font-size: 14px; 
+  font-weight: 600; 
+  margin-bottom: 8px; 
+  color: #333; 
+}
+
+.campo-formulario input, 
+.campo-formulario select, 
+.campo-formulario textarea {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid #eee;
+  background-color: #f9f9f9;
+  border-radius: 15px;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  box-sizing: border-box;
+}
+
+.campo-formulario textarea { height: 100px; resize: none; }
+
+.upload-foto {
+  width: 100%;
+  border: 2px dashed #eee;
+  padding: 15px;
+  border-radius: 15px;
+  text-align: center;
+  background: #fafafa;
+  box-sizing: border-box;
+}
+
+.label-upload { color: #007bff; cursor: pointer; font-size: 14px; font-weight: 500; }
+
+.btn-enviar {
+  width: 100%;
+  background: #000;
+  color: #fff;
+  border: none;
+  padding: 20px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.3s;
+}
+
+.btn-enviar:hover {
+  background: #222;
+}
