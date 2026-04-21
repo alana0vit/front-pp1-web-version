@@ -1,0 +1,58 @@
+/* Importar ou copiar as estruturas básicas do DashboardCliente.css (dash-header, pedidos-grid, card-pedido) */
+@import '../DashboardCliente/DashboardCliente.css';
+
+/* Estilos específicos para as ações do profissional */
+.cliente-info {
+    margin-top: 1rem;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: #495057;
+    line-height: 1.6;
+}
+
+.cliente-info i {
+    margin-right: 8px;
+    color: #6c757d;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.btn-aceitar, .btn-recusar {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-aceitar {
+    background-color: #e6f4ea;
+    color: #1e8e3e;
+}
+
+.btn-aceitar:hover {
+    background-color: #ceead6;
+    transform: translateY(-2px);
+}
+
+.btn-recusar {
+    background-color: #fce8e6;
+    color: #d93025;
+}
+
+.btn-recusar:hover {
+    background-color: #fad2cf;
+    transform: translateY(-2px);
+}

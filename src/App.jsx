@@ -1,60 +1,107 @@
-import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import Home from "./pages/Home/Home";
+import Login from "./pages/Login/Login";
+import Cadastro from "./pages/Cadastro/Cadastro";
+import FAQ from "./pages/FAQ/FAQ";
+import ListaProf from "./pages/ListaProf/ListaProf";
+import SolicServico from "./pages/SolicServico/SolicServico";
+import DashboardCliente from "./pages/DashboardCliente/DashboardCliente";
+import PerfilCliente from "./pages/PerfilCliente/PerfilCliente";
+import EditarPerfil from "./pages/EditarPerfil/EditarPerfil";
+import EsqueceuSenha from "./pages/EsqueceuSenha/EsqueceuSenha";
+import TermosDeUso from "./pages/TermosDeUso/TermosDeUso";
 
-// Componentes Globais
-import Footer from './components/Footer';
-import Header from './components/Header';
+// Componente de Proteção: Garante que apenas Clientes logados acedam a certas páginas
+const RotaPrivadaCliente = ({ children }) => {
+  const userStorage = localStorage.getItem("@ConectaPro:user");
+  const user = userStorage ? JSON.parse(userStorage) : null;
 
-// Páginas Originais
-import Cadastro from './pages/Cadastro/Cadastro';
-import FAQ from './pages/FAQ/FAQ';
-import Home from './pages/Home/Home';
-import Login from './pages/Login/Login';
+  // Verifica se o utilizador existe e se o tipo é CLIENT
+  if (!user || user.userType !== "CLIENT") {
+    return <Navigate to="/login" />;
+  }
 
-// Suas Páginas (Transplantadas e Corrigidas)
-import DashboardCliente from './pages/DashboardCliente/DashboardCliente';
-import EditarPerfil from './pages/EditarPerfil/EditarPerfil';
-import EsqueceuSenha from './pages/EsqueceuSenha/EsqueceuSenha';
-import ListaProf from './pages/ListaProf/ListaProf';
-import PerfilCliente from './pages/PerfilCliente/PerfilCliente';
-import PerfilProfissional from './pages/PerfilProfissional/PerfilProfissional';
-import SolicServico from './pages/SolicServico/SolicServico';
+  return children;
+};
 
-// Estilos globais
-import './App.css';
+const RotaPrivadaProfissional = ({ children }) => {
+  const user = JSON.parse(localStorage.getItem("@ConectaPro:user"));
+  if (!user || user.userType !== "PROFESSIONAL")
+    return <Navigate to="/login" />;
+  return children;
+};
 
 function App() {
   return (
-    <Router>
-      {/* Alertas visuais do sistema */}
-      <ToastContainer position="top-right" autoClose={3000} />
-      
+    <BrowserRouter>
       <Header />
-      
-      <main className="main-content">
-        <Routes>
-          {/* Início e Institucional */}
-          <Route path="/" element={<Home />} />
-          <Route path="/cadastro" element={<Cadastro />} />
-          <Route path="/faq" element={<FAQ />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/esqueceu-senha" element={<EsqueceuSenha />} />
+      <Routes>
+        {/* Rotas Públicas */}
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/cadastro" element={<Cadastro />} />
+        <Route path="/faq" element={<FAQ />} />
+        <Route path="/esqueceu-senha" element={<EsqueceuSenha />} />
+        <Route path="/termos-de-uso" element={<TermosDeUso />} />
 
-          {/* Busca e Contratação */}
-          <Route path="/lista-profissionais" element={<ListaProf />} />
-          <Route path="/perfil-profissional" element={<PerfilProfissional />} />
-          <Route path="/solicitar-servico" element={<SolicServico />} />
+        {/* Rotas Privadas do Cliente */}
+        <Route
+          path="/dashboard-cliente"
+          element={
+            <RotaPrivadaCliente>
+              <DashboardCliente />
+            </RotaPrivadaCliente>
+          }
+        />
+        <Route
+          path="/lista-profissionais"
+          element={
+            <RotaPrivadaCliente>
+              <ListaProf />
+            </RotaPrivadaCliente>
+          }
+        />
+        <Route
+          path="/solicitar-servico"
+          element={
+            <RotaPrivadaCliente>
+              <SolicServico />
+            </RotaPrivadaCliente>
+          }
+        />
+        <Route
+          path="/perfil"
+          element={
+            <RotaPrivadaCliente>
+              <PerfilCliente />
+            </RotaPrivadaCliente>
+          }
+        />
+        <Route
+          path="/editar-perfil"
+          element={
+            <RotaPrivadaCliente>
+              <EditarPerfil />
+            </RotaPrivadaCliente>
+          }
+        />
 
-          {/* Gestão e Dashboard */}
-          <Route path="/dashboard" element={<DashboardCliente />} />
-          <Route path="/perfil-cliente" element={<PerfilCliente />} />
-          <Route path="/editar-perfil" element={<EditarPerfil />} />
-        </Routes>
-      </main>
+        {/* Rota de fallback (caso a página não exista) */}
+        <Route path="*" element={<Navigate to="/" />} />
 
+        <Route
+          path="/dashboard-profissional"
+          element={
+            <RotaPrivadaProfissional>
+              <DashboardProfissional />
+            </RotaPrivadaProfissional>
+          }
+        />
+      </Routes>
       <Footer />
-    </Router>
+    </BrowserRouter>
   );
 }
 

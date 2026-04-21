@@ -9,21 +9,33 @@ const Login = () => {
   const navigate = useNavigate();
   const { register, handleSubmit } = useForm();
   const onSubmit = async (data) => {
-    try {
-      // TODO: Alinhar com o time de backend se a rota de auth será /login ou /auth
-      // FIXME: Por enquanto, vamos simular o POST enviando email e password
-      await api.post("/login", data);
-      // TODO: Salvar o Token JWT no localStorage ou Cookies aqui
-      // localStorage.setItem('token', response.data.token);
+        try {
+            // Chamada para a rota de login (verifique se o backend já ativou a rota /login ou /api/auth)
+            const response = await api.post('/login', data);
+            
+            // Extraindo exatamente o que o DTO do backend devolve
+            const { tooken, id, name, userType } = response.data;
 
-      toast.success("Bem-vindo de volta!");
-      navigate("/"); // Joga o user pra Home após logar
-    } catch (error) {
-      console.error("Erro na autenticação:", error);
-      // TODO: Tratar erro 401 (Credenciais inválidas) especificamente
-      toast.error("E-mail ou senha incorretos.");
-    }
-  };
+            // Salvando no LocalStorage para usarmos nas outras telas
+            localStorage.setItem('@ConectaPro:token', tooken);
+            localStorage.setItem('@ConectaPro:user', JSON.stringify({ id, name, userType }));
+            
+            toast.success(`Bem-vindo(a) de volta, ${name}!`);
+
+            // Redirecionamento dinâmico baseado no tipo de conta
+            if (userType === 'CLIENT') {
+                navigate('/cliente/catalogo'); // Manda o cliente pras compras
+            } else if (userType === 'PROFESSIONAL') {
+                navigate('/dashboard-profissional'); // Manda o profissional pro trabalho
+            } else {
+                navigate('/');
+            }
+
+        } catch (error) {
+            console.error("Erro na autenticação:", error);
+            toast.error("E-mail ou senha incorretos.");
+        }
+    };
 
   return (
     <div className="login-container">
