@@ -14,19 +14,16 @@ function EditarPerfil() {
 
   const { register, handleSubmit, reset } = useForm();
 
-  // Pega o ID do utilizador logado
   const userStorage = JSON.parse(localStorage.getItem('@ConectaPro:user'));
   const userId = userStorage?.id;
 
   useEffect(() => {
     const carregarDadosDoPerfil = async () => {
       try {
-        // 1. Busca os dados do Usuário
         const resUser = await api.get(`/api/user/${userId}`);
         const userData = resUser.data;
         setUsuarioAtual(userData);
 
-        // 2. Busca o Endereço do Usuário
         const resAddress = await api.get(`/api/user/${userId}/addresses`);
         let addressData = {};
         if (resAddress.data.length > 0) {
