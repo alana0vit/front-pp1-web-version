@@ -1,18 +1,41 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import imagemBusca from '../../assets/imgLista1.jpg';
+import api from '../../services/api';
+import imagemBusca from '../../assets/ImgLista1.jpg'; // Verifique a capitalização correta do ficheiro
 import './ListaProf.css';
 
 function ListaProf() {
   const navigate = useNavigate();
+  const [profissionais, setProfissionais] = useState([]);
+  const [termoBusca, setTermoBusca] = useState('');
 
-  const profissionais = [
-    { id: 1, nome: "Carlos Almeida", categoria: "Manutenção", especialidade: "Eletricista Residencial", nota: 4.9, avaliacoes: 128, corTopo: "#e6f0ff" },
-    { id: 2, nome: "Fernanda Souza", categoria: "Tecnologia", especialidade: "Desenvolvedora Frontend", nota: 5.0, avaliacoes: 85, corTopo: "#e6ffe6" },
-    { id: 3, nome: "Roberto Dias", categoria: "Serviços Domésticos", especialidade: "Montador de Móveis", nota: 4.7, avaliacoes: 210, corTopo: "#fff0e6" },
-    { id: 4, nome: "Aline Santos", categoria: "Design", especialidade: "Designer Gráfico & UI", nota: 4.8, avaliacoes: 94, corTopo: "#f0e6ff" },
-    { id: 5, nome: "Márcio Lima", categoria: "Manutenção", especialidade: "Encanador Profissional", nota: 4.6, avaliacoes: 156, corTopo: "#e6f0ff" },
-    { id: 6, nome: "Juliana Costa", categoria: "Tecnologia", especialidade: "Suporte Técnico em TI", nota: 4.9, avaliacoes: 62, corTopo: "#e6ffe6" },
-  ];
+  // 1. CORREÇÃO: Declaramos a função ANTES do useEffect para evitar o erro de inicialização
+  const buscarProfissionais = async (nome = '') => {
+    try {
+      const response = await api.get('/api/user/search', {
+        params: { name: nome || null }
+      });
+      
+      const apenasProfissionais = response.data.filter(u => u.userType === 'PROFESSIONAL');
+      setProfissionais(apenasProfissionais);
+    } catch (error) {
+      console.error("Erro ao buscar profissionais:", error);
+    }
+  };
+
+  // 2. Agora o useEffect pode chamar a função em segurança
+  useEffect(() => {
+    buscarProfissionais();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const lidarComBusca = (e) => {
+    e.preventDefault();
+    buscarProfissionais(termoBusca);
+  };
+
+  // 3. CORREÇÃO: Array de cores fixo para usar de forma determinística ("pura")
+  const coresTopo = ["#e6f0ff", "#e6ffe6", "#fff0e6", "#f0e6ff"];
 
   return (
     <div className="pagina-lista-profissionais">
@@ -29,9 +52,14 @@ function ListaProf() {
             </p>
             
             <div className="bloco-busca-e-filtros">
-              <form className="barra-pesquisa-lista" onSubmit={(e) => e.preventDefault()}>
+              <form className="barra-pesquisa-lista" onSubmit={lidarComBusca}>
                 <i className="bi bi-search"></i>
-                <input type="text" placeholder="Ex: Eletricista, Desenvolvedor..." />
+                <input 
+                  type="text" 
+                  placeholder="Ex: Carlos, Eletricista..." 
+                  value={termoBusca}
+                  onChange={(e) => setTermoBusca(e.target.value)}
+                />
                 <button type="submit" className="btn-buscar-lista">Buscar</button>
               </form>
             </div>
@@ -48,35 +76,44 @@ function ListaProf() {
         <div className="container-alinhado">
           <h2 className="titulo-sessao">Profissionais Disponíveis</h2>
           
-          <div className="grade-profissionais">
-            {profissionais.map(prof => (
-              <div key={prof.id} className="cartao-profissional-moderno">
-                <div className="topo-colorido-cartao" style={{ backgroundColor: prof.corTopo }}></div>
-                
-                <div className="corpo-cartao">
-                  <div className="avatar-profissional-sobreposto">
-                    <span>{prof.nome.charAt(0)}</span>
-                  </div>
+          {profissionais.length === 0 ? (
+            <p style={{textAlign: 'center', marginTop: '2rem'}}>Nenhum profissional encontrado com este nome.</p>
+          ) : (
+            <div className="grade-profissionais">
+              {/* Adicionamos o 'index' ao map para distribuir as cores de forma pura */}
+              {profissionais.map((prof, index) => (
+                <div key={prof.id} className="cartao-profissional-moderno">
+                  {/* Usamos o resto da divisão para intercalar as cores perfeitamente */}
+                  <div 
+                    className="topo-colorido-cartao" 
+                    style={{ backgroundColor: coresTopo[index % coresTopo.length] }}
+                  ></div>
                   
-                  <h3 className="nome-profissional">{prof.nome}</h3>
-                  <p className="especialidade-cartao">{prof.especialidade}</p>
-                  
-                  <div className="avaliacao-profissional">
-                    <i className="bi bi-star-fill"></i>
-                    <strong>{prof.nota}</strong>
-                    <span className="total-avaliacoes">({prof.avaliacoes})</span>
-                  </div>
+                  <div className="corpo-cartao">
+                    <div className="avatar-profissional-sobreposto">
+                      <span>{prof.name.charAt(0).toUpperCase()}</span>
+                    </div>
+                    
+                    <h3 className="nome-profissional">{prof.name}</h3>
+                    <p className="especialidade-cartao">{prof.phone}</p>
+                    
+                    <div className="avaliacao-profissional">
+                      <i className="bi bi-star-fill"></i>
+                      <strong>5.0</strong>
+                      <span className="total-avaliacoes">(Novo)</span>
+                    </div>
 
-                  <button 
-                    className="btn-ponto-cartao" 
-                    onClick={() => navigate('/perfil-profissional')}
-                  >
-                    Ver Perfil Completo
-                  </button>
+                    <button 
+                      className="btn-ponto-cartao" 
+                      onClick={() => navigate('/solicitar-servico', { state: { profId: prof.id } })}
+                    >
+                      Solicitar Serviço
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </div>
