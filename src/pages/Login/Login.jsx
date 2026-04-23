@@ -66,7 +66,7 @@ const Login = () => {
             <label className="remember-me">
               <input type="checkbox" /> Lembrar de mim
             </label>
-            <Link to="/recuperar-senha">Esqueceu a senha?</Link>
+            <Link to="/esqueceu-senha">Esqueceu a senha?</Link>
           </div>
 
           <button type="submit" className="btn-login-submit">

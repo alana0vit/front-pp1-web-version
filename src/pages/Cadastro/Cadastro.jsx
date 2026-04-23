@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import imagemBusca from '../../assets/ImgLista1.jpg'; // Cuidado com a capitalização do nome do ficheiro (ImgLista1 vs imgLista1)
-import './ListaProf.css';
+import imagemBusca from '../../assets/ImgLista1.jpg';
+import DashboardProfissional from "../DashboardProfissional/DashboardProfissional";
+import "../ListaProf/ListaProf.css";
 
 function ListaProf() {
   const navigate = useNavigate();

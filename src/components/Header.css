@@ -1,105 +1,120 @@
-.header-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 50px;
+/* Container Principal da Header */
+.header {
   background-color: #ffffff;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 0;
   z-index: 1000;
+  width: 100%;
 }
 
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 50px;
+  height: 90px; /* Altura fixa para o logo brilhar */
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Logo */
 .logo-img {
-  height: 50px;
+  height: 120px; /* Tamanho real, sem o scale que quebrava tudo */
   width: auto;
   display: block;
-  cursor: pointer;
-  transform: scale(4);
-  transform-origin: left center;
 }
 
-.header-actions {
+/* Navegação e Lado Direito */
+.header-nav {
   display: flex;
   align-items: center;
-  gap: 40px;
-}
-
-.nav-menu {
-  display: flex;
   gap: 30px;
-  align-items: center;
 }
 
-.nav-item {
+/* Links (FAQ, Meu Painel) */
+.nav-link {
   text-decoration: none;
   color: #495057;
   font-size: 16px;
   font-weight: 600;
   transition: color 0.2s;
+  white-space: nowrap;
 }
 
-.nav-item:hover {
+.nav-link:hover {
   color: #007bff;
 }
 
+/* Menu do Usuário Logado */
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.user-greeting {
+  font-size: 16px;
+  color: #212529;
+  font-weight: 500;
+}
+
+/* Botões de Autenticação (Deslogado) */
 .auth-buttons {
   display: flex;
-  gap: 15px;
   align-items: center;
+  gap: 20px;
 }
 
 .btn-login {
-  background: none;
-  border: none;
+  text-decoration: none;
   color: #007bff;
   font-size: 16px;
   font-weight: 600;
-  cursor: pointer;
-  transition: color 0.2s;
-}
-
-.btn-login:hover {
-  color: #0056b3;
 }
 
 .btn-cadastro {
   background-color: #007bff;
   color: #ffffff;
-  border: none;
-  padding: 10px 25px;
+  text-decoration: none;
+  padding: 10px 22px;
   border-radius: 8px;
   font-size: 16px;
   font-weight: 600;
-  cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .btn-cadastro:hover {
   background-color: #0056b3;
 }
+
+/* Botão de Sair */
 .btn-logout {
-  background: transparent;
+  background-color: transparent;
   color: #dc3545;
   border: 1px solid #dc3545;
-  padding: 6px 16px;
+  padding: 6px 15px;
   border-radius: 6px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s;
 }
 
 .btn-logout:hover {
-  background: #dc3545;
-  color: white;
+  background-color: #dc3545;
+  color: #ffffff;
 }
 
-@media (max-width: 768px) {
+/* Responsividade para o PC da Faculdade */
+@media (max-width: 850px) {
   .header-container {
-    padding: 15px 20px;
+    padding: 0 20px;
+    height: 70px;
   }
-  .auth-buttons {
-    gap: 10px;
+  .logo-img {
+    height: 45px;
   }
-  .btn-cadastro {
-    padding: 8px 15px;
+  .header-nav {
+    gap: 15px;
   }
 }

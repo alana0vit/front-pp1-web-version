@@ -5,6 +5,7 @@ import Home from "./pages/Home/Home";
 import Login from "./pages/Login/Login";
 import Cadastro from "./pages/Cadastro/Cadastro";
 import FAQ from "./pages/FAQ/FAQ";
+import DashboardProfissional from './pages/DashboardProfissional/DashboardProfissional';
 import ListaProf from "./pages/ListaProf/ListaProf";
 import SolicServico from "./pages/SolicServico/SolicServico";
 import DashboardCliente from "./pages/DashboardCliente/DashboardCliente";

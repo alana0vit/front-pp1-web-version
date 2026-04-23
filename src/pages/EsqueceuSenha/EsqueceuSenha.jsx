@@ -7,10 +7,9 @@ function EsqueceuSenha() {
   return (
     <div className="esqueceu-senha-container">
       <div className="esqueceu-senha-card">
-        <button className="btn-voltar" onClick={() => navigate('/')}>
+        <button className="btn-voltar" onClick={() => navigate('/login')}>
           <i className="bi bi-arrow-left"></i> Voltar
         </button>
-        
         <h2 className="serif-font">Recuperar Senha</h2>
         <p className="subtitle">Digite seu e-mail abaixo. Enviaremos um link para você definir uma nova senha.</p>
 
