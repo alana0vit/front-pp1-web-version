@@ -1,124 +1,196 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../../services/api';
-import imagemBusca from '../../assets/ImgLista1.jpg';
-import DashboardProfissional from "../DashboardProfissional/DashboardProfissional";
-import "../ListaProf/ListaProf.css";
+import React, { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
+import api from "../../services/api";
+import "./Cadastro.css";
 
-function ListaProf() {
-  const navigate = useNavigate();
-  const [profissionais, setProfissionais] = useState([]);
-  const [termoBusca, setTermoBusca] = useState('');
+const Cadastro = () => {
+  const [tipoPerfil, setTipoPerfil] = useState(null);
+  const [categoriasBanco, setCategoriasBanco] = useState([]);
+  const { register, handleSubmit, reset } = useForm();
 
-  // Carrega os profissionais assim que a página abre
+  // Busca as categorias do backend quando o componente carrega
   useEffect(() => {
-    buscarProfissionais();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const buscarCategorias = async () => {
+      try {
+        const response = await api.get("/api/category");
+        setCategoriasBanco(response.data);
+      } catch (error) {
+        console.error("Erro ao buscar categorias:", error);
+      }
+    };
+    buscarCategorias();
   }, []);
 
-  const buscarProfissionais = async (nome = '') => {
+  const onSubmit = async (data) => {
     try {
-      // Bate na nova rota de search do backend
-      const response = await api.get('/api/user/search', {
-        params: { name: nome || null } // Se houver nome, envia como query param
+      // 1. Converter data "YYYY-MM-DD" para "DD/MM/YYYY" conforme exigido pelo backend
+      const [ano, mes, dia] = data.birthDate.split('-');
+      const dataFormatada = `${dia}/${mes}/${ano}`;
+
+      // 2. Construir o payload
+      const usuarioPayload = {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        birthDate: dataFormatada,
+        phone: data.phone,
+        userType: tipoPerfil,
+        registryId: data.documento,
+        // Se for profissional, envia a categoria escolhida dentro de um Array. Se não, envia vazio.
+        categoriesIds: tipoPerfil === "PROFESSIONAL" && data.categoryId ? [Number(data.categoryId)] : []
+      };
+
+      // 3. Criar utilizador
+      const response = await api.post("/api/user", usuarioPayload);
+      const userId = response.data.id;
+
+      // 4. Vincular endereço
+      await api.post(`/api/user/${userId}/addresses`, {
+        street: data.street,
+        number: data.number,
+        neighborhood: data.neighborhood,
+        city: data.city,
+        state: data.state,
+        zipCode: data.zipCode,
       });
-      
-      // Filtra para garantir que só mostra quem é PROFISSIONAL
-      const apenasProfissionais = response.data.filter(u => u.userType === 'PROFESSIONAL');
-      setProfissionais(apenasProfissionais);
+
+      toast.success("Conta criada com sucesso! Faça o login.");
+      reset();
+      setTipoPerfil(null);
+
     } catch (error) {
-      console.error("Erro ao buscar profissionais:", error);
+      console.error("Falha no cadastro:", error);
+      toast.error("Erro no cadastro. Verifique se o E-mail ou CPF já existem.");
     }
   };
 
-  const lidarComBusca = (e) => {
-    e.preventDefault();
-    buscarProfissionais(termoBusca);
-  };
+  if (!tipoPerfil) {
+    return (
+      <div className="cadastro-container">
+        <div className="escolha-perfil-card">
+          <h2>Como você deseja usar o ConectaPro?</h2>
+          <p>Selecione seu perfil para continuarmos</p>
 
-  // Função auxiliar para gerar uma cor de topo aleatória para os cartões
-  const gerarCorTopo = () => {
-    const cores = ["#e6f0ff", "#e6ffe6", "#fff0e6", "#f0e6ff"];
-    return cores[Math.floor(Math.random() * cores.length)];
-  };
+          <div className="cards-container">
+            <button className="perfil-card" onClick={() => setTipoPerfil("CLIENT")}>
+              <i className="bi bi-person-badge"></i>
+              <h3>Quero Contratar</h3>
+              <span>Busco profissionais para serviços</span>
+            </button>
+
+            <button className="perfil-card profissional" onClick={() => setTipoPerfil("PROFESSIONAL")}>
+              <i className="bi bi-tools"></i>
+              <h3>Quero Trabalhar</h3>
+              <span>Quero oferecer meus serviços</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="pagina-lista-profissionais">
-      <section className="topo-busca-dividido">
-        <div className="conteudo-topo-busca">
-          
-          <div className="lado-esquerdo-busca">
-            <h1 className="titulo-principal-lista">
-              Encontre o<br />
-              <span className="sublinhado-azul-transparente">talento certo!</span>
-            </h1>
-            <p className="subtitulo-lista-detalhado">
-              Explore nossa rede de profissionais qualificados prontos para realizar o seu projeto.
-            </p>
-            
-            <div className="bloco-busca-e-filtros">
-              <form className="barra-pesquisa-lista" onSubmit={lidarComBusca}>
-                <i className="bi bi-search"></i>
-                <input 
-                  type="text" 
-                  placeholder="Ex: Carlos, Eletricista..." 
-                  value={termoBusca}
-                  onChange={(e) => setTermoBusca(e.target.value)}
-                />
-                <button type="submit" className="btn-buscar-lista">Buscar</button>
-              </form>
-            </div>
-          </div>
-
-          <div className="lado-direito-imagem">
-            <img src={imagemBusca} alt="Busca Profissionais" className="imagem-hero-lista" />
-          </div>
-
+    <div className="cadastro-container">
+      <div className="form-card">
+        <div className="form-header">
+          <button type="button" className="btn-voltar" onClick={() => setTipoPerfil(null)}>
+            <i className="bi bi-arrow-left"></i> Voltar
+          </button>
+          <h2>{tipoPerfil === "CLIENT" ? "Cadastro de Cliente" : "Cadastro de Profissional"}</h2>
         </div>
-      </section>
 
-      <section className="conteudo-grade-profissionais">
-        <div className="container-alinhado">
-          <h2 className="titulo-sessao">Profissionais Disponíveis</h2>
-          
-          {profissionais.length === 0 ? (
-            <p style={{textAlign: 'center', marginTop: '2rem'}}>Nenhum profissional encontrado com este nome.</p>
-          ) : (
-            <div className="grade-profissionais">
-              {profissionais.map(prof => (
-                <div key={prof.id} className="cartao-profissional-moderno">
-                  <div className="topo-colorido-cartao" style={{ backgroundColor: gerarCorTopo() }}></div>
-                  
-                  <div className="corpo-cartao">
-                    <div className="avatar-profissional-sobreposto">
-                      <span>{prof.name.charAt(0).toUpperCase()}</span>
-                    </div>
-                    
-                    <h3 className="nome-profissional">{prof.name}</h3>
-                    {/* O backend não devolve 'especialidade' diretamente, mas podes mostrar a cidade ou telefone aqui */}
-                    <p className="especialidade-cartao">{prof.phone}</p>
-                    
-                    <div className="avaliacao-profissional">
-                      <i className="bi bi-star-fill"></i>
-                      <strong>5.0</strong> {/* Fixo por agora, até o backend ter sistema de notas */}
-                      <span className="total-avaliacoes">(Novo)</span>
-                    </div>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="form-section">
+            <h4>Dados Pessoais</h4>
 
-                    <button 
-                      className="btn-ponto-cartao" 
-                      onClick={() => navigate('/solicitar-servico', { state: { profId: prof.id } })}
-                    >
-                      Solicitar Serviço
-                    </button>
-                  </div>
+            <div className="input-group">
+              <label>Nome Completo</label>
+              <input {...register("name", { required: true })} />
+            </div>
+
+            <div className="row">
+              <div className="input-group">
+                <label>{tipoPerfil === "CLIENT" ? "CPF (Apenas números)" : "CNPJ (Apenas números)"}</label>
+                <input {...register("documento", { required: true })} />
+              </div>
+
+              {/* Novo Campo Dinâmico: Categoria (apenas para Profissionais) */}
+              {tipoPerfil === "PROFESSIONAL" && (
+                <div className="input-group">
+                  <label>Especialidade</label>
+                  <select {...register("categoryId", { required: true })}>
+                    <option value="">Selecione uma especialidade...</option>
+                    {categoriasBanco.map(cat => (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
+                  </select>
                 </div>
-              ))}
+              )}
             </div>
-          )}
-        </div>
-      </section>
+
+            <div className="row">
+              <div className="input-group">
+                <label>E-mail</label>
+                <input type="email" {...register("email", { required: true })} />
+              </div>
+              <div className="input-group">
+                <label>Telefone</label>
+                <input {...register("phone", { required: true })} placeholder="11999999999" />
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="input-group">
+                <label>Data de Nascimento</label>
+                <input type="date" {...register("birthDate", { required: true })} />
+              </div>
+              <div className="input-group">
+                <label>Senha</label>
+                <input type="password" {...register("password", { required: true, minLength: 6 })} />
+              </div>
+            </div>
+          </div>
+
+          <div className="form-section">
+            <h4>Endereço</h4>
+            <div className="row">
+              <div className="input-group">
+                <label>CEP</label>
+                <input {...register("zipCode", { required: true })} placeholder="00000-000" />
+              </div>
+              <div className="input-group">
+                <label>Rua</label>
+                <input {...register("street", { required: true })} />
+              </div>
+            </div>
+            <div className="row">
+              <div className="input-group w-30">
+                <label>Número</label>
+                <input {...register("number")} />
+              </div>
+              <div className="input-group">
+                <label>Bairro</label>
+                <input {...register("neighborhood", { required: true })} />
+              </div>
+            </div>
+            <div className="row">
+              <div className="input-group">
+                <label>Cidade</label>
+                <input {...register("city", { required: true })} />
+              </div>
+              <div className="input-group">
+                <label>Estado (UF)</label>
+                <input {...register("state", { required: true, maxLength: 2 })} placeholder="EX: PE" />
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" className="btn-submit">Finalizar</button>
+        </form>
+      </div>
     </div>
   );
-}
+};
 
-export default ListaProf;
+export default Cadastro;
