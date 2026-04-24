@@ -9,7 +9,7 @@ const Cadastro = () => {
   const [categoriasBanco, setCategoriasBanco] = useState([]);
   const { register, handleSubmit, reset } = useForm();
 
-  // Busca as categorias do backend quando o componente carrega
+  // Procura as categorias do backend quando o componente carrega
   useEffect(() => {
     const buscarCategorias = async () => {
       try {
@@ -28,7 +28,7 @@ const Cadastro = () => {
       const [ano, mes, dia] = data.birthDate.split('-');
       const dataFormatada = `${dia}/${mes}/${ano}`;
 
-      // 2. Construir o payload
+      // 2. Construir o payload unificado (Usuário + Endereço aninhado)
       const usuarioPayload = {
         name: data.name,
         email: data.email,
@@ -37,52 +37,56 @@ const Cadastro = () => {
         phone: data.phone,
         userType: tipoPerfil,
         registryId: data.documento,
-        // Se for profissional, envia a categoria escolhida dentro de um Array. Se não, envia vazio.
-        categoriesIds: tipoPerfil === "PROFESSIONAL" && data.categoryId ? [Number(data.categoryId)] : []
+        // Envia a categoria apenas se for profissional
+        categoriesIds: tipoPerfil === "PROFESSIONAL" && data.categoryId ? [Number(data.categoryId)] : [],
+        
+        // NOVO: O objeto 'address' agora faz parte do UserRequest no backend
+        address: {
+          street: data.street,
+          number: data.number,
+          neighborhood: data.neighborhood,
+          city: data.city,
+          state: data.state,
+          zipCode: data.zipCode,
+        }
       };
 
-      // 3. Criar utilizador
-      const response = await api.post("/api/user", usuarioPayload);
-      const userId = response.data.id;
-
-      // 4. Vincular endereço
-      await api.post(`/api/user/${userId}/addresses`, {
-        street: data.street,
-        number: data.number,
-        neighborhood: data.neighborhood,
-        city: data.city,
-        state: data.state,
-        zipCode: data.zipCode,
-      });
+      // 3. Faz apenas UMA requisição para criar tudo de uma vez
+      await api.post("/api/user", usuarioPayload);
 
       toast.success("Conta criada com sucesso! Faça o login.");
+      
+      // Limpa o formulário e volta para a tela de seleção de perfil
       reset();
       setTipoPerfil(null);
 
     } catch (error) {
       console.error("Falha no cadastro:", error);
-      toast.error("Erro no cadastro. Verifique se o E-mail ou CPF já existem.");
+      // Exibe a mensagem de erro que vem do backend, se disponível
+      const mensagemErro = error.response?.data?.message || "Erro no cadastro. Verifique se os dados estão corretos.";
+      toast.error(mensagemErro);
     }
   };
 
+  // Ecrã inicial de escolha de perfil
   if (!tipoPerfil) {
     return (
       <div className="cadastro-container">
         <div className="escolha-perfil-card">
-          <h2>Como você deseja usar o ConectaPro?</h2>
-          <p>Selecione seu perfil para continuarmos</p>
+          <h2>Como deseja usar o ConectaPro?</h2>
+          <p>Selecione o seu perfil para continuarmos</p>
 
           <div className="cards-container">
             <button className="perfil-card" onClick={() => setTipoPerfil("CLIENT")}>
               <i className="bi bi-person-badge"></i>
               <h3>Quero Contratar</h3>
-              <span>Busco profissionais para serviços</span>
+              <span>Procuro profissionais para serviços</span>
             </button>
 
             <button className="perfil-card profissional" onClick={() => setTipoPerfil("PROFESSIONAL")}>
               <i className="bi bi-tools"></i>
               <h3>Quero Trabalhar</h3>
-              <span>Quero oferecer meus serviços</span>
+              <span>Quero oferecer os meus serviços</span>
             </button>
           </div>
         </div>
@@ -115,7 +119,6 @@ const Cadastro = () => {
                 <input {...register("documento", { required: true })} />
               </div>
 
-              {/* Novo Campo Dinâmico: Categoria (apenas para Profissionais) */}
               {tipoPerfil === "PROFESSIONAL" && (
                 <div className="input-group">
                   <label>Especialidade</label>
@@ -186,7 +189,7 @@ const Cadastro = () => {
             </div>
           </div>
 
-          <button type="submit" className="btn-submit">Finalizar</button>
+          <button type="submit" className="btn-submit">Finalizar Cadastro</button>
         </form>
       </div>
     </div>
