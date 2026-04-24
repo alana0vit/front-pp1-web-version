@@ -11,7 +11,7 @@ const Login = () => {
   const onSubmit = async (data) => {
         try {
             // Chamada para a rota de login (verifique se o backend já ativou a rota /login ou /api/auth)
-            const response = await api.post('/login', data);
+            const response = await api.post('auth/login', data);
             
             // Extraindo exatamente o que o DTO do backend devolve
             const { tooken, id, name, userType } = response.data;
