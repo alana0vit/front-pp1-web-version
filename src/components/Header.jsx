@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.png';
 import './Header.css';
@@ -27,18 +26,27 @@ const Header = () => {
                 </Link>
 
                 <nav className="header-nav">
+                    {/* Link público sempre visível */}
                     <Link to="/faq" className="nav-link">FAQ</Link>
 
                     {/* Renderização Condicional: Logado vs Deslogado */}
                     {user ? (
                         <div className="user-menu">
-                            {/* Se for cliente, tem atalho pro Catálogo. Se for Profissional, vai pro painel dele */}
+                            {/* Link de Serviços exclusivo para Clientes */}
+                            {user.userType === 'CLIENT' && (
+                                <Link to="/lista-profissionais" className="nav-link">
+                                    Serviços
+                                </Link>
+                            )}
+
+                            {/* Atalho para o Dashboard dependendo do tipo de usuário */}
                             <Link 
                                 to={user.userType === 'CLIENT' ? "/dashboard-cliente" : "/dashboard-profissional"} 
                                 className="nav-link"
                             >
                                 Meu Painel
                             </Link>
+
                             <span className="user-greeting">Olá, {user.name.split(' ')[0]}</span>
                             <button onClick={fazerLogout} className="btn-logout">Sair</button>
                         </div>

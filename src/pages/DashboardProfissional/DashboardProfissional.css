@@ -1,58 +1,55 @@
-/* Importar ou copiar as estruturas básicas do DashboardCliente.css (dash-header, pedidos-grid, card-pedido) */
-@import '../DashboardCliente/DashboardCliente.css';
-
-/* Estilos específicos para as ações do profissional */
-.cliente-info {
-    margin-top: 1rem;
-    padding: 10px;
-    background-color: #f8f9fa;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    color: #495057;
-    line-height: 1.6;
+/* Layout Principal - Estilo Base */
+.dashboard-container {
+    padding: 60px 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background-color: #f9f9f9;
+    min-height: 100vh;
 }
 
-.cliente-info i {
-    margin-right: 8px;
-    color: #6c757d;
+.dash-header {
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #eee;
+}
+
+.dash-header h1 {
+    font-size: 2.4rem;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+/* Grid de Cards */
+.pedidos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+/* Card do Pedido */
+.card-pedido {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
+}
+
+/* Suas customizações de Profissional */
+.cliente-info {
+    margin-top: 15px;
+    padding: 12px;
+    background-color: #f1f3f5;
+    border-radius: 8px;
+    font-size: 0.9rem;
 }
 
 .action-buttons {
     display: flex;
     gap: 10px;
-    margin-top: 10px;
+    margin-top: 20px;
 }
 
-.btn-aceitar, .btn-recusar {
-    flex: 1;
-    padding: 10px;
-    border: none;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    transition: background-color 0.2s, transform 0.1s;
-}
-
-.btn-aceitar {
-    background-color: #e6f4ea;
-    color: #1e8e3e;
-}
-
-.btn-aceitar:hover {
-    background-color: #ceead6;
-    transform: translateY(-2px);
-}
-
-.btn-recusar {
-    background-color: #fce8e6;
-    color: #d93025;
-}
-
-.btn-recusar:hover {
-    background-color: #fad2cf;
-    transform: translateY(-2px);
-}
+.btn-aceitar { background-color: #27ae60; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; flex: 1; }
+.btn-recusar { background-color: #e74c3c; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; flex: 1; }

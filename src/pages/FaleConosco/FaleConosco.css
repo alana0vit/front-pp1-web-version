@@ -1,0 +1,132 @@
+/* Container Principal */
+.pagina-fale-conosco {
+  width: 100%;
+  min-height: calc(100vh - 70px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 80px 5%;
+}
+
+.cartao-fale-conosco {
+  display: flex;
+  width: 100%;
+  max-width: 1150px;
+  gap: 60px;
+  align-items: center;
+}
+
+/* Lado Esquerdo - Visual */
+.secao-visual-contato {
+  flex: 1.2;
+}
+
+.etiqueta-contato {
+  color: #6390f0; /* Cor de destaque azul */
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.titulo-contato {
+  font-size: 38px;
+  font-weight: 800;
+  margin: 15px 0;
+  line-height: 1.1;
+  color: #000;
+}
+
+.texto-contato {
+  font-size: 15px;
+  color: #555;
+  margin-bottom: 25px;
+  line-height: 1.5;
+}
+
+.container-imagem-contato img {
+  width: 100%;
+  max-width: 550px;
+  height: auto;
+}
+
+/* Lado Direito - Formulário */
+.secao-formulario-contato {
+  flex: 0.8;
+  background: white;
+  padding: 40px;
+  border-radius: 25px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+}
+
+.campo-entrada-contato {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.campo-entrada-contato label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.campo-entrada-contato input, 
+.campo-entrada-contato select, 
+.campo-entrada-contato textarea {
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
+  font-size: 14px;
+  outline: none;
+  transition: 0.2s;
+}
+
+.campo-entrada-contato input:focus, 
+.campo-entrada-contato textarea:focus {
+  border-color: #6390f0;
+  background-color: #fff;
+}
+
+.campo-entrada-contato textarea {
+  height: 120px; /* Um pouco maior para mensagens */
+  resize: none;
+}
+
+.botao-contato {
+  width: 100%;
+  background-color: #000;
+  color: #fff;
+  padding: 16px;
+  border-radius: 50px;
+  font-weight: bold;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.botao-contato:hover {
+  background-color: #6390f0; /* Fica azul no hover para dar feedback */
+  transform: translateY(-2px);
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+  .cartao-fale-conosco {
+    flex-direction: column;
+    text-align: center;
+    gap: 40px;
+  }
+  .titulo-contato { font-size: 32px; }
+}
+
+@media (max-width: 768px) {
+  .pagina-fale-conosco { padding: 40px 20px; }
+  .secao-formulario-contato { padding: 25px; width: 100%; }
+}

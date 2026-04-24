@@ -1,116 +1,172 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import imagemDash from '../../assets/imgdash.png';
 import api from '../../services/api';
 import './DashboardCliente.css';
 
-const DashboardCliente = () => {
-    const navigate = useNavigate();
-    const [pedidos, setPedidos] = useState([]);
-    const [loading, setLoading] = useState(true);
+function DashboardCliente() {
+  const navigate = useNavigate();
+  const [pedidos, setPedidos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
+  // Estado para capturar o que o usuário digita na busca
+  const [termoBusca, setTermoBusca] = useState('');
 
-    // Pegando o usuário logado dinamicamente do LocalStorage
-    const usuarioLogado = JSON.parse(localStorage.getItem('@ConectaPro:user'));
-    const clienteId = usuarioLogado ? usuarioLogado.id : null;
+  // Recupera os dados do usuário logado
+  const usuarioLogado = JSON.parse(localStorage.getItem('@ConectaPro:user'));
+  const clienteId = usuarioLogado?.id;
 
-    useEffect(() => {
-        const buscarPedidos = async () => {
-            if (!clienteId) return; // Se não tiver logado, nem busca
-            
-            try {
-                // A rota que o backend criou para buscar as demandas
-                const response = await api.get('/api/demand/user');
-                
-                // Filtramos para garantir que o cliente só veja os pedidos dele
-                const meusPedidos = response.data.filter(d => d.clientId?.id === clienteId);
-                setPedidos(meusPedidos);
-            } catch (err) {
-                console.error("Erro ao buscar demandas:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        buscarPedidos();
-    }, [clienteId]);
-
-    // Função atualizada para os novos ENUMS do backend
-    const renderStatusBadge = (statusEnum) => {
-        switch(statusEnum) {
-            case 'OPENED':
-                return <span className="badge-status pendente">Aguardando Profissional</span>;
-            case 'IN_WAITING':
-                return <span className="badge-status aceito">Serviço Aceito</span>;
-            case 'REJECTED':
-                return <span className="badge-status negado">Pedido Recusado</span>;
-            case 'CLOSED':
-                return <span className="badge-status concluido" style={{backgroundColor: '#e2e3e5', color: '#383d41'}}>Concluído</span>;
-            default:
-                return <span className="badge-status pendente">Enviado</span>;
-        }
+  useEffect(() => {
+    const buscarPedidos = async () => {
+      if (!clienteId) return;
+      try {
+        const response = await api.get('/api/demand/user');
+        // Filtra os pedidos que pertencem a este cliente
+        const meusPedidos = response.data.filter(d => d.clientId?.id === clienteId);
+        setPedidos(meusPedidos);
+      } catch (err) {
+        console.error("Erro ao carregar demandas:", err);
+      } finally {
+        setLoading(false);
+      }
     };
+    buscarPedidos();
+  }, [clienteId]);
 
-    return (
-        <div className="dashboard-container">
-            <header className="dash-header">
-                <div>
-                    <h1>Meus Pedidos</h1>
-                    <p>Acompanhe o status das suas solicitações, {usuarioLogado?.name}.</p>
-                </div>
-                <button className="btn-novo-pedido" onClick={() => navigate('/cliente/catalogo')}>
-                    <i className="bi bi-search"></i> Buscar Profissionais
+  // Lógica dos Contadores baseada nos status do seu banco
+  const emAndamento = pedidos.filter(p => p.demandStatus === 'IN_WAITING').length;
+  const aguardandoOrcamento = pedidos.filter(p => p.demandStatus === 'OPENED').length;
+  const concluidos = pedidos.filter(p => p.demandStatus === 'CLOSED').length;
+
+  // 1. Função para buscar profissionais pelo campo de texto
+  const realizarBusca = () => {
+    if (termoBusca.trim()) {
+      navigate(`/listaprof?busca=${termoBusca}`);
+    } else {
+      navigate('/listaprof');
+    }
+  };
+
+  // 2. Função para filtrar pelas sugestões (Doméstico, Design, etc)
+  const filtrarPorCategoria = (categoria) => {
+    navigate(`/listaprof?categoria=${categoria}`);
+  };
+
+  return (
+    <div className="container-dashboard">
+      <section className="secao-topo-branco">
+        <div className="conteudo-introducao">
+          <div className="lado-esquerdo-texto">
+            <h1 className="titulo-principal-destaque">
+              Olá, {usuarioLogado?.name?.split(' ')[0] || 'Marian'}!<br />
+              O que você<br />
+              <span className="sublinhado-azul-transparente">precisa hoje?</span>
+            </h1>
+            <p className="subtitulo-detalhado">
+              Encontre os melhores profissionais para realizar seus projetos ou resolver problemas do dia a dia com agilidade e segurança.
+            </p>
+            
+            <div className="bloco-busca-e-categorias">
+              {/* CAMPO DE BUSCA */}
+              <div className="container-busca">
+                <i className="bi bi-search"></i>
+                <input 
+                  type="text" 
+                  placeholder="Ex: Eletricista, Design, Limpeza..." 
+                  value={termoBusca}
+                  onChange={(e) => setTermoBusca(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && realizarBusca()}
+                />
+                <button className="btn-buscar-dashboard" onClick={realizarBusca}>
+                  Buscar
                 </button>
-            </header>
+              </div>
 
-            <section className="pedidos-section">
-                {loading ? <p>Carregando seus pedidos...</p> : pedidos.length === 0 ? (
-                    <div className="empty-dash">
-                        <p>Você ainda não tem serviços solicitados.</p>
-                    </div>
-                ) : (
-                    <div className="pedidos-grid">
-                        {pedidos.map(pedido => (
-                            <div key={pedido.id} className={`card-pedido ${(pedido.demandStatus || 'OPENED').toLowerCase()}`}>
-                                <div className="pedido-info">
-                                    {/* ATENÇÃO: Agora chamamos demandStatus */}
-                                    {renderStatusBadge(pedido.demandStatus)}
-                                    <h4>{pedido.title}</h4>
-                                    <p>{pedido.description}</p>
-                                </div>
-                                
-                                <div className="pedido-footer">
-                                    <div className="pro-match">
-                                        <span>
-                                            Profissional: <strong>{pedido.professionalId?.name || 'Não identificado'}</strong>
-                                        </span>
-                                        
-                                        {/* Mostra o WhatsApp apenas se IN_WAITING (Aceito) */}
-                                        {pedido.demandStatus === 'IN_WAITING' && (
-                                            <a 
-                                                href={`https://wa.me/55${pedido.professionalId?.phone}`} 
-                                                target="_blank" 
-                                                rel="noreferrer"
-                                                className="btn-whatsapp"
-                                            >
-                                                <i className="bi bi-whatsapp"></i> Falar no WhatsApp
-                                            </a>
-                                        )}
+              {/* BOTÕES DE SUGESTÃO (FILTROS) */}
+              <div className="grade-categorias">
+                <button onClick={() => filtrarPorCategoria('Manutencao')}>
+                  <i className="bi bi-tools"></i> Manutenção
+                </button>
+                <button onClick={() => filtrarPorCategoria('Tecnologia')}>
+                  <i className="bi bi-laptop"></i> Tecnologia
+                </button>
+                <button onClick={() => filtrarPorCategoria('Design')}>
+                  <i className="bi bi-palette"></i> Design
+                </button>
+                <button onClick={() => filtrarPorCategoria('Domesticos')}>
+                  <i className="bi bi-house-door"></i> Domésticos
+                </button>
+              </div>
+            </div>
+          </div>
 
-                                        {pedido.demandStatus === 'REJECTED' && (
-                                            <button 
-                                                className="btn-tentar-outro"
-                                                onClick={() => navigate('/cliente/catalogo')}
-                                            >
-                                                <i className="bi bi-arrow-clockwise"></i> Procurar Outro
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </section>
+          <div className="lado-direito-imagem">
+            <img src={imagemDash} alt="Ilustração Dashboard" />
+          </div>
         </div>
-    );
-};
+      </section>
+
+      <section className="secao-servicos-cinza">
+        <div className="cabecalho-servicos">
+          <h2>Como estão seus serviços?</h2>
+          <p>Acompanhe cada etapa com total segurança e transparência.</p>
+        </div>
+
+        {/* BOTÃO SOLICITAR NOVO SERVIÇO */}
+        <div className="acao-solicitar">
+          <button className="btn-azul-solicitar" onClick={() => navigate('/listaprof')}>
+            <i className="bi bi-plus-circle"></i> Solicitar Novo Serviço
+          </button>
+        </div>
+
+        <div className="layout-dashboard-baixo">
+          {/* CARDS COM DADOS REAIS DA API */}
+          <div className="coluna-status">
+            <div className="cartao-contador-status">
+              <div className="numero-status">{emAndamento}</div>
+              <p>Pedidos em Andamento</p>
+              <i className="bi bi-play-circle-fill icone-status-azul"></i>
+            </div>
+            
+            <div className="cartao-contador-status">
+              <div className="numero-status">{aguardandoOrcamento}</div>
+              <p>Aguardando Orçamento</p>
+              <i className="bi bi-clock-fill icone-status-amarelo"></i>
+            </div>
+
+            <div className="cartao-contador-status">
+              <div className="numero-status">{concluidos}</div>
+              <p>Serviços Finalizados</p>
+              <i className="bi bi-check-circle-fill icone-status-verde"></i>
+            </div>
+          </div>
+
+          <div className="coluna-pedidos-recentes">
+            <div className="cartao-pedidos-painel">
+              <h3>Pedidos Recentes</h3>
+              {loading ? (
+                <p style={{ marginTop: '20px' }}>Carregando...</p>
+              ) : pedidos.length === 0 ? (
+                <div className="conteudo-vazio-pedidos">
+                  <i className="bi bi-clipboard-x"></i>
+                  <p>Você ainda não realizou nenhum pedido.</p>
+                </div>
+              ) : (
+                <div className="lista-real" style={{ marginTop: '20px' }}>
+                  {pedidos.slice(0, 4).map(p => (
+                    <div key={p.id} style={{ padding: '12px 0', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between' }}>
+                       <strong>{p.title}</strong>
+                       <span style={{ color: '#0066ff', fontWeight: 'bold' }}>{p.demandStatus}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
 
 export default DashboardCliente;

@@ -1,9 +1,23 @@
+/* RESET GLOBAL */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
 /* Container Principal da Header */
 .header {
-  background-color: #ffffff;
+  background-color: #f5f8ff;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 0;
+  left: 0;
   z-index: 1000;
   width: 100%;
 }
@@ -12,31 +26,37 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 50px;
-  height: 90px; /* Altura fixa para o logo brilhar */
-  max-width: 1400px;
-  margin: 0 auto;
+  padding: 0 40px; /* Reduzi um pouco o recuo lateral */
+  height: 70px;    /* DIMINUÍDO: de 90px para 70px para ficar mais fina */
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
 }
 
 /* Logo */
 .logo-img {
-  height: 120px; /* Tamanho real, sem o scale que quebrava tudo */
+  height: 80px;    /* DIMINUÍDO: de 120px para 80px para acompanhar a altura da header */
   width: auto;
   display: block;
+  transition: transform 0.3s;
+}
+
+.logo-img:hover {
+  transform: scale(1.05); /* Um efeitinho leve ao passar o mouse */
 }
 
 /* Navegação e Lado Direito */
 .header-nav {
   display: flex;
   align-items: center;
-  gap: 30px;
+  gap: 25px; /* Reduzi um pouco o espaço entre os itens */
 }
 
-/* Links (FAQ, Meu Painel) */
+/* Links (FAQ, Meu Painel, Fale Conosco) */
 .nav-link {
   text-decoration: none;
   color: #495057;
-  font-size: 16px;
+  font-size: 15px; /* Diminuído levemente para combinar com a delicadeza */
   font-weight: 600;
   transition: color 0.2s;
   white-space: nowrap;
@@ -50,11 +70,11 @@
 .user-menu {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 15px;
 }
 
 .user-greeting {
-  font-size: 16px;
+  font-size: 15px;
   color: #212529;
   font-weight: 500;
 }
@@ -63,13 +83,13 @@
 .auth-buttons {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 15px;
 }
 
 .btn-login {
   text-decoration: none;
   color: #007bff;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
 }
 
@@ -77,9 +97,9 @@
   background-color: #007bff;
   color: #ffffff;
   text-decoration: none;
-  padding: 10px 22px;
-  border-radius: 8px;
-  font-size: 16px;
+  padding: 8px 18px; /* Botão um pouco menor também */
+  border-radius: 6px;
+  font-size: 15px;
   font-weight: 600;
   transition: background-color 0.2s;
 }
@@ -93,28 +113,21 @@
   background-color: transparent;
   color: #dc3545;
   border: 1px solid #dc3545;
-  padding: 6px 15px;
+  padding: 5px 12px;
   border-radius: 6px;
   font-weight: 600;
+  font-size: 14px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.btn-logout:hover {
-  background-color: #dc3545;
-  color: #ffffff;
-}
-
-/* Responsividade para o PC da Faculdade */
+/* Responsividade */
 @media (max-width: 850px) {
   .header-container {
     padding: 0 20px;
-    height: 70px;
+    height: 60px;
   }
   .logo-img {
-    height: 45px;
-  }
-  .header-nav {
-    gap: 15px;
+    height: 50px;
   }
 }
