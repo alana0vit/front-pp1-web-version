@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './FAQ.css';
 
@@ -61,9 +61,9 @@ const FAQ = () => {
             </div>
 
             <div className="faq-cta">
-                <p>Ainda tem dúvidas? Comece agora e veja na prática!</p>
-                <button className="btn-action" onClick={() => navigate('/cadastro')}>
-                    Criar minha conta
+                <p>Ainda tem dúvidas? Mande uma mensagem e lhe retornaremos!</p>
+                <button className="btn-action" onClick={() => navigate('/fale-conosco')}>
+                    Atendimento ao Cliente 
                 </button>
             </div>
         </div>

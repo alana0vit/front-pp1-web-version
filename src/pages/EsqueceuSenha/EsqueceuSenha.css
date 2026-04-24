@@ -82,3 +82,24 @@
     font-weight: bold;
     cursor: pointer;
 }
+.esqueceu-senha-card {
+  position: relative; 
+}
+
+.esqueceu-senha-card .btn-voltar {
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  background: none;
+  border: none;
+  color: #007bff;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.esqueceu-senha-card h2 {
+  margin-top: 40px; 
+}

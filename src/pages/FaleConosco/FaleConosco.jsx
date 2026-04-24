@@ -11,7 +11,6 @@ function FaleConosco() {
     mensagem: ''
   });
 
-  // Novo estado para controlar se o e-mail está sendo enviado
   const [enviando, setEnviando] = useState(false);
 
   const handleChange = (e) => {
@@ -22,10 +21,9 @@ function FaleConosco() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Se já estiver enviando, não deixa clicar de novo
     if (enviando) return;
 
-    setEnviando(true); // Ativa a trava
+    setEnviando(true);
 
     const serviceID = 'service_ok6bjoh';
     const templateID = 'template_383q4r7';
@@ -48,7 +46,7 @@ function FaleConosco() {
         alert("Ocorreu um erro ao enviar. Tente novamente.");
       })
       .finally(() => {
-        setEnviando(false); // Desativa a trava, independente se deu certo ou erro
+        setEnviando(false);
       });
   };
 

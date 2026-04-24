@@ -1,8 +1,7 @@
-import React from 'react';
-import './HeroSection.css';
 import ilustracaoHero from '../assets/banner.png';
+import './HeroSection.css';
 
-const HeroSection = () => {
+const HeroSection = ({ onScrollClick }) => {
   return (
     <section className="hero-container">
       <div className="hero-content">
@@ -15,7 +14,10 @@ const HeroSection = () => {
           Uma plataforma que aproxima clientes e profissionais de diversas áreas, de forma simples e segura.
         </p>
         <div className="hero-actions">
-          <button className="btn-how-it-works">Como funciona?</button>
+          {/* Adicionamos o evento de clique no botão */}
+          <button className="btn-how-it-works" onClick={onScrollClick}>
+            Como funciona?
+          </button>
         </div>
       </div>
       

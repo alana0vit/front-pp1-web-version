@@ -1,4 +1,4 @@
-/* Container Principal */
+
 .pagina-fale-conosco {
   width: 100%;
   min-height: calc(100vh - 70px);
@@ -17,13 +17,12 @@
   align-items: center;
 }
 
-/* Lado Esquerdo - Visual */
 .secao-visual-contato {
   flex: 1.2;
 }
 
 .etiqueta-contato {
-  color: #6390f0; /* Cor de destaque azul */
+  color: #6390f0;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 1.2px;
@@ -52,7 +51,6 @@
   height: auto;
 }
 
-/* Lado Direito - Formulário */
 .secao-formulario-contato {
   flex: 0.8;
   background: white;
@@ -94,7 +92,7 @@
 }
 
 .campo-entrada-contato textarea {
-  height: 120px; /* Um pouco maior para mensagens */
+  height: 120px;
   resize: none;
 }
 
@@ -112,11 +110,10 @@
 }
 
 .botao-contato:hover {
-  background-color: #6390f0; /* Fica azul no hover para dar feedback */
+  background-color: #6390f0;
   transform: translateY(-2px);
 }
 
-/* Responsividade */
 @media (max-width: 1024px) {
   .cartao-fale-conosco {
     flex-direction: column;

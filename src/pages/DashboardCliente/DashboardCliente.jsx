@@ -8,11 +8,7 @@ function DashboardCliente() {
   const navigate = useNavigate();
   const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  // Estado para capturar o que o usuário digita na busca
   const [termoBusca, setTermoBusca] = useState('');
-
-  // Recupera os dados do usuário logado
   const usuarioLogado = JSON.parse(localStorage.getItem('@ConectaPro:user'));
   const clienteId = usuarioLogado?.id;
 
@@ -21,7 +17,6 @@ function DashboardCliente() {
       if (!clienteId) return;
       try {
         const response = await api.get('/api/demand/user');
-        // Filtra os pedidos que pertencem a este cliente
         const meusPedidos = response.data.filter(d => d.clientId?.id === clienteId);
         setPedidos(meusPedidos);
       } catch (err) {
@@ -33,12 +28,9 @@ function DashboardCliente() {
     buscarPedidos();
   }, [clienteId]);
 
-  // Lógica dos Contadores baseada nos status do seu banco
   const emAndamento = pedidos.filter(p => p.demandStatus === 'IN_WAITING').length;
   const aguardandoOrcamento = pedidos.filter(p => p.demandStatus === 'OPENED').length;
   const concluidos = pedidos.filter(p => p.demandStatus === 'CLOSED').length;
-
-  // 1. Função para buscar profissionais pelo campo de texto
   const realizarBusca = () => {
     if (termoBusca.trim()) {
       navigate(`/listaprof?busca=${termoBusca}`);
@@ -47,7 +39,6 @@ function DashboardCliente() {
     }
   };
 
-  // 2. Função para filtrar pelas sugestões (Doméstico, Design, etc)
   const filtrarPorCategoria = (categoria) => {
     navigate(`/listaprof?categoria=${categoria}`);
   };
@@ -112,7 +103,6 @@ function DashboardCliente() {
           <p>Acompanhe cada etapa com total segurança e transparência.</p>
         </div>
 
-        {/* BOTÃO SOLICITAR NOVO SERVIÇO */}
         <div className="acao-solicitar">
           <button className="btn-azul-solicitar" onClick={() => navigate('/listaprof')}>
             <i className="bi bi-plus-circle"></i> Solicitar Novo Serviço
