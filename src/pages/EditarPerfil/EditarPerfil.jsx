@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
 import './EditarPerfil.css';
@@ -32,20 +32,20 @@ function EditarPerfil() {
           addressData = end;
         }
 
-        // 3. Se for profissional, busca a lista de categorias do banco
+        // Se for profissional, busca a lista de categorias do banco
         if (userData.userType === 'PROFESSIONAL') {
           const resCat = await api.get('/api/category');
           setCategoriasBanco(resCat.data);
         }
 
-        // 4. Converte a data que vem do banco (dd/MM/yyyy) para o formato do input HTML (yyyy-MM-dd)
+        // Converte a data que vem do banco (dd/MM/yyyy) para o formato do input HTML (yyyy-MM-dd)
         let birthDateFormated = userData.birthDate;
         if (birthDateFormated && birthDateFormated.includes('/')) {
           const [dia, mes, ano] = birthDateFormated.split('/');
           birthDateFormated = `${ano}-${mes}-${dia}`;
         }
 
-        // 5. Preenche os campos do formulário automaticamente!
+        // Preenche os campos do formulário automaticamente
         reset({
           name: userData.name,
           email: userData.email,
@@ -80,32 +80,41 @@ function EditarPerfil() {
       const [ano, mes, dia] = data.birthDate.split('-');
       const dataFormatada = `${dia}/${mes}/${ano}`;
 
-      // Monta o payload do Usuário. Como o UserRequest exige todos os campos, temos de enviar tudo!
+      // Monta o payload do Usuário COM o endereço embutido (exigência do UserRequest.java)
       const usuarioPayload = {
         name: data.name,
         email: data.email,
-        password: data.password, // O utilizador tem de digitar a senha para confirmar a edição
+        password: data.password, // O usuário precisa digitar a senha para confirmar a edição
         birthDate: dataFormatada,
         phone: data.phone,
         userType: usuarioAtual.userType, 
         registryId: usuarioAtual.registryId, // Mantém o CPF/CNPJ original
-        categoriesIds: usuarioAtual.userType === 'PROFESSIONAL' && data.categoryId ? [Number(data.categoryId)] : []
+        categoriesIds: usuarioAtual.userType === 'PROFESSIONAL' && data.categoryId ? [Number(data.categoryId)] : [],
+        
+        // NOVO: Endereço agora viaja embutido no PUT também, igual no cadastro
+        address: {
+          street: data.street,
+          number: data.number,
+          neighborhood: data.neighborhood,
+          city: data.city,
+          state: data.state,
+          zipCode: data.zipCode
+        }
       };
 
-      // Monta o payload do Endereço
-      const enderecoPayload = {
-        street: data.street,
-        number: data.number,
-        neighborhood: data.neighborhood,
-        city: data.city,
-        state: data.state,
-        zipCode: data.zipCode
-      };
-
-      // Dispara as duas requisições de atualização (PUT)
+      // Dispara a requisição PUT principal do usuário
       await api.put(`/api/user/${userId}`, usuarioPayload);
       
+      // Mantemos o PUT do endereço separado apenas como garantia extra
       if (enderecoId) {
+        const enderecoPayload = {
+          street: data.street,
+          number: data.number,
+          neighborhood: data.neighborhood,
+          city: data.city,
+          state: data.state,
+          zipCode: data.zipCode
+        };
         await api.put(`/api/user/address/${enderecoId}`, enderecoPayload);
       }
 
@@ -116,11 +125,11 @@ function EditarPerfil() {
       }
 
       toast.success("Perfil atualizado com sucesso!");
-      navigate('/'); // Volta para a página inicial (ou dashboard) após salvar
+      navigate(-1); // Volta para a tela anterior (dashboard) após salvar
 
     } catch (error) {
       console.error("Erro ao atualizar perfil:", error);
-      toast.error("Erro ao atualizar. Verifique se a sua senha está correta.");
+      toast.error("Erro ao atualizar. Verifique se a sua senha está correta ou se os dados são válidos.");
     }
   };
 

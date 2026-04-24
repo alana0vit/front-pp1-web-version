@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../../services/api';
 import imagemBusca from '../../assets/ImgLista1.jpg'; // Verifique a capitalização correta do ficheiro
+import api from '../../services/api';
 import './ListaProf.css';
 
 function ListaProf() {
@@ -12,12 +12,23 @@ function ListaProf() {
   // 1. CORREÇÃO: Declaramos a função ANTES do useEffect para evitar o erro de inicialização
   const buscarProfissionais = async (nome = '') => {
     try {
-      const response = await api.get('/api/user/search', {
-        params: { name: nome || null }
-      });
+      let response;
+
+      // 1. Se o usuário digitou um nome, usamos a rota de busca do backend
+      if (nome.trim() !== '') {
+        response = await api.get('/api/user/search', {
+          params: { name: nome }
+        });
+      } 
+      // 2. Se estiver vazio (quando a página acaba de carregar), pegamos todos os usuários
+      else {
+        response = await api.get('/api/user'); 
+      }
       
+      // 3. O filtro de quem é PROFISSIONAL continua funcionando perfeitamente
       const apenasProfissionais = response.data.filter(u => u.userType === 'PROFESSIONAL');
       setProfissionais(apenasProfissionais);
+      
     } catch (error) {
       console.error("Erro ao buscar profissionais:", error);
     }
