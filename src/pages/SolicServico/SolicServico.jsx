@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import api from '../../services/api'; // Certifique-se de que o caminho do Axios está correto
+import api from '../../services/api';
 import imgSolic from '../../assets/imgsolic.jpg';
 import './SolicServico.css';
 
@@ -9,16 +9,63 @@ function SolicServico() {
   const navegar = useNavigate();
   const location = useLocation();
   
-  // Recupera o ID do profissional passado na tela de ListaProf (ex: onClick={() => navegar('/solicitar', { state: { profId: pro.id } })})
-  // Se não vier nada (para testes diretos na URL), usamos um fallback (null)
-  const professionalId = location.state?.profId || 1; // Mude 1 para null quando estiver 100% integrado
+  // Recupera o ID do profissional selecionado na ListaProf
+  const professionalId = location.state?.profId;
 
+  // Estados para dados do banco
+  const [categorias, setCategorias] = useState([]);
+  const [enderecos, setEnderecos] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Estados do formulário
   const [dadosFormulario, setDadosFormulario] = useState({
-    categoria: 'Manutenção',
     titulo: '',
     descricao: '',
-    urgencia: 'Normal'
+    categoryId: '',
+    addressId: ''
   });
+
+  // 1. Pega os dados do cliente logado no LocalStorage
+  const userStorage = localStorage.getItem('@ConectaPro:user');
+  const usuarioLogado = userStorage ? JSON.parse(userStorage) : null;
+
+  useEffect(() => {
+    // Se não houver profissional selecionado, volta para a lista
+    if (!professionalId) {
+      toast.warn("Selecione um profissional antes de solicitar um serviço.");
+      navegar('/lista-profissionais');
+      return;
+    }
+
+    const carregarDadosIniciais = async () => {
+      try {
+        setLoading(true);
+        
+        // 2. Busca Categorias Reais do Banco
+        const resCat = await api.get('/api/category');
+        setCategorias(resCat.data);
+
+        // 3. Busca Endereços do Usuário Logado
+        if (usuarioLogado?.id) {
+          const resEnd = await api.get(`/api/user/${usuarioLogado.id}/addresses`);
+          setEnderecos(resEnd.data);
+          
+          // Se o usuário tiver apenas um endereço, já deixa selecionado
+          if (resEnd.data.length === 1) {
+            setDadosFormulario(prev => ({ ...prev, addressId: resEnd.data[0].id }));
+          }
+        }
+
+      } catch (error) {
+        console.error("Erro ao carregar dados para solicitação:", error);
+        toast.error("Erro ao carregar categorias ou endereços.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    carregarDadosIniciais();
+  }, [professionalId, navegar, usuarioLogado?.id]);
 
   const lidarComMudanca = (e) => {
     const { name, value } = e.target;
@@ -28,42 +75,39 @@ function SolicServico() {
   const enviarSolicitacao = async (e) => {
     e.preventDefault();
 
-    try {
-      // 1. Pega os dados do cliente logado no LocalStorage
-      const userStorage = localStorage.getItem('@ConectaPro:user');
-      if (!userStorage) {
-        toast.error("Você precisa estar logado para solicitar um serviço.");
-        navegar('/login');
-        return;
-      }
-      
-      const usuarioLogado = JSON.parse(userStorage);
+    if (!dadosFormulario.addressId || !dadosFormulario.categoryId) {
+      toast.error("Por favor, selecione uma categoria e um endereço.");
+      return;
+    }
 
-      // 2. Monta o Payload (JSON) exatamente como o DemandRequest.java exige
+    try {
+      // 4. Monta o Payload (JSON) para o DemandRequest
       const payload = {
-        code: `REQ-${Math.floor(Math.random() * 10000)}`, // Gerador simples de código único
+        code: `REQ-${Math.floor(Math.random() * 10000)}`,
         title: dadosFormulario.titulo,
         description: dadosFormulario.descricao,
-        imgUrl: "", // Vazio por enquanto, se implementar upload real precisa hospedar a imagem (ex: AWS S3 ou Firebase)
-        addressId: 1, // TODO: Substituir pelo ID real do endereço do cliente (pode buscar da API de perfil antes)
-        categoryId: 1, // TODO: Substituir pelo ID real da categoria (pode vir de um <select> puxando do banco)
-        clientId: usuarioLogado.id, // O ID de quem está logado
-        professionalId: professionalId, // O ID do profissional escolhido
-        demandStatus: "OPENED" // Sempre nasce como OPENED, conforme o Enum do backend
+        imgUrl: "", 
+        addressId: Number(dadosFormulario.addressId),
+        categoryId: Number(dadosFormulario.categoryId),
+        clientId: usuarioLogado.id, // Extraído do LocalStorage
+        professionalId: professionalId,
+        demandStatus: "OPENED" 
       };
 
-      // 3. Dispara para a API
       await api.post('/api/demand', payload);
 
-      // 4. Sucesso!
       toast.success("Solicitação enviada com sucesso!");
-      navegar('/dashboard-cliente'); // Ajuste para o nome correto da rota do seu dashboard
+      navegar('/dashboard-cliente');
 
     } catch (error) {
       console.error("Erro ao enviar demanda:", error);
-      toast.error("Ocorreu um erro ao enviar a solicitação. Tente novamente.");
+      toast.error("Ocorreu um erro ao enviar a solicitação.");
     }
   };
+
+  if (loading) {
+    return <div className="pagina-solicitar-servico"><p>Carregando opções...</p></div>;
+  }
 
   return (
     <div className="pagina-solicitar-servico">
@@ -71,62 +115,78 @@ function SolicServico() {
         
         <div className="lado-informativo">
           <p className="tag-ajuda">ESTAMOS AQUI PARA TE AJUDAR!</p>
-          <h1 className="titulo-solicitacao">Tudo pronto para começar seu projeto?</h1>
+          <h1 className="titulo-solicitacao">Descreva o que você precisa</h1>
           <p className="texto-apoio">
-            Descreva o que você precisa abaixo. Assim que receber sua solicitação, 
-            o profissional analisará seu pedido e entrará em contato com você o 
-            mais rápido possível para conversar sobre os detalhes.
+            O profissional escolhido receberá os detalhes abaixo e entrará em contato 
+            para conversar sobre o orçamento e prazos.
           </p>
           <div className="wrapper-imagem">
-            <img src={imgSolic} alt="Ilustração Suporte" />
+            <img src={imgSolic} alt="Ilustração Solicitação" />
           </div>
         </div>
 
         <div className="lado-formulario">
-          {/* Atualizamos o onSubmit para chamar a nossa nova função */}
           <form className="card-formulario" onSubmit={enviarSolicitacao}>
 
             <div className="campo-formulario">
-              <label>O que você precisa?</label>
+              <label>Título do Serviço</label>
               <input 
                 type="text" 
                 name="titulo" 
-                placeholder="Ex: Conserto de ar condicionado" 
+                placeholder="Ex: Instalação de chuveiro elétrico" 
+                value={dadosFormulario.titulo}
                 onChange={lidarComMudanca} 
                 required 
               />
             </div>
 
             <div className="campo-formulario">
-              <label>Detalhes do Serviço</label>
-              <textarea 
-                name="descricao" 
-                placeholder="Digite sua mensagem detalhando o serviço..." 
+              <label>Categoria</label>
+              <select 
+                name="categoryId" 
+                value={dadosFormulario.categoryId} 
                 onChange={lidarComMudanca} 
-                required 
-              />
-            </div>
-
-            <div className="campo-formulario">
-              <label>Urgência</label>
-              <select name="urgencia" onChange={lidarComMudanca}>
-                <option value="Normal">Normal</option>
-                <option value="Urgente">Urgente</option>
-                <option value="Planejado">Planejado</option>
+                required
+              >
+                <option value="">Selecione a categoria...</option>
+                {categorias.map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                ))}
               </select>
             </div>
 
             <div className="campo-formulario">
-              <label>Adicionar foto (opcional)</label>
-              <div className="upload-foto">
-                <input type="file" id="foto-servico" hidden />
-                <label htmlFor="foto-servico" className="label-upload">
-                  <i className="bi bi-camera"></i> Clique para anexar
-                </label>
-              </div>
+              <label>Onde o serviço será realizado?</label>
+              <select 
+                name="addressId" 
+                value={dadosFormulario.addressId} 
+                onChange={lidarComMudanca} 
+                required
+              >
+                <option value="">Selecione um dos seus endereços...</option>
+                {enderecos.map(end => (
+                  <option key={end.id} value={end.id}>
+                    {end.street}, {end.number} - {end.city}
+                  </option>
+                ))}
+              </select>
+              {enderecos.length === 0 && (
+                <p className="aviso-endereco">Nenhum endereço encontrado. Vá ao seu perfil para cadastrar.</p>
+              )}
             </div>
 
-            <button type="submit" className="btn-enviar">Enviar Solicitação</button>
+            <div className="campo-formulario">
+              <label>Descrição Detalhada</label>
+              <textarea 
+                name="description" 
+                placeholder="Explique o problema ou o que precisa ser feito..." 
+                value={dadosFormulario.description}
+                onChange={lidarComMudanca} 
+                required 
+              />
+            </div>
+
+            <button type="submit" className="btn-enviar">Enviar Pedido ao Profissional</button>
           </form>
         </div>
 
