@@ -22,12 +22,12 @@ function DashboardProfissional() {
     try {
       setLoading(true);
       const response = await api.get('/api/demand/user');
-      
+
       const meusPedidos = response.data.filter(d => {
         const idProf = d.professional?.id || d.professionalId?.id || d.professionalId;
         return Number(idProf) === Number(profissionalId);
       });
-      
+
       setPedidos(meusPedidos);
     } catch (err) {
       console.error("❌ Erro ao carregar demandas:", err);
@@ -64,13 +64,15 @@ function DashboardProfissional() {
 
       console.log("📦 Payload Final Enviado:", payload);
 
-      await api.put(`/api/demand/${pedido.id}`, payload);
-      
+      await api.patch(`/api/demand/${pedido.id}/status`, {
+        status: novoStatus
+      });
+
       if (novoStatus === 'IN_WAITING') toast.success('Serviço aceito com sucesso!');
       else if (novoStatus === 'CLOSED') toast.info('Status atualizado.');
       else if (novoStatus === 'REJECTED') toast.warn('Serviço recusado.');
-      
-      buscarPedidos(); 
+
+      buscarPedidos();
 
     } catch (error) {
       console.error("❌ Erro detalhado:", error);
@@ -80,7 +82,7 @@ function DashboardProfissional() {
   };
 
   const mostrarDetalhes = (p) => {
-    alert(`📋 DETALHES DO SERVIÇO\n\n👤 Solicitante: ${p.client?.name || 'Cliente'}\n🛠️ Título: ${p.title}\n📝 Descrição: ${p.description}`);
+    alert(`📋 DETALHES DO SERVIÇO\n\n👤 Solicitante: ${p.clientId?.name || 'Cliente'}\n🛠️ Título: ${p.title}\n📝 Descrição: ${p.description}`);
   };
 
   const contagem = (status) => pedidos.filter(p => p.demandStatus === status).length;
@@ -88,7 +90,7 @@ function DashboardProfissional() {
   return (
     <div className="dash-prof-bg">
       <div className="dash-prof-container">
-        
+
         <header className="dash-prof-header">
           <div className="welcome-box">
             <h1>Painel de Controle</h1>
@@ -139,15 +141,15 @@ function DashboardProfissional() {
                     </span>
                     <h4>{p.title}</h4>
                     <p className="client-name">
-                      <i className="bi bi-person"></i> {p.client?.name || 'Cliente ConectaPro'}
+                      <i className="bi bi-person"></i> {p.clientId?.name || 'Cliente ConectaPro'}
                     </p>
                   </div>
-                  
+
                   <div className="card-footer">
                     <button className="btn-action info" onClick={() => mostrarDetalhes(p)}>
                       <i className="bi bi-info-circle"></i>
                     </button>
-                    
+
                     {p.demandStatus === 'OPENED' && (
                       <>
                         <button className="btn-action accept" onClick={() => atualizarStatus(p, 'IN_WAITING')}>

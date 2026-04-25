@@ -104,7 +104,7 @@ function DashboardCliente() {
         </div>
 
         <div className="acao-solicitar">
-          <button className="btn-azul-solicitar" onClick={() => navigate('/listaprof')}>
+          <button className="btn-azul-solicitar" onClick={() => navigate('/solicitar-servico')}>
             <i className="bi bi-plus-circle"></i> Solicitar Novo Serviço
           </button>
         </div>
