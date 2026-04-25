@@ -85,57 +85,7 @@ function DashboardCliente() {
 
   return (
     <div className="container-dashboard">
-      <section className="secao-topo-branco">
-        <div className="conteudo-introducao">
-          <div className="lado-esquerdo-texto">
-            <h1 className="titulo-principal-destaque">
-              Olá, {usuarioLogado?.name?.split(' ')[0] || 'Marian'}!<br />
-              O que você<br />
-              <span className="sublinhado-azul-transparente">precisa hoje?</span>
-            </h1>
-            <p className="subtitulo-detalhado">
-              Encontre os melhores profissionais para realizar seus projetos ou resolver problemas do dia a dia com agilidade e segurança.
-            </p>
-
-            <div className="bloco-busca-e-categorias">
-              {/* CAMPO DE BUSCA */}
-              <div className="container-busca">
-                <i className="bi bi-search"></i>
-                <input
-                  type="text"
-                  placeholder="Ex: Eletricista, Design, Limpeza..."
-                  value={termoBusca}
-                  onChange={(e) => setTermoBusca(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && realizarBusca()}
-                />
-                <button className="btn-buscar-dashboard" onClick={realizarBusca}>
-                  Buscar
-                </button>
-              </div>
-
-              {/* BOTÕES DE SUGESTÃO (FILTROS) */}
-              <div className="grade-categorias">
-                <button onClick={() => filtrarPorCategoria('Manutencao')}>
-                  <i className="bi bi-tools"></i> Manutenção
-                </button>
-                <button onClick={() => filtrarPorCategoria('Tecnologia')}>
-                  <i className="bi bi-laptop"></i> Tecnologia
-                </button>
-                <button onClick={() => filtrarPorCategoria('Design')}>
-                  <i className="bi bi-palette"></i> Design
-                </button>
-                <button onClick={() => filtrarPorCategoria('Domesticos')}>
-                  <i className="bi bi-house-door"></i> Domésticos
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="lado-direito-imagem">
-            <img src={imagemDash} alt="Ilustração Dashboard" />
-          </div>
-        </div>
-      </section>
+      
 
       <section className="secao-servicos-cinza">
         <div className="cabecalho-servicos">
