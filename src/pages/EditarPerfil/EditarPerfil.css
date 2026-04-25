@@ -1,83 +1,142 @@
-.editar-perfil-container {
-    padding: 80px 20px;
-    background-color: #f4f7fe;
-    min-height: 80vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.editar-perfil-page {
+  background-color: #f8fafc;
+  min-height: 100vh;
+  padding: 40px 20px;
 }
 
+.editar-perfil-wrapper {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Botão Voltar no topo */
+.btn-voltar-topo {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: #64748b;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: 0.2s;
+  padding: 0;
+}
+
+.btn-voltar-topo i { font-size: 24px; }
+
+.btn-voltar-topo:hover {
+  color: #1e293b;
+  transform: translateX(-3px);
+}
+
+/* Card principal */
 .editar-perfil-card {
-    background: white;
-    padding: 40px;
-    border-radius: 25px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.06);
-    width: 100%;
-    max-width: 550px;
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
 }
 
-.btn-voltar {
-    background: none;
-    border: none;
-    color: #0066ff;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 25px;
-    font-size: 14px;
+.perfil-header-info h2 {
+  color: #0f172a;
+  margin-bottom: 8px;
 }
 
-.serif-font { 
-    font-size: 32px; 
-    margin-bottom: 8px; 
-    color: #1a1a1a;
-    font-family: 'Georgia', serif; 
+.perfil-header-info p {
+  color: #64748b;
+  font-size: 15px;
+  margin-bottom: 30px;
 }
 
-.subtitle { color: #777; margin-bottom: 35px; font-size: 15px; }
+/* Organização das Seções e Grids */
+.form-section {
+  margin-bottom: 35px;
+}
 
-.input-group { margin-bottom: 22px; display: flex; flex-direction: column; }
-.input-group label { font-weight: bold; margin-bottom: 10px; color: #444; font-size: 14px; }
-.input-group input {
-    padding: 14px;
-    border: 1.5px solid #eee;
-    border-radius: 12px;
-    font-size: 16px;
-    background: #fdfdfd;
-    transition: 0.3s;
+.section-title {
+  color: #1a365d;
+  font-size: 17px;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.full-width { grid-column: span 3; }
+.span-2 { grid-column: span 2; }
+
+.input-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.input-group input, 
+.input-group select {
+  padding: 10px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 15px;
+  transition: 0.2s;
 }
 
 .input-group input:focus {
-    border-color: #0066ff;
-    outline: none;
-    background: white;
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.botoes-acao { display: flex; gap: 15px; margin-top: 35px; }
-
-.btn-salvar {
-    flex: 2;
-    background: #0066ff;
-    color: white;
-    border: none;
-    padding: 16px;
-    border-radius: 50px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
+/* Seção de Confirmação */
+.confirm-section {
+  background: #fef2f2;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #fee2e2;
 }
 
-.btn-salvar:hover { background: #0052cc; transform: translateY(-2px); }
+.label-confirm { color: #b91c1c !important; }
 
-.btn-cancelar {
-    flex: 1;
-    background: #f0f0f0;
-    color: #555;
-    border: none;
-    padding: 16px;
-    border-radius: 50px;
-    font-weight: bold;
-    cursor: pointer;
+/* Botões de Ação */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 20px;
 }
+
+.btn-cancel {
+  padding: 12px 24px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-submit {
+  padding: 12px 30px;
+  background: #1e293b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-submit:hover { background: #0f172a; }

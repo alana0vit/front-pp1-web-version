@@ -1,202 +1,277 @@
-.dashboard-prof-main {
-  min-height: 100vh;
+/* Fundo da Página e Container Principal */
+.dash-prof-bg {
   background-color: #f8fafc;
   padding: 40px 20px;
+  min-height: calc(100vh - 80px);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-.dashboard-prof-container {
+.dash-prof-container {
   max-width: 1100px;
   margin: 0 auto;
 }
 
-/* Header */
-.prof-header-top {
+/* =========================================
+   1. CABEÇALHO (HEADER)
+   ========================================= */
+.dash-prof-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: #ffffff;
+  padding: 25px 30px;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  margin-bottom: 30px;
+  border: 1px solid #e2e8f0;
+}
+
+.welcome-box h1 {
+  font-size: 24px;
+  color: #0f172a;
+  margin: 0 0 5px 0;
+}
+
+.welcome-box p {
+  color: #64748b;
+  margin: 0;
+  font-size: 15px;
+}
+
+.btn-config {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-config:hover {
+  background: #e2e8f0;
+}
+
+/* =========================================
+   2. GRADE DE ESTATÍSTICAS (STATS)
+   ========================================= */
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
   margin-bottom: 40px;
 }
 
-.prof-welcome h1 {
-  font-size: 1.8rem;
+.stat-card {
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Linha colorida no topo de cada card de status */
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+}
+
+.stat-card.new::before { background-color: #3b82f6; }
+.stat-card.active::before { background-color: #f59e0b; }
+.stat-card.total::before { background-color: #10b981; }
+
+.stat-card h3 {
+  font-size: 36px;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1;
+}
+
+.stat-card span {
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* =========================================
+   3. TÍTULO DA LISTA DE DEMANDAS
+   ========================================= */
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.list-header h2 {
+  font-size: 20px;
   color: #1e293b;
   margin: 0;
 }
 
-.prof-welcome p {
-  color: #64748b;
-  margin-top: 5px;
-}
-
-.prof-btn-edit {
-  background: white;
-  border: 1px solid #e2e8f0;
-  padding: 10px 20px;
-  border-radius: 8px;
-  color: #1e293b;
+.btn-refresh {
+  background: none;
+  border: none;
+  color: #3b82f6;
   font-weight: 600;
-  transition: all 0.2s;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: 0.2s;
 }
 
-.prof-btn-edit:hover {
-  background: #f1f5f9;
+.btn-refresh:hover {
+  background: #eff6ff;
+}
+
+/* =========================================
+   4. GRADE DE CARDS DE SERVIÇO
+   ========================================= */
+.requests-grid {
+  display: grid;
+  /* Aumentamos de 320px para 340px para dar mais espaço aos botões */
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 24px;
+  align-items: stretch; /* Faz os cards esticarem juntos na mesma linha */
+}
+
+.request-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Ocupa 100% do espaço vertical disponível */
+  transition: all 0.2s ease;
+}
+
+.request-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   border-color: #cbd5e1;
 }
 
-/* Stats Cards */
-.prof-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
-  margin-bottom: 50px;
-}
-
-.prof-stat-card {
-  background: white;
-  padding: 25px;
-  border-radius: 12px;
+.card-body {
+  padding: 24px;
   display: flex;
-  align-items: center;
-  gap: 20px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  border-left: 5px solid transparent;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
-.stat-icon {
-  width: 50px;
-  height: 50px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
+.badge-status {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+  align-self: flex-start; /* Mantém a tag curta, sem esticar */
 }
 
-.stat-info h3 {
-  font-size: 1.6rem;
+.request-card.status-opened .badge-status { background: #eff6ff; color: #2563eb; }
+.request-card.status-in_waiting .badge-status { background: #fffbeb; color: #d97706; }
+
+.card-body h4 {
+  margin: 0 0 15px 0;
+  font-size: 18px;
+  color: #0f172a;
+  line-height: 1.4;
+}
+
+.client-name {
   margin: 0;
-  color: #1e293b;
-}
-
-.stat-info span {
-  font-size: 0.9rem;
+  font-size: 14px;
   color: #64748b;
-  font-weight: 500;
-}
-
-.card-new { border-left-color: #3b82f6; }
-.card-new .stat-icon { background: #eff6ff; color: #3b82f6; }
-
-.card-waiting { border-left-color: #f59e0b; }
-.card-waiting .stat-icon { background: #fffbeb; color: #f59e0b; }
-
-.card-done { border-left-color: #10b981; }
-.card-done .stat-icon { background: #ecfdf5; color: #10b981; }
-
-/* Section Work */
-.prof-work-section {
-  background: white;
-  border-radius: 12px;
-  padding: 30px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-}
-
-.section-title-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 25px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.section-title-bar h2 {
-  font-size: 1.2rem;
-  color: #1e293b;
   display: flex;
   align-items: center;
+  gap: 6px;
+  /* O segredo do alinhamento: empurra este elemento para o final do card-body */
+  margin-top: auto; 
+}
+
+/* =========================================
+   5. RODAPÉ DO CARD (BOTÕES DE AÇÃO)
+   ========================================= */
+.card-footer {
+  padding: 16px 24px;
+  background: #f8fafc;
+  border-top: 1px solid #f1f5f9;
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+  display: flex;
+  flex-wrap: wrap; /* Permite que os botões se ajustem se a tela diminuir */
   gap: 10px;
 }
 
-.prof-btn-refresh {
-  background: none;
+.btn-action {
   border: none;
-  color: #64748b;
-  cursor: pointer;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px; /* Reduzimos um pouco a fonte para caber melhor */
   font-weight: 600;
-}
-
-.spin { animation: spin 1s linear infinite; }
-@keyframes spin { 100% { transform: rotate(360deg); } }
-
-/* Items da Lista */
-.prof-requests-list {
+  cursor: pointer;
   display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.prof-request-item {
-  display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  padding: 20px;
-  border-radius: 10px;
-  border: 1px solid #f1f5f9;
-  transition: transform 0.2s, background 0.2s;
+  gap: 6px;
+  transition: all 0.2s ease;
+  flex-grow: 1; /* Os botões de texto dividem o espaço restante */
 }
 
-.prof-request-item:hover {
-  background: #f8fafc;
-  transform: translateX(5px);
+.btn-action.info {
+  flex-grow: 0;
+  flex-shrink: 0;
+  width: 45px; /* Tamanho fixo apenas para o botão do ícone */
+  background: #e2e8f0;
+  color: #475569;
 }
+.btn-action.info:hover { background: #cbd5e1; }
 
-.request-main-info h4 {
-  margin: 10px 0 5px 0;
-  color: #1e293b;
-}
+.btn-action.accept { background: #10b981; color: white; }
+.btn-action.accept:hover { background: #059669; }
 
-.request-main-info p {
-  font-size: 0.9rem;
-  color: #64748b;
-  margin: 0;
-}
+.btn-action.decline { background: #ef4444; color: white; }
+.btn-action.decline:hover { background: #dc2626; }
 
-/* Badges Status */
-.status-badge {
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 20px;
-  text-transform: uppercase;
-}
+.btn-action.finish { background: #3b82f6; color: white; }
+.btn-action.finish:hover { background: #2563eb; }
 
-.status-badge.opened { background: #dcfce7; color: #166534; }
-.status-badge.in_waiting { background: #fef3c7; color: #92400e; }
-.status-badge.closed { background: #e0e7ff; color: #3730a3; }
-
-.btn-view-details {
-  background: #1a365d;
-  color: white;
-  border: none;
-  padding: 8px 18px;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.btn-view-details:hover { background: #122846; }
-
-.prof-empty-state {
+/* =========================================
+   6. MENSAGEM VAZIA (EMPTY STATE)
+   ========================================= */
+.empty-state {
   text-align: center;
   padding: 60px 20px;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 2px dashed #cbd5e1;
+}
+
+.empty-state i {
+  font-size: 45px;
   color: #94a3b8;
 }
 
-.prof-empty-state i {
-  font-size: 3rem;
-  margin-bottom: 15px;
+.empty-state p {
+  margin-top: 15px;
+  color: #64748b;
+  font-size: 16px;
 }

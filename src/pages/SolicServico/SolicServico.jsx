@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import api from '../../services/api';
 import imgSolic from '../../assets/imgsolic.jpg';
+import api from '../../services/api';
 import './SolicServico.css';
 
 function SolicServico() {
@@ -12,20 +12,20 @@ function SolicServico() {
   // Recupera o ID do profissional selecionado na ListaProf
   const professionalId = location.state?.profId;
 
-  // Estados para dados do banco
+  // Estados para dados da base de dados
   const [categorias, setCategorias] = useState([]);
   const [enderecos, setEnderecos] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Estados do formulário
+  // Estados do formulário (Corrigido 'descricao' para 'description' para ligar corretamente ao input)
   const [dadosFormulario, setDadosFormulario] = useState({
     titulo: '',
-    descricao: '',
+    description: '',
     categoryId: '',
     addressId: ''
   });
 
-  // 1. Pega os dados do cliente logado no LocalStorage
+  // Pega os dados do cliente logado no LocalStorage
   const userStorage = localStorage.getItem('@ConectaPro:user');
   const usuarioLogado = userStorage ? JSON.parse(userStorage) : null;
 
@@ -41,16 +41,16 @@ function SolicServico() {
       try {
         setLoading(true);
         
-        // 2. Busca Categorias Reais do Banco
+        // Busca Categorias Reais da base de dados
         const resCat = await api.get('/api/category');
         setCategorias(resCat.data);
 
-        // 3. Busca Endereços do Usuário Logado
+        // Busca Endereços do Utilizador Logado
         if (usuarioLogado?.id) {
           const resEnd = await api.get(`/api/user/${usuarioLogado.id}/addresses`);
           setEnderecos(resEnd.data);
           
-          // Se o usuário tiver apenas um endereço, já deixa selecionado
+          // Se o utilizador tiver apenas um endereço, já deixa selecionado
           if (resEnd.data.length === 1) {
             setDadosFormulario(prev => ({ ...prev, addressId: resEnd.data[0].id }));
           }
@@ -81,16 +81,18 @@ function SolicServico() {
     }
 
     try {
-      // 4. Monta o Payload (JSON) para o DemandRequest
+      // Monta o Payload exatamente como o DemandRequest.java exige
       const payload = {
-        code: `REQ-${Math.floor(Math.random() * 10000)}`,
         title: dadosFormulario.titulo,
-        description: dadosFormulario.descricao,
-        imgUrl: "", 
+        description: dadosFormulario.description,
+        
+        // CORREÇÃO: Passar null para imgUrl para não falhar na validação @URL do backend
+        imgUrl: null, 
+        
         addressId: Number(dadosFormulario.addressId),
         categoryId: Number(dadosFormulario.categoryId),
-        clientId: usuarioLogado.id, // Extraído do LocalStorage
-        professionalId: professionalId,
+        clientId: usuarioLogado.id, 
+        professionalId: Number(professionalId),
         demandStatus: "OPENED" 
       };
 
@@ -101,12 +103,14 @@ function SolicServico() {
 
     } catch (error) {
       console.error("Erro ao enviar demanda:", error);
-      toast.error("Ocorreu um erro ao enviar a solicitação.");
+      // Apresenta o erro exato que o Java devolveu, caso exista
+      const msgErro = error.response?.data?.message || "Ocorreu um erro ao enviar a solicitação.";
+      toast.error(msgErro);
     }
   };
 
   if (loading) {
-    return <div className="pagina-solicitar-servico"><p>Carregando opções...</p></div>;
+    return <div className="pagina-solicitar-servico"><p>A carregar opções...</p></div>;
   }
 
   return (
@@ -114,10 +118,10 @@ function SolicServico() {
       <div className="container-solicitacao">
         
         <div className="lado-informativo">
-          <p className="tag-ajuda">ESTAMOS AQUI PARA TE AJUDAR!</p>
-          <h1 className="titulo-solicitacao">Descreva o que você precisa</h1>
+          <p className="tag-ajuda">ESTAMOS AQUI PARA AJUDAR!</p>
+          <h1 className="titulo-solicitacao">Descreva o que precisa</h1>
           <p className="texto-apoio">
-            O profissional escolhido receberá os detalhes abaixo e entrará em contato 
+            O profissional escolhido receberá os detalhes abaixo e entrará em contacto 
             para conversar sobre o orçamento e prazos.
           </p>
           <div className="wrapper-imagem">
@@ -171,7 +175,7 @@ function SolicServico() {
                 ))}
               </select>
               {enderecos.length === 0 && (
-                <p className="aviso-endereco">Nenhum endereço encontrado. Vá ao seu perfil para cadastrar.</p>
+                <p className="aviso-endereco">Nenhum endereço encontrado. Vá ao seu perfil para registar.</p>
               )}
             </div>
 
