@@ -12,6 +12,10 @@ function DashboardCliente() {
   const usuarioLogado = JSON.parse(localStorage.getItem('@ConectaPro:user'));
   const clienteId = usuarioLogado?.id;
 
+  const [profissionais, setProfissionais] = useState([]);
+  const [profSelecionado, setProfSelecionado] = useState('');
+  const [pedidoSelecionado, setPedidoSelecionado] = useState(null);
+
   useEffect(() => {
     const buscarPedidos = async () => {
       if (!clienteId) return;
@@ -26,7 +30,43 @@ function DashboardCliente() {
       }
     };
     buscarPedidos();
+    buscarProfissionais();
   }, [clienteId]);
+
+  const buscarProfissionais = async () => {
+    try {
+      const response = await api.get('/api/user');
+      const apenasProfissionais = response.data.filter(
+        u => u.userType === 'PROFESSIONAL'
+      );
+      setProfissionais(apenasProfissionais);
+    } catch (error) {
+      console.error("Erro ao buscar profissionais:", error);
+    }
+  };
+
+  const reatribuirProfissional = async () => {
+    if (!pedidoSelecionado || !profSelecionado) return;
+
+    try {
+      console.log("Reatribuindo:", pedidoSelecionado, profSelecionado);
+      await api.patch(`/api/demand/${pedidoSelecionado}/reassign`, {
+        professionalId: Number(profSelecionado)
+      });
+
+      alert("Profissional reatribuído com sucesso!");
+
+      setPedidoSelecionado(null);
+      setProfSelecionado('');
+
+      // Atualiza lista
+      window.location.reload();
+
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao reatribuir profissional");
+    }
+  };
 
   const emAndamento = pedidos.filter(p => p.demandStatus === 'IN_WAITING').length;
   const aguardandoOrcamento = pedidos.filter(p => p.demandStatus === 'OPENED').length;
@@ -56,14 +96,14 @@ function DashboardCliente() {
             <p className="subtitulo-detalhado">
               Encontre os melhores profissionais para realizar seus projetos ou resolver problemas do dia a dia com agilidade e segurança.
             </p>
-            
+
             <div className="bloco-busca-e-categorias">
               {/* CAMPO DE BUSCA */}
               <div className="container-busca">
                 <i className="bi bi-search"></i>
-                <input 
-                  type="text" 
-                  placeholder="Ex: Eletricista, Design, Limpeza..." 
+                <input
+                  type="text"
+                  placeholder="Ex: Eletricista, Design, Limpeza..."
                   value={termoBusca}
                   onChange={(e) => setTermoBusca(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && realizarBusca()}
@@ -110,14 +150,13 @@ function DashboardCliente() {
         </div>
 
         <div className="layout-dashboard-baixo">
-          {/* CARDS COM DADOS REAIS DA API */}
           <div className="coluna-status">
             <div className="cartao-contador-status">
               <div className="numero-status">{emAndamento}</div>
               <p>Pedidos em Andamento</p>
               <i className="bi bi-play-circle-fill icone-status-azul"></i>
             </div>
-            
+
             <div className="cartao-contador-status">
               <div className="numero-status">{aguardandoOrcamento}</div>
               <p>Aguardando Orçamento</p>
@@ -144,9 +183,29 @@ function DashboardCliente() {
               ) : (
                 <div className="lista-real" style={{ marginTop: '20px' }}>
                   {pedidos.slice(0, 4).map(p => (
-                    <div key={p.id} style={{ padding: '12px 0', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between' }}>
-                       <strong>{p.title}</strong>
-                       <span style={{ color: '#0066ff', fontWeight: 'bold' }}>{p.demandStatus}</span>
+                    <div key={p.id} style={{ padding: '12px 0', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+
+                      <div>
+                        <strong>{p.title}</strong><br />
+                        <small>{p.demandStatus}</small>
+                      </div>
+
+                      {p.demandStatus === 'REJECTED' && (
+                        <button
+                          onClick={() => setPedidoSelecionado(p.id)}
+                          style={{
+                            background: '#ff9800',
+                            color: '#fff',
+                            border: 'none',
+                            padding: '6px 12px',
+                            borderRadius: '8px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Reatribuir
+                        </button>
+                      )}
+
                     </div>
                   ))}
                 </div>
@@ -155,6 +214,40 @@ function DashboardCliente() {
           </div>
         </div>
       </section>
+      {pedidoSelecionado && (
+        <div className="modal-overlay">
+          <div className="modal-container">
+            <h3 className="modal-title">Reatribuir profissional</h3>
+
+            <p className="modal-subtitle">
+              Escolha um novo profissional para este serviço
+            </p>
+
+            <select
+              value={profSelecionado}
+              onChange={(e) => setProfSelecionado(e.target.value)}
+              className="modal-select"
+            >
+              <option value="">Selecione um profissional</option>
+              {profissionais.map(p => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+
+            <div className="modal-actions">
+              <button className="btn-cancelar" onClick={() => setPedidoSelecionado(null)}>
+                Cancelar
+              </button>
+
+              <button className="btn-confirmar" onClick={reatribuirProfissional}>
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
