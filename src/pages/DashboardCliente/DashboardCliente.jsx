@@ -181,8 +181,8 @@ function DashboardCliente() {
                   <p>Você ainda não realizou nenhum pedido.</p>
                 </div>
               ) : (
-                <div className="lista-real" style={{ marginTop: '20px' }}>
-                  {pedidos.slice(0, 4).map(p => (
+                <div className="lista-real">
+                  {pedidos.map(p => (
                     <div key={p.id} style={{ padding: '12px 0', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
 
                       <div>
@@ -203,6 +203,22 @@ function DashboardCliente() {
                           }}
                         >
                           Reatribuir
+                        </button>
+                      )}
+
+                      {p.demandStatus === 'IN_WAITING' && (
+                        <button
+                          onClick={() => navigate('/detalhes-solicitacao', { state: { pedidoId: p.id } })}
+                          style={{
+                            background: '#1e66f5',
+                            color: '#fff',
+                            border: 'none',
+                            padding: '6px 12px',
+                            borderRadius: '8px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Ver detalhes
                         </button>
                       )}
 

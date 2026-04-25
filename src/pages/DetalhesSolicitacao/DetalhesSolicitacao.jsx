@@ -1,17 +1,42 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './DetalhesSolicitacao.css';
+import { useLocation } from 'react-router-dom';
+import api from '../../services/api';
 
-function DetalhesSolicitacao({ demanda, modo }) {
-  // 'modo' pode ser 'CLIENTE' (vendo dados do prof) ou 'PROFISSIONAL' (vendo dados do cliente)
-  
-  const exibirPessoa = modo === 'CLIENTE' ? demanda.professional : demanda.client;
-  const tituloRelacao = modo === 'CLIENTE' ? "Profissional Designado" : "Dados do Solicitante";
+function DetalhesSolicitacao() {
+  const location = useLocation();
+  const pedidoId = location.state?.pedidoId;
+
+  const [demanda, setDemanda] = useState(null);
+  const modo = 'CLIENTE'; // você pode dinamizar depois
+
+  useEffect(() => {
+    if (!pedidoId) return;
+
+    const buscar = async () => {
+      try {
+        const response = await api.get(`/api/demand/user/${pedidoId}`);
+        setDemanda(response.data);
+      } catch (err) {
+        console.error("Erro ao buscar demanda:", err);
+      }
+    };
+
+    buscar();
+  }, [pedidoId]);
+
+  // ✅ proteção contra undefined
+  if (!demanda) {
+    return <p style={{ padding: '20px' }}>Carregando...</p>;
+  }
+
+  const exibirPessoa =
+    modo === 'CLIENTE' ? demanda.professionalId : demanda.clientId;
 
   return (
     <div className="card-detalhes-contato">
       <div className="header-match">
         <div className="badge-andamento">SESSÃO EM ANDAMENTO</div>
-        <h3>{tituloRelacao}</h3>
       </div>
 
       <div className="corpo-detalhes">
@@ -19,10 +44,13 @@ function DetalhesSolicitacao({ demanda, modo }) {
           <div className="avatar-fake">
             {exibirPessoa?.name?.charAt(0).toUpperCase() || "U"}
           </div>
+
           <div>
             <h4>{exibirPessoa?.name || "Usuário ConectaPro"}</h4>
             <p className="especialidade">
-              {modo === 'CLIENTE' ? (demanda.category?.name || "Especialista") : "Cliente Verificado"}
+              {modo === 'CLIENTE'
+                ? demanda.category?.name || "Especialista"
+                : "Cliente Verificado"}
             </p>
           </div>
         </div>
@@ -51,7 +79,8 @@ function DetalhesSolicitacao({ demanda, modo }) {
             <div>
               <span>Local do Serviço</span>
               <p>
-                {demanda.address?.street}, {demanda.address?.number} - {demanda.address?.city}
+                {demanda.address?.street}, {demanda.address?.number} -{" "}
+                {demanda.address?.city}
               </p>
             </div>
           </div>
@@ -59,10 +88,14 @@ function DetalhesSolicitacao({ demanda, modo }) {
       </div>
 
       <div className="footer-detalhes">
-        <p>Combine os detalhes finais, valores e horários diretamente pelo WhatsApp.</p>
-        <a 
-          href={`https://wa.me/${exibirPessoa?.phone?.replace(/\D/g, '')}`} 
-          target="_blank" 
+        <p>
+          Combine os detalhes finais, valores e horários diretamente pelo
+          WhatsApp.
+        </p>
+
+        <a
+          href={`https://wa.me/${exibirPessoa?.phone?.replace(/\D/g, '')}`}
+          target="_blank"
           rel="noreferrer"
           className="btn-whatsapp-direto"
         >

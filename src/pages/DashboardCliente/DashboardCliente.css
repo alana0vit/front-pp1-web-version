@@ -395,3 +395,24 @@
     opacity: 1;
   }
 }
+
+.lista-real {
+  margin-top: 20px;
+  max-height: 300px; /* altura do scroll */
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+/* scrollbar bonitinha */
+.lista-real::-webkit-scrollbar {
+  width: 6px;
+}
+
+.lista-real::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 10px;
+}
+
+.lista-real::-webkit-scrollbar-thumb:hover {
+  background-color: #999;
+}
