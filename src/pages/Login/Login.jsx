@@ -1,6 +1,5 @@
-import React from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate, Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../../services/api";
 import "./Login.css";
@@ -8,34 +7,38 @@ import "./Login.css";
 const Login = () => {
   const navigate = useNavigate();
   const { register, handleSubmit } = useForm();
+
   const onSubmit = async (data) => {
-        try {
-            // Chamada para a rota de login (verifique se o backend já ativou a rota /login ou /api/auth)
-            const response = await api.post('/auth/login', data);
-            
-            // Extraindo exatamente o que o DTO do backend devolve
-            const { tooken, id, name, userType } = response.data;
+    try {
+      // Chamada para a rota de login configurada no AuthController do Backend
+      const response = await api.post('/auth/login', data);
+      
+      // Extraindo os dados conforme definidos no LoginResponseDTO.java
+      const { token, id, name, userType } = response.data;
 
-            // Salvando no LocalStorage para usarmos nas outras telas
-            localStorage.setItem('@ConectaPro:token', tooken);
-            localStorage.setItem('@ConectaPro:user', JSON.stringify({ id, name, userType }));
-            
-            toast.success(`Bem-vindo(a) de volta, ${name}!`);
+      // Salvando no LocalStorage com os nomes padrão do projeto
+      localStorage.setItem('@ConectaPro:token', token);
+      localStorage.setItem('@ConectaPro:user', JSON.stringify({ id, name, userType }));
+      
+      toast.success(`Bem-vindo(a) de volta, ${name}!`);
 
-            // Redirecionamento dinâmico baseado no tipo de conta
-            if (userType === 'CLIENT') {
-                navigate('/cliente/catalogo'); // Manda o cliente pras compras
-            } else if (userType === 'PROFESSIONAL') {
-                navigate('/dashboard-profissional'); // Manda o profissional pro trabalho
-            } else {
-                navigate('/');
-            }
+      // Redirecionamento dinâmico baseado no UserType.java (CLIENT ou PROFESSIONAL)
+      if (userType === 'CLIENT') {
+        navigate('/dashboard-cliente'); 
+      } else if (userType === 'PROFESSIONAL') {
+        navigate('/dashboard-profissional'); 
+      } else {
+        navigate('/');
+      }
 
-        } catch (error) {
-            console.error("Erro na autenticação:", error);
-            toast.error("E-mail ou senha incorretos.");
-        }
-    };
+    } catch (error) {
+      console.error("Erro na autenticação:", error);
+      
+      // Captura a mensagem de erro vinda do AuthController.java se disponível
+      const mensagemErro = error.response?.data || "E-mail ou senha incorretos.";
+      toast.error(mensagemErro);
+    }
+  };
 
   return (
     <div className="login-container">
@@ -49,7 +52,7 @@ const Login = () => {
             <input
               type="email"
               placeholder="seu@email.com"
-              {...register("email", { required: true })}
+              {...register("email", { required: "O e-mail é obrigatório" })}
             />
           </div>
 
@@ -58,7 +61,7 @@ const Login = () => {
             <input
               type="password"
               placeholder="********"
-              {...register("password", { required: true })}
+              {...register("password", { required: "A senha é obrigatória" })}
             />
           </div>
 
