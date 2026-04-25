@@ -11,7 +11,6 @@ function SolicServico() {
   
   const professionalId = location.state?.profId;
 
-  // Estados para dados da base de dados
   const [categorias, setCategorias] = useState([]);
   const [enderecos, setEnderecos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,12 +22,10 @@ function SolicServico() {
     addressId: ''
   });
 
-  // Pega os dados do cliente logado no LocalStorage
   const userStorage = localStorage.getItem('@ConectaPro:user');
   const usuarioLogado = userStorage ? JSON.parse(userStorage) : null;
 
   useEffect(() => {
-    // Se não houver profissional selecionado, volta para a lista
     if (!professionalId) {
       toast.warn("Selecione um profissional antes de solicitar um serviço.");
       navegar('/lista-profissionais');
@@ -79,7 +76,6 @@ function SolicServico() {
     }
 
     try {
-      // Monta o Payload exatamente como o DemandRequest.java exige
       const payload = {
         title: dadosFormulario.titulo,
         description: dadosFormulario.description,
@@ -100,7 +96,6 @@ function SolicServico() {
 
     } catch (error) {
       console.error("Erro ao enviar demanda:", error);
-      // Apresenta o erro exato que o Java devolveu, caso exista
       const msgErro = error.response?.data?.message || "Ocorreu um erro ao enviar a solicitação.";
       toast.error(msgErro);
     }
