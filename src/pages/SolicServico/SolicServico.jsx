@@ -9,7 +9,6 @@ function SolicServico() {
   const navegar = useNavigate();
   const location = useLocation();
   
-  // Recupera o ID do profissional selecionado na ListaProf
   const professionalId = location.state?.profId;
 
   // Estados para dados da base de dados
@@ -17,7 +16,6 @@ function SolicServico() {
   const [enderecos, setEnderecos] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Estados do formulário (Corrigido 'descricao' para 'description' para ligar corretamente ao input)
   const [dadosFormulario, setDadosFormulario] = useState({
     titulo: '',
     description: '',
@@ -86,7 +84,6 @@ function SolicServico() {
         title: dadosFormulario.titulo,
         description: dadosFormulario.description,
         
-        // CORREÇÃO: Passar null para imgUrl para não falhar na validação @URL do backend
         imgUrl: null, 
         
         addressId: Number(dadosFormulario.addressId),
