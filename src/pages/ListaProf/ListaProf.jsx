@@ -9,23 +9,19 @@ function ListaProf() {
   const [profissionais, setProfissionais] = useState([]);
   const [termoBusca, setTermoBusca] = useState('');
 
-  // 1. CORREÇÃO: Declaramos a função ANTES do useEffect para evitar o erro de inicialização
   const buscarProfissionais = async (nome = '') => {
     try {
       let response;
 
-      // 1. Se o usuário digitou um nome, usamos a rota de busca do backend
       if (nome.trim() !== '') {
         response = await api.get('/api/user/search', {
           params: { name: nome }
         });
       } 
-      // 2. Se estiver vazio (quando a página acaba de carregar), pegamos todos os usuários
       else {
         response = await api.get('/api/user'); 
       }
       
-      // 3. O filtro de quem é PROFISSIONAL continua funcionando perfeitamente
       const apenasProfissionais = response.data.filter(u => u.userType === 'PROFESSIONAL');
       setProfissionais(apenasProfissionais);
       
@@ -34,7 +30,6 @@ function ListaProf() {
     }
   };
 
-  // 2. Agora o useEffect pode chamar a função em segurança
   useEffect(() => {
     buscarProfissionais();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -45,7 +40,6 @@ function ListaProf() {
     buscarProfissionais(termoBusca);
   };
 
-  // 3. CORREÇÃO: Array de cores fixo para usar de forma determinística ("pura")
   const coresTopo = ["#e6f0ff", "#e6ffe6", "#fff0e6", "#f0e6ff"];
 
   return (
@@ -91,10 +85,8 @@ function ListaProf() {
             <p style={{textAlign: 'center', marginTop: '2rem'}}>Nenhum profissional encontrado com este nome.</p>
           ) : (
             <div className="grade-profissionais">
-              {/* Adicionamos o 'index' ao map para distribuir as cores de forma pura */}
               {profissionais.map((prof, index) => (
                 <div key={prof.id} className="cartao-profissional-moderno">
-                  {/* Usamos o resto da divisão para intercalar as cores perfeitamente */}
                   <div 
                     className="topo-colorido-cartao" 
                     style={{ backgroundColor: coresTopo[index % coresTopo.length] }}

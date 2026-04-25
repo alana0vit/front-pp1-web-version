@@ -14,7 +14,6 @@ const HeroSection = ({ onScrollClick }) => {
           Uma plataforma que aproxima clientes e profissionais de diversas áreas, de forma simples e segura.
         </p>
         <div className="hero-actions">
-          {/* Adicionamos o evento de clique no botão */}
           <button className="btn-how-it-works" onClick={onScrollClick}>
             Como funciona?
           </button>

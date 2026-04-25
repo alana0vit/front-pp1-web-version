@@ -76,7 +76,6 @@
   overflow: hidden;
 }
 
-/* Linha colorida no topo de cada card de status */
 .stat-card::before {
   content: '';
   position: absolute;
@@ -158,7 +157,7 @@
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
-  height: 100%; /* Ocupa 100% do espaço vertical disponível */
+  height: 100%; 
   transition: all 0.2s ease;
 }
 
@@ -183,7 +182,7 @@
   font-weight: 700;
   margin-bottom: 12px;
   letter-spacing: 0.5px;
-  align-self: flex-start; /* Mantém a tag curta, sem esticar */
+  align-self: flex-start; 
 }
 
 .request-card.status-opened .badge-status { background: #eff6ff; color: #2563eb; }
@@ -203,7 +202,6 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  /* O segredo do alinhamento: empurra este elemento para o final do card-body */
   margin-top: auto; 
 }
 
@@ -217,15 +215,14 @@
   border-bottom-left-radius: 16px;
   border-bottom-right-radius: 16px;
   display: flex;
-  flex-wrap: wrap; /* Permite que os botões se ajustem se a tela diminuir */
-  gap: 10px;
+  flex-wrap: wrap; 
 }
 
 .btn-action {
   border: none;
   padding: 10px 12px;
   border-radius: 8px;
-  font-size: 13px; /* Reduzimos um pouco a fonte para caber melhor */
+  font-size: 13px; 
   font-weight: 600;
   cursor: pointer;
   display: flex;
@@ -233,13 +230,13 @@
   align-items: center;
   gap: 6px;
   transition: all 0.2s ease;
-  flex-grow: 1; /* Os botões de texto dividem o espaço restante */
+  flex-grow: 1; 
 }
 
 .btn-action.info {
   flex-grow: 0;
   flex-shrink: 0;
-  width: 45px; /* Tamanho fixo apenas para o botão do ícone */
+  width: 45px; 
   background: #e2e8f0;
   color: #475569;
 }

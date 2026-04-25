@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './FAQ.css';
 
-// Dicionário de perguntas - Fácil de dar manutenção sem poluir o HTML
 const faqData = [
     {
         pergunta: "Como encontro um profissional na minha região?",
@@ -20,14 +19,13 @@ const faqData = [
 
 const FAQ = () => {
     const navigate = useNavigate();
-    // Estado para controlar qual pergunta está aberta (Accordion)
     const [perguntaAtiva, setPerguntaAtiva] = useState(null);
 
     const togglePergunta = (index) => {
         if (perguntaAtiva === index) {
-            setPerguntaAtiva(null); // Fecha se já estiver aberta
+            setPerguntaAtiva(null);
         } else {
-            setPerguntaAtiva(index); // Abre a nova
+            setPerguntaAtiva(index); 
         }
     };
 
@@ -50,7 +48,6 @@ const FAQ = () => {
                             <i className={`bi ${perguntaAtiva === index ? 'bi-chevron-up' : 'bi-chevron-down'}`}></i>
                         </div>
                         
-                        {/* Renderização condicional da resposta */}
                         {perguntaAtiva === index && (
                             <div className="faq-resposta">
                                 <p>{item.resposta}</p>

@@ -9,7 +9,6 @@
   margin: 0 auto;
 }
 
-/* Botão Voltar no topo */
 .btn-voltar-topo {
   display: flex;
   align-items: center;
@@ -31,7 +30,6 @@
   transform: translateX(-3px);
 }
 
-/* Card principal */
 .editar-perfil-card {
   background: white;
   border-radius: 16px;
@@ -51,7 +49,6 @@
   margin-bottom: 30px;
 }
 
-/* Organização das Seções e Grids */
 .form-section {
   margin-bottom: 35px;
 }
@@ -100,7 +97,6 @@
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-/* Seção de Confirmação */
 .confirm-section {
   background: #fef2f2;
   padding: 20px;
@@ -110,7 +106,6 @@
 
 .label-confirm { color: #b91c1c !important; }
 
-/* Botões de Ação */
 .form-actions {
   display: flex;
   justify-content: flex-end;

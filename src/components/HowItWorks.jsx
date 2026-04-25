@@ -10,7 +10,6 @@ const HowItWorks = () => {
         <div className="step-card">
           <div className="step-icon-wrapper">
             <span className="step-number">1</span>
-            {/* Marian, substitui esse emoji por um ícone real do nosso design (pode usar o react-icons ou jogar um SVG aqui). */}
             <div className="icon-placeholder">📱</div>
           </div>
           <h3>Conexão instantânea</h3>
@@ -20,7 +19,6 @@ const HowItWorks = () => {
         <div className="step-card">
           <div className="step-icon-wrapper">
             <span className="step-number">2</span>
-            {/* Mesma coisa aqui, colocar o ícone real de lupa/pesquisa. */}
             <div className="icon-placeholder">🔍</div>
           </div>
           <h3>Escolha certa</h3>
@@ -30,7 +28,6 @@ const HowItWorks = () => {
         <div className="step-card">
           <div className="step-icon-wrapper">
             <span className="step-number">3</span>
-            {/* Colocar o ícone real de calendário aqui. */}
             <div className="icon-placeholder">📅</div>
           </div>
           <h3>Agende e conclua</h3>

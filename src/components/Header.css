@@ -11,7 +11,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Container Principal da Header */
 .header {
   background-color: #f5f8ff;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
@@ -26,8 +25,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 40px; /* Reduzi um pouco o recuo lateral */
-  height: 70px;    /* DIMINUÍDO: de 90px para 70px para ficar mais fina */
+  padding: 0 40px; 
+  height: 70px;    
   width: 100%;
   max-width: 100%;
   margin: 0;
@@ -35,28 +34,26 @@ body {
 
 /* Logo */
 .logo-img {
-  height: 80px;    /* DIMINUÍDO: de 120px para 80px para acompanhar a altura da header */
+  height: 80px;    
   width: auto;
   display: block;
   transition: transform 0.3s;
 }
 
 .logo-img:hover {
-  transform: scale(1.05); /* Um efeitinho leve ao passar o mouse */
+  transform: scale(1.05); /
 }
 
-/* Navegação e Lado Direito */
 .header-nav {
   display: flex;
   align-items: center;
-  gap: 25px; /* Reduzi um pouco o espaço entre os itens */
+  gap: 25px; 
 }
 
-/* Links (FAQ, Meu Painel, Fale Conosco) */
 .nav-link {
   text-decoration: none;
   color: #495057;
-  font-size: 15px; /* Diminuído levemente para combinar com a delicadeza */
+  font-size: 15px; 
   font-weight: 600;
   transition: color 0.2s;
   white-space: nowrap;
@@ -66,7 +63,6 @@ body {
   color: #007bff;
 }
 
-/* Menu do Usuário Logado */
 .user-menu {
   display: flex;
   align-items: center;
@@ -79,7 +75,6 @@ body {
   font-weight: 500;
 }
 
-/* Botões de Autenticação (Deslogado) */
 .auth-buttons {
   display: flex;
   align-items: center;
@@ -97,7 +92,7 @@ body {
   background-color: #007bff;
   color: #ffffff;
   text-decoration: none;
-  padding: 8px 18px; /* Botão um pouco menor também */
+  padding: 8px 18px; 
   border-radius: 6px;
   font-size: 15px;
   font-weight: 600;
@@ -108,7 +103,6 @@ body {
   background-color: #0056b3;
 }
 
-/* Botão de Sair */
 .btn-logout {
   background-color: transparent;
   color: #dc3545;
@@ -121,7 +115,6 @@ body {
   transition: all 0.2s;
 }
 
-/* Responsividade */
 @media (max-width: 850px) {
   .header-container {
     padding: 0 20px;

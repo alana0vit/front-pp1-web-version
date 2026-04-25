@@ -10,19 +10,15 @@ const Login = () => {
 
   const onSubmit = async (data) => {
     try {
-      // Chamada para a rota de login configurada no AuthController do Backend
       const response = await api.post('/auth/login', data);
       
-      // Extraindo os dados conforme definidos no LoginResponseDTO.java
       const { token, id, name, userType } = response.data;
 
-      // Salvando no LocalStorage com os nomes padrão do projeto
       localStorage.setItem('@ConectaPro:token', token);
       localStorage.setItem('@ConectaPro:user', JSON.stringify({ id, name, userType }));
       
       toast.success(`Bem-vindo(a) de volta, ${name}!`);
 
-      // Redirecionamento dinâmico baseado no UserType.java (CLIENT ou PROFESSIONAL)
       if (userType === 'CLIENT') {
         navigate('/dashboard-cliente'); 
       } else if (userType === 'PROFESSIONAL') {
@@ -34,7 +30,6 @@ const Login = () => {
     } catch (error) {
       console.error("Erro na autenticação:", error);
       
-      // Captura a mensagem de erro vinda do AuthController.java se disponível
       const mensagemErro = error.response?.data || "E-mail ou senha incorretos.";
       toast.error(mensagemErro);
     }

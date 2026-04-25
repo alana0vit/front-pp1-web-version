@@ -6,10 +6,10 @@
 }
 
 .footer-content {
-  max-width: 800px; /* Reduzi um pouco a largura máxima para as 2 colunas não ficarem longe demais */
+  max-width: 800px; 
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr 1fr; /* Apenas duas colunas agora */
+  grid-template-columns: 1fr 1fr; 
   gap: 60px;
   padding: 0 20px;
 }
@@ -39,7 +39,7 @@
 
 .footer-links a:hover {
   color: #0066ff;
-  transform: translateX(5px); /* Efeito suave ao passar o mouse */
+  transform: translateX(5px); 
 }
 
 .footer-links i {
