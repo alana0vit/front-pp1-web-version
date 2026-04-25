@@ -1,4 +1,3 @@
-import React from 'react';
 import './AppPromo.css';
 
 const AppPromo = () => {

@@ -1,0 +1,94 @@
+.card-detalhes-contato {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  margin-top: 15px;
+}
+
+.header-match {
+  background: #f8fafc;
+  padding: 20px;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.badge-andamento {
+  display: inline-block;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+}
+
+.corpo-detalhes { padding: 25px; }
+
+.info-principal {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.avatar-fake {
+  width: 55px;
+  height: 55px;
+  background: #1e293b;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.info-principal h4 { margin: 0; color: #0f172a; font-size: 18px; }
+.especialidade { margin: 0; color: #64748b; font-size: 14px; }
+
+.grid-contatos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.item-contato { display: flex; gap: 12px; align-items: flex-start; }
+.item-contato i { color: #3b82f6; font-size: 18px; }
+.item-contato span { font-size: 12px; color: #94a3b8; display: block; font-weight: 600; }
+.item-contato p { font-size: 14px; color: #334155; margin: 2px 0 0; font-weight: 500; }
+
+.endereco-servico {
+  display: flex;
+  gap: 12px;
+  padding-top: 15px;
+  border-top: 1px dashed #e2e8f0;
+}
+.endereco-servico i { color: #ef4444; }
+
+.footer-detalhes {
+  background: #f1f5f9;
+  padding: 20px;
+  text-align: center;
+}
+
+.footer-detalhes p { font-size: 13px; color: #64748b; margin-bottom: 15px; }
+
+.btn-whatsapp-direto {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #25d366;
+  color: white;
+  text-decoration: none;
+  padding: 12px 25px;
+  border-radius: 8px;
+  font-weight: 700;
+  transition: 0.2s;
+}
+
+.btn-whatsapp-direto:hover { background: #128c7e; transform: scale(1.02); }

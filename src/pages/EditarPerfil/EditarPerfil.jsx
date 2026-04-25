@@ -116,7 +116,6 @@ function EditarPerfil() {
     <div className="editar-perfil-page">
       <div className="editar-perfil-wrapper">
         
-        {/* BOTÃO VOLTAR ESTILIZADO */}
         <button type="button" className="btn-voltar-topo" onClick={() => navigate(-1)}>
           <i className="bi bi-arrow-left-short"></i>
           <span>Voltar ao Painel</span>

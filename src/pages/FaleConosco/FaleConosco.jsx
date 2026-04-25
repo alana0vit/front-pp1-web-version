@@ -119,7 +119,6 @@ function FaleConosco() {
               ></textarea>
             </div>
 
-            {/* O botão agora muda o texto e fica desativado enquanto envia */}
             <button 
               type="submit" 
               className="botao-contato" 

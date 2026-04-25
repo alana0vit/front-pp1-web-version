@@ -41,15 +41,12 @@ function DashboardProfissional() {
     buscarPedidos();
   }, [profissionalId]);
 
-  // FUNÇÃO CORRIGIDA: Extração profunda de IDs para evitar NaN
   const atualizarStatus = async (pedido, novoStatus) => {
     try {
-      // Tenta pegar o ID de qualquer lugar possível dentro do objeto retornado pelo backend
       const idEndereco = pedido.address?.id || pedido.addressId;
       const idCategoria = pedido.category?.id || pedido.categoryId;
       const idCliente = pedido.client?.id || pedido.clientId;
 
-      // Montagem do payload garantindo números válidos (fallback para 1 se for nulo ou NaN)
       const payload = {
         code: pedido.code || null,
         title: pedido.title,
