@@ -1,37 +1,39 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import imagemBusca from '../../assets/ImgLista1.jpg'; // Verifique a capitalização correta do ficheiro
-import api from '../../services/api';
-import './ListaProf.css';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import imagemBusca from "../../assets/ImgLista1.jpg";
+import api from "../../services/api";
+import "./ListaProf.css";
 
 function ListaProf() {
   const navigate = useNavigate();
   const [profissionais, setProfissionais] = useState([]);
-  const [termoBusca, setTermoBusca] = useState('');
-
+  const [termoBusca, setTermoBusca] = useState("");
   const [categorias, setCategorias] = useState([]);
-  const [categoriaSelecionada, setCategoriaSelecionada] = useState('');
+  const [categoriaSelecionada, setCategoriaSelecionada] = useState("");
+
+  // Estado para controlar a exibição do pop-up informativo "Perto de mim"
+  const [mostrarPopUpLocalizacao, setMostrarPopUpLocalizacao] = useState(false);
 
   const buscarProfissionais = async (filtros = {}) => {
     try {
       let response;
-
-      const temFiltros = Object.values(filtros).some(v => v !== undefined && v !== '');
+      const temFiltros = Object.values(filtros).some(
+        (v) => v !== undefined && v !== "",
+      );
 
       if (temFiltros) {
-        response = await api.get('/api/user/search', {
-          params: filtros
+        response = await api.get("/api/user/search", {
+          params: filtros,
         });
       } else {
-        response = await api.get('/api/user');
+        response = await api.get("/api/user");
       }
 
       const apenasProfissionais = response.data.filter(
-        u => u.userType === 'PROFESSIONAL'
+        (u) => u.userType === "PROFESSIONAL",
       );
 
       setProfissionais(apenasProfissionais);
-
     } catch (error) {
       console.error("Erro ao buscar profissionais:", error);
     }
@@ -40,34 +42,46 @@ function ListaProf() {
   useEffect(() => {
     buscarProfissionais();
 
-    api.get('/api/category')
-      .then(res => setCategorias(res.data))
-      .catch(err => console.error(err));
-
+    api
+      .get("/api/category")
+      .then((res) => setCategorias(res.data))
+      .catch((err) => console.error(err));
   }, []);
 
   const lidarComBusca = (e) => {
     e.preventDefault();
-
     buscarProfissionais({
       name: termoBusca,
-      categoryId: categoriaSelecionada || undefined
+      categoryId: categoriaSelecionada || undefined,
     });
   };
 
   const pegarLocalizacao = () => {
-    navigator.geolocation.getCurrentPosition((pos) => {
-      const lat = pos.coords.latitude;
-      const lng = pos.coords.longitude;
+    if (!navigator.geolocation) {
+      alert("A geolocalização não é suportada pelo seu navegador.");
+      return;
+    }
 
-      buscarProfissionais({
-        name: termoBusca,
-        categoryId: categoriaSelecionada || undefined,
-        latitude: lat,
-        longitude: lng,
-        radiusKm: 20
-      });
-    });
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+
+        buscarProfissionais({
+          name: termoBusca,
+          categoryId: categoriaSelecionada || undefined,
+          latitude: lat,
+          longitude: lng,
+          radiusKm: 20,
+        });
+      },
+      (error) => {
+        console.error("Erro ao obter localização:", error);
+        alert(
+          "Não foi possível obter sua localização. Verifique as permissões do navegador.",
+        );
+      },
+    );
   };
 
   const coresTopo = ["#e6f0ff", "#e6ffe6", "#fff0e6", "#f0e6ff"];
@@ -76,14 +90,16 @@ function ListaProf() {
     <div className="pagina-lista-profissionais">
       <section className="topo-busca-dividido">
         <div className="conteudo-topo-busca">
-
           <div className="lado-esquerdo-busca">
             <h1 className="titulo-principal-lista">
               Encontre o<br />
-              <span className="sublinhado-azul-transparente">talento certo!</span>
+              <span className="sublinhado-azul-transparente">
+                talento certo!
+              </span>
             </h1>
             <p className="subtitulo-lista-detalhado">
-              Explore nossa rede de profissionais qualificados prontos para realizar o seu projeto.
+              Explore nossa rede de profissionais qualificados prontos para
+              realizar o seu projeto.
             </p>
 
             <div className="bloco-busca-e-filtros">
@@ -95,38 +111,63 @@ function ListaProf() {
                   value={termoBusca}
                   onChange={(e) => setTermoBusca(e.target.value)}
                 />
-                <button type="submit" className="btn-buscar-lista">Buscar</button>
+                <button type="submit" className="btn-buscar-lista">
+                  Buscar
+                </button>
               </form>
 
-              <div className="filtros-linha">
+              <div className="filtros-linha" style={{ position: "relative" }}>
                 <select
                   className="select-categoria"
                   value={categoriaSelecionada}
                   onChange={(e) => setCategoriaSelecionada(e.target.value)}
                 >
                   <option value="">Todas categorias</option>
-                  {categorias.map(cat => (
+                  {categorias.map((cat) => (
                     <option key={cat.id} value={cat.id}>
                       {cat.name}
                     </option>
                   ))}
                 </select>
 
-                <button
-                  type="button"
-                  className="btn-localizacao"
-                  onClick={pegarLocalizacao}
+                <div
+                  className="container-btn-localizacao"
+                  style={{ position: "relative", display: "inline-block" }}
+                  onMouseEnter={() => setMostrarPopUpLocalizacao(true)}
+                  onMouseLeave={() => setMostrarPopUpLocalizacao(false)}
                 >
-                  📍 Perto de mim
-                </button>
+                  <button
+                    type="button"
+                    className="btn-localizacao"
+                    onClick={pegarLocalizacao}
+                  >
+                    📍 Perto de mim
+                  </button>
+
+                  {/* POP-UP INFORMATIVO DO FILTRO PERTO DE MIM */}
+                  {mostrarPopUpLocalizacao && (
+                    <div className="pop-up-informativo-localizacao">
+                      <div className="seta-pop-up"></div>
+                      <p>
+                        <strong>Busca por Geolocalização:</strong> Filtra
+                        automaticamente os prestadores parceiros localizados num
+                        raio máximo de <strong>20km</strong> com base nas
+                        coordenadas GPS do seu dispositivo.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
 
           <div className="lado-direito-imagem">
-            <img src={imagemBusca} alt="Busca Profissionais" className="imagem-hero-lista" />
+            <img
+              src={imagemBusca}
+              alt="Busca Profissionais"
+              className="imagem-hero-lista"
+            />
           </div>
-
         </div>
       </section>
 
@@ -135,33 +176,50 @@ function ListaProf() {
           <h2 className="titulo-sessao">Profissionais Disponíveis</h2>
 
           {profissionais.length === 0 ? (
-            <p style={{ textAlign: 'center', marginTop: '2rem' }}>Nenhum profissional encontrado com este nome.</p>
+            <p style={{ textAlign: "center", marginTop: "2rem" }}>
+              Nenhum profissional encontrado.
+            </p>
           ) : (
             <div className="grade-profissionais">
               {profissionais.map((prof, index) => (
                 <div key={prof.id} className="cartao-profissional-moderno">
                   <div
                     className="topo-colorido-cartao"
-                    style={{ backgroundColor: coresTopo[index % coresTopo.length] }}
+                    style={{
+                      backgroundColor: coresTopo[index % coresTopo.length],
+                    }}
                   ></div>
 
                   <div className="corpo-cartao">
                     <div className="avatar-profissional-sobreposto">
-                      <span>{prof.name.charAt(0).toUpperCase()}</span>
+                      <span>
+                        {prof.name ? prof.name.charAt(0).toUpperCase() : "U"}
+                      </span>
                     </div>
 
                     <h3 className="nome-profissional">{prof.name}</h3>
-                    <p className="especialidade-cartao">{prof.phone}</p>
+                    <p className="especialidade-cartao">
+                      {prof.phone || "Telefone não informado"}
+                    </p>
 
                     <div className="avaliacao-profissional">
                       <i className="bi bi-star-fill"></i>
-                      <strong>5.0</strong>
-                      <span className="total-avaliacoes">(Novo)</span>
+                      <strong>
+                        {prof.rating ? prof.rating.toFixed(1) : "5.0"}
+                      </strong>
+                      <span className="total-avaliacoes">
+                        ({prof.rating ? "Avaliado" : "Novo"})
+                      </span>
                     </div>
 
+                    {/* CORREÇÃO DO NOME DO PARÂMETRO: Alinhado exatamente com o state de SolicServico.jsx */}
                     <button
                       className="btn-ponto-cartao"
-                      onClick={() => navigate('/solicitar-servico', { state: { profId: prof.id } })}
+                      onClick={() =>
+                        navigate("/solicitar-servico", {
+                          state: { professionalIdSelecionado: prof.id },
+                        })
+                      }
                     >
                       Solicitar Serviço
                     </button>

@@ -1,101 +1,159 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-
-.pagina-solicitar-servico {
-  background-color: #fff;
-  min-height: 100vh;
+/* Container que centraliza o formulário na tela cinza padrão do projeto */
+.solic-container {
+  background-color: #f8f9fa;
+  min-height: calc(100vh - 80px);
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: 'Inter', sans-serif;
+  padding: 40px 20px;
+  font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
 }
 
-.container-solicitacao {
-  display: flex;
-  max-width: 1200px;
+/* Card centralizado e flutuante com bordas suaves e sombra leve */
+.solic-card {
+  background: #ffffff;
   width: 100%;
-  gap: 80px;
+  max-width: 650px;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  border: 1px solid #eeeeee;
+  position: relative;
+}
+
+/* Botão voltar estilizado de forma discreta e elegante */
+.btn-voltar-solic {
+  display: inline-flex;
   align-items: center;
-}
-
-.lado-informativo { flex: 1; }
-.tag-ajuda { color: #888; font-weight: 700; font-size: 11px; letter-spacing: 1.5px; margin-bottom: 10px; }
-.titulo-solicitacao { font-size: 42px; font-weight: 700; line-height: 1.1; margin-bottom: 20px; }
-.texto-apoio { color: #666; margin-bottom: 30px; font-size: 16px; }
-.wrapper-imagem img { width: 100%; max-width: 550px; }
-
-.lado-formulario { 
-  flex: 1; 
-  display: flex; 
-  justify-content: center; 
-}
-
-.card-formulario {
-  background: #fff;
-  padding: 50px;
-  border-radius: 40px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.07);
-  width: 100%;
-  max-width: 480px;
-  display: flex;
-  flex-direction: column;
-}
-
-.campo-formulario { 
-  width: 100%;
-  margin-bottom: 20px; 
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start; 
-}
-
-.campo-formulario label { 
-  font-size: 14px; 
-  font-weight: 600; 
-  margin-bottom: 8px; 
-  color: #333; 
-}
-
-.campo-formulario input, 
-.campo-formulario select, 
-.campo-formulario textarea {
-  width: 100%;
-  padding: 16px;
-  border: 1px solid #eee;
-  background-color: #f9f9f9;
-  border-radius: 15px;
-  font-size: 14px;
-  font-family: 'Inter', sans-serif;
-  box-sizing: border-box;
-}
-
-.campo-formulario textarea { height: 100px; resize: none; }
-
-.upload-foto {
-  width: 100%;
-  border: 2px dashed #eee;
-  padding: 15px;
-  border-radius: 15px;
-  text-align: center;
-  background: #fafafa;
-  box-sizing: border-box;
-}
-
-.label-upload { color: #007bff; cursor: pointer; font-size: 14px; font-weight: 500; }
-
-.btn-enviar {
-  width: 100%;
-  background: #000;
-  color: #fff;
+  gap: 6px;
+  background: #f1f1f1;
+  color: #444;
   border: none;
-  padding: 20px;
+  padding: 8px 16px;
   border-radius: 50px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  margin-bottom: 25px;
+  transition: all 0.2s ease;
+}
+
+.btn-voltar-solic:hover {
+  background: #e0e0e0;
+  color: #111;
+  transform: translateX(-3px);
+}
+
+.btn-voltar-solic i {
+  color: #0066ff;
+  font-size: 16px;
+}
+
+/* Títulos principais */
+.solic-card h2 {
+  font-family: "Georgia", "Times New Roman", serif;
+  font-size: 32px;
+  font-weight: 800;
+  color: #111111;
+  margin-bottom: 8px;
+}
+
+/* Texto de destaque para o profissional selecionado */
+.prof-destaque-solic {
+  font-size: 15px;
+  color: #555555;
+  background-color: #e3efff;
+  padding: 12px 18px;
+  border-radius: 10px;
+  border-left: 4px solid #0066ff;
+  margin-bottom: 30px;
+}
+
+.prof-destaque-solic strong {
+  color: #0052cc;
+}
+
+/* Estrutura do formulário */
+.solic-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Grupos de labels e inputs */
+.solic-form .input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.solic-form .input-group label {
+  font-size: 14px;
   font-weight: 700;
+  color: #333333;
+}
+
+/* Inputs, Textareas e Selects padronizados e modernos */
+.solic-form .input-group input,
+.solic-form .input-group textarea,
+.solic-form .input-group select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #dddddd;
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: inherit;
+  background-color: #ffffff;
+  color: #111111;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+/* Textarea redimensionável verticalmente */
+.solic-form .input-group textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+/* Estados de foco alinhados com o azul padrão do ConectaPro */
+.solic-form .input-group input:focus,
+.solic-form .input-group textarea:focus,
+.solic-form .input-group select:focus {
+  border-color: #0066ff;
+  box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.1);
+  background-color: #ffffff;
+}
+
+/* Botão principal de envio azul */
+.btn-enviar-solic {
+  background-color: #0066ff;
+  color: #ffffff;
+  border: none;
+  padding: 16px;
+  border-radius: 50px;
+  font-weight: bold;
   font-size: 16px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s ease;
   margin-top: 10px;
-  transition: background 0.3s;
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.15);
 }
 
-.btn-enviar:hover {
-  background: #222;
+.btn-enviar-solic:hover:not(:disabled) {
+  background-color: #0052cc;
+  transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(0, 102, 255, 0.25);
+}
+
+.btn-enviar-solic:disabled {
+  background-color: #cccccc;
+  color: #888888;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }

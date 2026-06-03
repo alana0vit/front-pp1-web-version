@@ -1,191 +1,183 @@
-import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import imgSolic from '../../assets/imgsolic.jpg';
-import api from '../../services/api';
-import './SolicServico.css';
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate, useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
+import api from "../../services/api";
+import "./SolicServico.css";
 
 function SolicServico() {
-  const navegar = useNavigate();
+  const navigate = useNavigate();
   const location = useLocation();
-  
-  const professionalId = location.state?.profId;
-
-  const [categorias, setCategorias] = useState([]);
+  const { register, handleSubmit } = useForm();
+  const [loading, setLoading] = useState(false);
   const [enderecos, setEnderecos] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [profissional, setProfissional] = useState(null);
 
-  const [dadosFormulario, setDadosFormulario] = useState({
-    titulo: '',
-    description: '',
-    categoryId: '',
-    addressId: ''
-  });
+  // CORREÇÃO CRÍTICA: Captura tanto se a chave vier como professionalIdSelecionado ou profId
+  const profissionalIdSelecionado =
+    location.state?.professionalIdSelecionado || location.state?.profId;
 
-  const userStorage = localStorage.getItem('@ConectaPro:user');
-  const usuarioLogado = userStorage ? JSON.parse(userStorage) : null;
+  // Recupera dados do cliente logado no LocalStorage
+  const userStorage = localStorage.getItem("@ConectaPro:user");
+  const usuarioLogado =
+    userStorage && userStorage !== "undefined" ? JSON.parse(userStorage) : null;
+  const clienteId = usuarioLogado?.id;
 
   useEffect(() => {
-    if (!professionalId) {
-      toast.warn("Selecione um profissional antes de solicitar um serviço.");
-      navegar('/lista-profissionais');
+    if (!clienteId) {
+      toast.error("Sessão expirada. Por favor, refaça o login.");
+      navigate("/login");
       return;
     }
 
-    const carregarDadosIniciais = async () => {
+    // 1. Carrega os endereços cadastrados do Cliente logado
+    const carregarEnderecos = async () => {
       try {
-        setLoading(true);
-        
-        // Busca Categorias Reais da base de dados
-        const resCat = await api.get('/api/category');
-        setCategorias(resCat.data);
-
-        // Busca Endereços do Utilizador Logado
-        if (usuarioLogado?.id) {
-          const resEnd = await api.get(`/api/user/${usuarioLogado.id}/addresses`);
-          setEnderecos(resEnd.data);
-          
-          // Se o utilizador tiver apenas um endereço, já deixa selecionado
-          if (resEnd.data.length === 1) {
-            setDadosFormulario(prev => ({ ...prev, addressId: resEnd.data[0].id }));
-          }
-        }
-
-      } catch (error) {
-        console.error("Erro ao carregar dados para solicitação:", error);
-        toast.error("Erro ao carregar categorias ou endereços.");
-      } finally {
-        setLoading(false);
+        const res = await api.get(`/api/user/${clienteId}/addresses`);
+        setEnderecos(Array.isArray(res.data) ? res.data : []);
+      } catch (err) {
+        console.error("Erro ao carregar endereços do cliente:", err);
       }
     };
 
-    carregarDadosIniciais();
-  }, [professionalId, navegar, usuarioLogado?.id]);
+    // 2. Carrega os dados do Profissional selecionado para capturar a Categoria dele automaticamente
+    const carregarDadosProfissional = async () => {
+      if (!profissionalIdSelecionado) {
+        toast.warn("Nenhum profissional foi selecionado.");
+        navigate("/lista-profissionais");
+        return;
+      }
+      try {
+        const res = await api.get(`/api/user/${profissionalIdSelecionado}`);
+        setProfissional(res.data);
+      } catch (err) {
+        console.error("Erro ao carregar dados do profissional:", err);
+        toast.error("Não foi possível identificar o especialista selecionado.");
+      }
+    };
 
-  const lidarComMudanca = (e) => {
-    const { name, value } = e.target;
-    setDadosFormulario(prev => ({ ...prev, [name]: value }));
-  };
+    carregarEnderecos();
+    carregarDadosProfissional();
+  }, [clienteId, profissionalIdSelecionado, navigate]);
 
-  const enviarSolicitacao = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
+    // Validação de segurança pré-envio
+    if (!data.addressId) {
+      toast.warning(
+        "Por favor, selecione ou cadastre um endereço para o serviço.",
+      );
+      return;
+    }
 
-    if (!dadosFormulario.addressId || !dadosFormulario.categoryId) {
-      toast.error("Por favor, selecione uma categoria e um endereço.");
+    // Captura a categoria do profissional
+    const categoriaId =
+      profissional?.categories?.length > 0
+        ? profissional.categories[0].id
+        : null;
+
+    if (!categoriaId) {
+      toast.error(
+        "Este profissional não possui uma categoria válida vinculada no banco.",
+      );
       return;
     }
 
     try {
-      const payload = {
-        title: dadosFormulario.titulo,
-        description: dadosFormulario.description,
-        
-        imgUrl: null, 
-        
-        addressId: Number(dadosFormulario.addressId),
-        categoryId: Number(dadosFormulario.categoryId),
-        clientId: usuarioLogado.id, 
-        professionalId: Number(professionalId),
-        demandStatus: "OPENED" 
+      setLoading(true);
+
+      // MONTAGEM DO PAYLOAD CRITICAMENTE TIPADO PARA O DEMANDREQUEST.JAVA
+      const demandPayload = {
+        title: data.title,
+        description: data.description,
+        // Se a URL estiver vazia, envia null para não quebrar a anotação @URL do Java
+        imgUrl: data.imgUrl && data.imgUrl.trim() !== "" ? data.imgUrl : null,
+        // Força a conversão explícita para Long/Number exigida pelo Spring Boot
+        addressId: Number(data.addressId),
+        categoryId: Number(categoriaId),
+        clientId: Number(clienteId),
+        professionalId: Number(profissionalIdSelecionado),
+        demandStatus: "OPENED",
       };
 
-      await api.post('/api/demand', payload);
+      // Dispara o POST para o endpoint do DemandController
+      await api.post("/api/demand", demandPayload);
 
-      toast.success("Solicitação enviada com sucesso!");
-      navegar('/dashboard-cliente');
-
+      toast.success("Solicitação de serviço enviada com sucesso!");
+      navigate("/dashboard-cliente"); // Retorna ao painel atualizado
     } catch (error) {
-      console.error("Erro ao enviar demanda:", error);
-      const msgErro = error.response?.data?.message || "Ocorreu um erro ao enviar a solicitação.";
-      toast.error(msgErro);
+      console.error("Erro completo ao criar demanda:", error);
+      const msgBackend =
+        error.response?.data ||
+        "Verifique se preencheu todos os campos obrigatórios.";
+      toast.error(`Falha no envio: ${msgBackend}`);
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (loading) {
-    return <div className="pagina-solicitar-servico"><p>A carregar opções...</p></div>;
-  }
-
   return (
-    <div className="pagina-solicitar-servico">
-      <div className="container-solicitacao">
-        
-        <div className="lado-informativo">
-          <p className="tag-ajuda">ESTAMOS AQUI PARA AJUDAR!</p>
-          <h1 className="titulo-solicitacao">Descreva o que precisa</h1>
-          <p className="texto-apoio">
-            O profissional escolhido receberá os detalhes abaixo e entrará em contacto 
-            para conversar sobre o orçamento e prazos.
+    <div className="solic-container">
+      <div className="solic-card">
+        <button
+          type="button"
+          className="btn-voltar-solic"
+          onClick={() => navigate(-1)}
+        >
+          <i className="bi bi-arrow-left"></i> Voltar
+        </button>
+
+        <h2>Solicitar Serviço</h2>
+        {profissional && (
+          <p className="prof-destaque-solic">
+            Você está enviando esta solicitação para:{" "}
+            <strong>{profissional.name}</strong>
           </p>
-          <div className="wrapper-imagem">
-            <img src={imgSolic} alt="Ilustração Solicitação" />
+        )}
+
+        <form onSubmit={handleSubmit(onSubmit)} className="solic-form">
+          <div className="input-group">
+            <label>Título do Chamado *</label>
+            <input
+              type="text"
+              placeholder="Ex: Reparo em infiltração no banheiro"
+              {...register("title", { required: true })}
+            />
           </div>
-        </div>
 
-        <div className="lado-formulario">
-          <form className="card-formulario" onSubmit={enviarSolicitacao}>
+          <div className="input-group">
+            <label>Descrição Detalhada *</label>
+            <textarea
+              rows="5"
+              placeholder="Descreva o que precisa ser feito com o máximo de detalhes possível..."
+              {...register("description", { required: true })}
+            ></textarea>
+          </div>
 
-            <div className="campo-formulario">
-              <label>Título do Serviço</label>
-              <input 
-                type="text" 
-                name="titulo" 
-                placeholder="Ex: Instalação de chuveiro elétrico" 
-                value={dadosFormulario.titulo}
-                onChange={lidarComMudanca} 
-                required 
-              />
-            </div>
+          <div className="input-group">
+            <label>URL de Imagem de Referência (Opcional)</label>
+            <input
+              type="text"
+              placeholder="http://exemplo.com/foto.jpg"
+              {...register("imgUrl")}
+            />
+          </div>
 
-            <div className="campo-formulario">
-              <label>Categoria</label>
-              <select 
-                name="categoryId" 
-                value={dadosFormulario.categoryId} 
-                onChange={lidarComMudanca} 
-                required
-              >
-                <option value="">Selecione a categoria...</option>
-                {categorias.map(cat => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
-                ))}
-              </select>
-            </div>
+          <div className="input-group">
+            <label>Selecione o Local do Serviço *</label>
+            <select {...register("addressId", { required: true })}>
+              <option value="">Selecione um endereço cadastrado...</option>
+              {enderecos.map((end) => (
+                <option key={end.id} value={end.id}>
+                  {end.street}, {end.number} - {end.neighborhood} ({end.city})
+                </option>
+              ))}
+            </select>
+          </div>
 
-            <div className="campo-formulario">
-              <label>Onde o serviço será realizado?</label>
-              <select 
-                name="addressId" 
-                value={dadosFormulario.addressId} 
-                onChange={lidarComMudanca} 
-                required
-              >
-                <option value="">Selecione um dos seus endereços...</option>
-                {enderecos.map(end => (
-                  <option key={end.id} value={end.id}>
-                    {end.street}, {end.number} - {end.city}
-                  </option>
-                ))}
-              </select>
-              {enderecos.length === 0 && (
-                <p className="aviso-endereco">Nenhum endereço encontrado. Vá ao seu perfil para registar.</p>
-              )}
-            </div>
-
-            <div className="campo-formulario">
-              <label>Descrição Detalhada</label>
-              <textarea 
-                name="description" 
-                placeholder="Explique o problema ou o que precisa ser feito..." 
-                value={dadosFormulario.description}
-                onChange={lidarComMudanca} 
-                required 
-              />
-            </div>
-
-            <button type="submit" className="btn-enviar">Enviar Pedido ao Profissional</button>
-          </form>
-        </div>
-
+          <button type="submit" className="btn-enviar-solic" disabled={loading}>
+            {loading ? "Enviando Chamado..." : "Confirmar e Enviar Solicitação"}
+          </button>
+        </form>
       </div>
     </div>
   );

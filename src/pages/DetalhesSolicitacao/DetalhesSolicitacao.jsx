@@ -1,55 +1,35 @@
-import React, { useEffect, useState } from 'react';
-import './DetalhesSolicitacao.css';
-import { useLocation } from 'react-router-dom';
-import api from '../../services/api';
+import React from "react";
+import "./DetalhesSolicitacao.css";
 
-function DetalhesSolicitacao() {
-  const location = useLocation();
-  const pedidoId = location.state?.pedidoId;
+function DetalhesSolicitacao({ demanda, modo }) {
+  // 'modo' pode ser 'CLIENTE' (vendo dados do prof) ou 'PROFISSIONAL' (vendo dados do cliente)
 
-  const [demanda, setDemanda] = useState(null);
-  const modo = 'CLIENTE'; // você pode dinamizar depois
-
-  useEffect(() => {
-    if (!pedidoId) return;
-
-    const buscar = async () => {
-      try {
-        const response = await api.get(`/api/demand/user/${pedidoId}`);
-        setDemanda(response.data);
-      } catch (err) {
-        console.error("Erro ao buscar demanda:", err);
-      }
-    };
-
-    buscar();
-  }, [pedidoId]);
-
-  // ✅ proteção contra undefined
-  if (!demanda) {
-    return <p style={{ padding: '20px' }}>Carregando...</p>;
-  }
-
+  // Extração segura das entidades para evitar quebras se vierem nulas do banco
   const exibirPessoa =
-    modo === 'CLIENTE' ? demanda.professionalId : demanda.clientId;
+    modo === "CLIENTE" ? demanda?.professional : demanda?.client;
+  const tituloRelacao =
+    modo === "CLIENTE" ? "Profissional Designado" : "Dados do Solicitante";
+
+  // Fallback para a inicial do avatar
+  const inicialNome = exibirPessoa?.name
+    ? exibirPessoa.name.charAt(0).toUpperCase()
+    : "U";
 
   return (
     <div className="card-detalhes-contato">
       <div className="header-match">
         <div className="badge-andamento">SESSÃO EM ANDAMENTO</div>
+        <h3>{tituloRelacao}</h3>
       </div>
 
       <div className="corpo-detalhes">
         <div className="info-principal">
-          <div className="avatar-fake">
-            {exibirPessoa?.name?.charAt(0).toUpperCase() || "U"}
-          </div>
-
+          <div className="avatar-fake">{inicialNome}</div>
           <div>
             <h4>{exibirPessoa?.name || "Usuário ConectaPro"}</h4>
             <p className="especialidade">
-              {modo === 'CLIENTE'
-                ? demanda.category?.name || "Especialista"
+              {modo === "CLIENTE"
+                ? demanda?.category?.name || "Especialista Parceiro"
                 : "Cliente Verificado"}
             </p>
           </div>
@@ -60,7 +40,7 @@ function DetalhesSolicitacao() {
             <i className="bi bi-whatsapp"></i>
             <div>
               <span>WhatsApp / Telefone</span>
-              <p>{exibirPessoa?.phone || "(00) 00000-0000"}</p>
+              <p>{exibirPessoa?.phone || "Contacto não registado"}</p>
             </div>
           </div>
 
@@ -68,19 +48,24 @@ function DetalhesSolicitacao() {
             <i className="bi bi-envelope-at"></i>
             <div>
               <span>E-mail de Contacto</span>
-              <p>{exibirPessoa?.email || "contato@email.com"}</p>
+              <p>{exibirPessoa?.email || "email@naoinformado.com"}</p>
             </div>
           </div>
         </div>
 
-        {modo === 'PROFISSIONAL' && (
+        {/* O profissional precisa de ver a morada completa para ir fazer o serviço */}
+        {modo === "PROFISSIONAL" && demanda?.address && (
           <div className="endereco-servico">
             <i className="bi bi-geo-alt"></i>
             <div>
               <span>Local do Serviço</span>
               <p>
-                {demanda.address?.street}, {demanda.address?.number} -{" "}
-                {demanda.address?.city}
+                {demanda.address.street || "Rua não informada"},{" "}
+                {demanda.address.number || "S/N"}
+                {demanda.address.neighborhood
+                  ? ` - ${demanda.address.neighborhood}`
+                  : ""}
+                {demanda.address.city ? ` - ${demanda.address.city}` : ""}
               </p>
             </div>
           </div>
@@ -92,15 +77,20 @@ function DetalhesSolicitacao() {
           Combine os detalhes finais, valores e horários diretamente pelo
           WhatsApp.
         </p>
-
-        <a
-          href={`https://wa.me/${exibirPessoa?.phone?.replace(/\D/g, '')}`}
-          target="_blank"
-          rel="noreferrer"
-          className="btn-whatsapp-direto"
-        >
-          <i className="bi bi-chat-dots"></i> Iniciar Conversa
-        </a>
+        {exibirPessoa?.phone ? (
+          <a
+            href={`https://wa.me/${exibirPessoa.phone.replace(/\D/g, "")}`}
+            target="_blank"
+            rel="noreferrer"
+            className="btn-whatsapp-direto"
+          >
+            <i className="bi bi-chat-dots"></i> Iniciar Conversa
+          </a>
+        ) : (
+          <button className="btn-whatsapp-direto disabled" disabled>
+            <i className="bi bi-chat-dots"></i> Sem número disponível
+          </button>
+        )}
       </div>
     </div>
   );

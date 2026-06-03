@@ -253,3 +253,54 @@
 .btn-localizacao:active {
   transform: scale(0.97);
 }
+
+/* POP-UP INFORMATIVO PERTO DE MIM */
+.pop-up-informativo-localizacao {
+  position: absolute;
+  bottom: 125%; /* Faz o pop-up surgir logo acima do botão */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #1e293b;
+  color: #ffffff;
+  padding: 12px 16px;
+  border-radius: 10px;
+  width: 260px;
+  font-size: 13px;
+  line-height: 1.4;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  pointer-events: none;
+  animation: fadeInPopUp 0.2s ease-in-out;
+}
+
+.pop-up-informativo-localizacao p {
+  margin: 0;
+}
+
+.pop-up-informativo-localizacao strong {
+  color: #3b82f6;
+}
+
+/* Seta apontando para baixo no centro do pop-up */
+.seta-pop-up {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid #1e293b;
+}
+
+@keyframes fadeInPopUp {
+  from {
+    opacity: 0;
+    transform: translate(-50__, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50__, 0);
+  }
+}
