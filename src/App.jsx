@@ -18,6 +18,7 @@ import PerfilProfissional from "./pages/PerfilProfissional/PerfilProfissional";
 import SolicServico from "./pages/SolicServico/SolicServico";
 import TermosDeUso from "./pages/TermosDeUso/TermosDeUso";
 import DetalhesSolicitacao from "./pages/DetalhesSolicitacao/DetalhesSolicitacao";
+import EditarDemanda from "./pages/EditarDemanda/EditarDemanda";
 
 // GUARDA 1: Apenas Clientes
 const RotaPrivadaCliente = ({ children }) => {
@@ -67,6 +68,7 @@ function App() {
         <Route path="/solicitar-servico" element={<RotaPrivadaCliente><SolicServico /></RotaPrivadaCliente>} />
         <Route path="/perfil" element={<RotaPrivadaCliente><PerfilCliente /></RotaPrivadaCliente>} />
         <Route path="/detalhes-solicitacao" element={<RotaPrivadaCliente><DetalhesSolicitacao /></RotaPrivadaCliente>} />
+        <Route path="/editar-demanda/:id" element={<RotaPrivadaCliente><EditarDemanda /></RotaPrivadaCliente>} />
 
         {/* Rotas Privadas - PROFISSIONAL */}
         <Route path="/dashboard-profissional" element={<RotaPrivadaProfissional><DashboardProfissional /></RotaPrivadaProfissional>} />
