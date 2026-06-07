@@ -13,8 +13,8 @@ function SolicServico() {
   const [enderecos, setEnderecos] = useState([]);
   const [profissional, setProfissional] = useState(null);
 
-  // CORREÇÃO CRÍTICA: Captura tanto se a chave vier como professionalIdSelecionado ou profId
-  const profissionalIdSelecionado =
+  // Captura o ID do profissional de forma flexível vindo da navegação
+  const profesionalIdSelecionado =
     location.state?.professionalIdSelecionado || location.state?.profId;
 
   // Recupera dados do cliente logado no LocalStorage
@@ -42,13 +42,13 @@ function SolicServico() {
 
     // 2. Carrega os dados do Profissional selecionado para capturar a Categoria dele automaticamente
     const carregarDadosProfissional = async () => {
-      if (!profissionalIdSelecionado) {
+      if (!profesionalIdSelecionado) {
         toast.warn("Nenhum profissional foi selecionado.");
         navigate("/lista-profissionais");
         return;
       }
       try {
-        const res = await api.get(`/api/user/${profissionalIdSelecionado}`);
+        const res = await api.get(`/api/user/${profesionalIdSelecionado}`);
         setProfissional(res.data);
       } catch (err) {
         console.error("Erro ao carregar dados do profissional:", err);
@@ -58,57 +58,55 @@ function SolicServico() {
 
     carregarEnderecos();
     carregarDadosProfissional();
-  }, [clienteId, profissionalIdSelecionado, navigate]);
+  }, [clienteId, profesionalIdSelecionado, navigate]);
 
   const onSubmit = async (data) => {
-    // Validação de segurança pré-envio
     if (!data.addressId) {
-      toast.warning(
-        "Por favor, selecione ou cadastre um endereço para o serviço.",
-      );
+      toast.warning("Por favor, selecione um endereço cadastrado para o local do serviço.");
       return;
     }
 
-    // Captura a categoria do profissional
+    // Captura de forma segura a categoria associada ao profissional
     const categoriaId =
       profissional?.categories?.length > 0
         ? profissional.categories[0].id
         : null;
 
     if (!categoriaId) {
-      toast.error(
-        "Este profissional não possui uma categoria válida vinculada no banco.",
-      );
+      toast.error("Este profissional não possui uma categoria válida vinculada no banco.");
       return;
     }
 
     try {
       setLoading(true);
 
-      // MONTAGEM DO PAYLOAD CRITICAMENTE TIPADO PARA O DEMANDREQUEST.JAVA
+      // MONTAGEM DO PAYLOAD ENXUTO E TOTALMENTE COMPATÍVEL COM O DEMANDREQUEST.JAVA
       const demandPayload = {
-        title: data.title,
-        description: data.description,
-        // Se a URL estiver vazia, envia null para não quebrar a anotação @URL do Java
-        imgUrl: data.imgUrl && data.imgUrl.trim() !== "" ? data.imgUrl : null,
-        // Força a conversão explícita para Long/Number exigida pelo Spring Boot
+        title: data.title.trim(),
+        description: data.description.trim(),
         addressId: Number(data.addressId),
         categoryId: Number(categoriaId),
         clientId: Number(clienteId),
-        professionalId: Number(profissionalIdSelecionado),
-        demandStatus: "OPENED",
+        professionalId: Number(profesionalIdSelecionado),
+        imgUrl: null // 🌟 REMOVIDO: Campo de imagem anulado por padrão para evitar quebra no backend
+        // 🌟 REMOVIDO: demandStatus omitido. O DemandService.java injetará o valor nativo direto por código!
       };
 
-      // Dispara o POST para o endpoint do DemandController
+      console.log("📤 Enviando payload limpo para o Servidor:", demandPayload);
+
+      // Dispara a requisição HTTP POST para salvar a demanda
       await api.post("/api/demand", demandPayload);
 
       toast.success("Solicitação de serviço enviada com sucesso!");
-      navigate("/dashboard-cliente"); // Retorna ao painel atualizado
+      navigate("/dashboard-cliente"); 
     } catch (error) {
       console.error("Erro completo ao criar demanda:", error);
+      
       const msgBackend =
+        error.response?.data?.message ||
         error.response?.data ||
-        "Verifique se preencheu todos os campos obrigatórios.";
+        "Verifique se preencheu todos os campos obrigatórios corretamente.";
+        
       toast.error(`Falha no envio: ${msgBackend}`);
     } finally {
       setLoading(false);
@@ -151,15 +149,6 @@ function SolicServico() {
               placeholder="Descreva o que precisa ser feito com o máximo de detalhes possível..."
               {...register("description", { required: true })}
             ></textarea>
-          </div>
-
-          <div className="input-group">
-            <label>URL de Imagem de Referência (Opcional)</label>
-            <input
-              type="text"
-              placeholder="http://exemplo.com/foto.jpg"
-              {...register("imgUrl")}
-            />
           </div>
 
           <div className="input-group">
