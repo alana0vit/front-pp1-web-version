@@ -10,6 +10,8 @@ function DashboardCliente() {
   const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [abaAtiva, setAbaAtiva] = useState('ATIVAS');
+  const [pedidoDetalhado, setPedidoDetalhado] = useState(null);
+  const [buscaTexto, setBuscaTexto] = useState('');
 
   const userStorage = localStorage.getItem('@ConectaPro:user');
   const usuarioLogado = userStorage && userStorage !== "undefined" ? JSON.parse(userStorage) : null;
@@ -29,7 +31,7 @@ function DashboardCliente() {
           const idCli = d.client?.id || d.clientId?.id || d.clientId;
           return Number(idCli) === Number(clienteId);
         })
-        .sort((a, b) => (b.id || 0) - (a.id || 0)); // Trava a ordenação para evitar pulos
+        .sort((a, b) => (b.id || 0) - (a.id || 0));
       
       setPedidos(meusPedidos);
     } catch (err) {
@@ -44,7 +46,6 @@ function DashboardCliente() {
     buscarMeusPedidos();
   }, [clienteId]);
 
-  // CAMADA DE TRADUÇÃO COMPATÍVEL: Traduz qualquer padrão retornado pelo banco (String, Texto-BR ou Ordinal)
   const traduzirStatus = (status) => {
     const s = String(status || '').toUpperCase();
     if (s === 'ABERTO' || s === '1' || s === 'OPENED') return 'Aguardando Resposta';
@@ -54,9 +55,12 @@ function DashboardCliente() {
     return s;
   };
 
-  // NAVEGAÇÃO ENTRE ABAS BLINDADA (Captura Texto, Texto-BR ou Ordinal)
   const pedidosFiltrados = pedidos.filter(p => {
     const status = String(p.demandStatus || '').toUpperCase();
+    const matchesTexto = p.title.toLowerCase().includes(buscaTexto.toLowerCase());
+    
+    if (!matchesTexto) return false;
+
     if (abaAtiva === 'ATIVAS') {
       return status === 'ABERTO' || status === '1' || status === 'OPENED' || 
              status === 'AGURADANDO' || status === '3' || status === 'IN_WAITING';
@@ -68,7 +72,6 @@ function DashboardCliente() {
     return true;
   });
 
-  // Mapeamento dinâmico dos contadores superiores
   const emAndamento = pedidos.filter(p => {
     const s = String(p.demandStatus || '').toUpperCase();
     return s === 'AGURADANDO' || s === '3' || s === 'IN_WAITING';
@@ -87,7 +90,6 @@ function DashboardCliente() {
   return (
     <div className="container-dashboard">
       
-      {/* SEÇÃO DO TOPO BRANCO */}
       <section className="secao-topo-branco">
         <div className="conteudo-introducao">
           <div className="lado-esquerdo-texto">
@@ -111,7 +113,6 @@ function DashboardCliente() {
         </div>
       </section>
 
-      {/* SEÇÃO CINZA DE SERVIÇOS */}
       <section className="secao-servicos-cinza">
         <div className="cabecalho-servicos">
           <h2>Como estão seus serviços?</h2>
@@ -121,10 +122,8 @@ function DashboardCliente() {
           <i className="bi bi-plus-circle"></i> Solicitar Novo Serviço
         </button>
 
-        {/* LAYOUT PRINCIPAL DO CONTEÚDO */}
         <div className="layout-dashboard-baixo">
           
-          {/* COLUNA ESQUERDA: CONTADORES DE STATUS */}
           <aside className="coluna-status">
             <div className="cartao-contador-status" onClick={() => setAbaAtiva('ATIVAS')}>
               <span className="numero-status">{emAndamento}</span>
@@ -154,24 +153,34 @@ function DashboardCliente() {
             </div>
           </aside>
 
-          {/* COLUNA DIREITA: ABAS E LISTAGEM DOS CARDS */}
           <main className="coluna-pedidos-recentes">
             <div className="cartao-pedidos-painel">
               
-              {/* HEADER INTERNO COM REFRESH */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '15px' }}>
                 <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '700' }}>Listagem de Pedidos</h3>
-                <button 
-                  className="btn-cancelar" 
-                  style={{ padding: '6px 12px', fontSize: '13px' }} 
-                  onClick={buscarMeusPedidos} 
-                  disabled={loading}
-                >
-                  <i className={`bi bi-arrow-clockwise ${loading ? 'spin' : ''}`}></i> Atualizar
-                </button>
+                
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flex: 1, maxWidth: '350px', marginLeft: 'auto' }}>
+                  <div style={{ position: 'relative', width: '100%' }}>
+                    <i className="bi bi-search" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }}></i>
+                    <input 
+                      type="text" 
+                      placeholder="Filtrar por título..." 
+                      value={buscaTexto}
+                      onChange={(e) => setBuscaTexto(e.target.value)}
+                      style={{ width: '100%', padding: '8px 12px 8px 35px', borderRadius: '50px', border: '1px solid #ddd', fontSize: '14px', outline: 'none' }}
+                    />
+                  </div>
+                  <button 
+                    className="btn-cancelar" 
+                    style={{ padding: '8px 14px', fontSize: '13px', whiteSpace: 'nowrap' }} 
+                    onClick={buscarMeusPedidos} 
+                    disabled={loading}
+                  >
+                    <i className={`bi bi-arrow-clockwise ${loading ? 'spin' : ''}`}></i>
+                  </button>
+                </div>
               </div>
 
-              {/* NAVEGAÇÃO POR ABAS (TABS) */}
               <div className="tabs-container-dashboard">
                 <button className={`tab-btn-dash ${abaAtiva === 'ATIVAS' ? 'active' : ''}`} onClick={() => setAbaAtiva('ATIVAS')}>
                   Chamados Ativos
@@ -186,7 +195,7 @@ function DashboardCliente() {
               ) : pedidosFiltrados.length === 0 ? (
                 <div className="conteudo-vazio-pedidos">
                   <i className="bi bi-inbox" style={{ fontSize: '40px', marginBottom: '10px' }}></i>
-                  <p>Nenhum chamado encontrado para esta aba.</p>
+                  <p>Nenhum chamado encontrado.</p>
                 </div>
               ) : (
                 <div className="lista-real">
@@ -194,50 +203,32 @@ function DashboardCliente() {
                     const statusAtual = String(pedido.demandStatus || '').toUpperCase();
                     
                     return (
-                      <div key={pedido.id} className="card-item-demanda-real">
+                      <div 
+                        key={pedido.id} 
+                        className="card-item-demanda-real" 
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => setPedidoDetalhado(pedido)}
+                      >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
                           <h4 style={{ margin: 0, fontSize: '18px', color: '#111', fontWeight: '700' }}>{pedido.title}</h4>
-                          {/* Adiciona estilo baseado no status de maneira segura e higienizada */}
                           <span className={`status-badge-real ${statusAtual === '1' || statusAtual === 'ABERTO' || statusAtual === 'OPENED' ? 'opened' : statusAtual === '3' || statusAtual === 'AGURADANDO' || statusAtual === 'IN_WAITING' ? 'in_waiting' : statusAtual === '0' || statusAtual === 'FECHADO' || statusAtual === 'CLOSED' ? 'closed' : 'rejected'}`}>
                             {traduzirStatus(pedido.demandStatus)}
                           </span>
                         </div>
 
-                        {/* Nome do Profissional caso já esteja vinculado */}
                         {pedido.professional?.name && (
                           <p className="texto-card-profissional">
                             <i className="bi bi-person-badge"></i> Profissional: <strong>{pedido.professional.name}</strong>
                           </p>
                         )}
 
-                        <p style={{ fontSize: '14px', color: '#555', margin: '10px 0', lineHeight: '1.4' }}>
+                        <p style={{ fontSize: '14px', color: '#555', margin: '10px 0', lineHeight: '1.4', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {pedido.description}
                         </p>
-
-                        {/* Botão para Editar Solicitação (Apenas se o chamado estiver Aberto) */}
-                        {(statusAtual === 'OPENED' || statusAtual === 'ABERTO' || statusAtual === '1') && (
-                          <button 
-                            className="btn-cancelar" 
-                            style={{ marginTop: '5px', fontSize: '13px', border: '1px solid #ddd', color: '#333' }}
-                            onClick={() => navigate(`/editar-demanda/${pedido.id}`)}
-                          >
-                            <i className="bi bi-pencil-square" style={{ marginRight: '5px', color: '#0066ff' }}></i>
-                            Editar Solicitação
-                          </button>
-                        )}
-
-                        {/* Componente dinâmico de contato se estiver em andamento */}
-                        {(statusAtual === 'IN_WAITING' || statusAtual === 'AGURADANDO' || statusAtual === '3') && (
-                          <DetalhesSolicitacao demanda={pedido} modo="CLIENTE" />
-                        )}
-
-                        {/* Notificação visível caso o chamado tenha sido rejeitado */}
-                        {(statusAtual === 'REJECTED' || statusAtual === 'REJEITADO' || statusAtual === '2') && (
-                          <div style={{ marginTop: '15px', background: '#fff5f5', color: '#c53030', padding: '12px', borderRadius: '10px', fontSize: '13px', display: 'flex', gap: '8px', alignItems: 'center', border: '1px solid #fed7d7' }}>
-                            <i className="bi bi-exclamation-triangle-fill"></i>
-                            <span>Este profissional recusou o chamado. Você pode excluí-lo ou solicitar a outro especialista.</span>
-                          </div>
-                        )}
+                        
+                        <span style={{ fontSize: '12px', color: '#0066ff', fontWeight: '600' }}>
+                          <i className="bi bi-eye"></i> Clique para ver a descrição completa
+                        </span>
                       </div>
                     );
                   })}
@@ -246,9 +237,82 @@ function DashboardCliente() {
 
             </div>
           </main>
-
         </div>
       </section>
+
+      {pedidoDetalhado && (
+        <div className="modal-overlay" onClick={() => setPedidoDetalhado(null)}>
+          <div className="modal-container" style={{ maxWidth: '550px' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
+              <h3 className="modal-title" style={{ margin: 0 }}>Detalhes da Solicitação</h3>
+              <button className="btn-cancelar" style={{ padding: '5px 10px', borderRadius: '50%' }} onClick={() => setPedidoDetalhado(null)}>X</button>
+            </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: '700', color: '#888', textTransform: 'uppercase' }}>Título do Chamado</label>
+                <p style={{ fontSize: '18px', fontWeight: '700', color: '#111', margin: '4px 0 0 0' }}>{pedidoDetalhado.title}</p>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: '700', color: '#888', textTransform: 'uppercase' }}>Status Atual</label>
+                <div style={{ marginTop: '5px' }}>
+                  <span className={`status-badge-real ${String(pedidoDetalhado.demandStatus).toUpperCase() === '1' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'ABERTO' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'OPENED' ? 'opened' : String(pedidoDetalhado.demandStatus).toUpperCase() === '3' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'AGURADANDO' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'IN_WAITING' ? 'in_waiting' : String(pedidoDetalhado.demandStatus).toUpperCase() === '0' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'FECHADO' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'CLOSED' ? 'closed' : 'rejected'}`}>
+                    {traduzirStatus(pedidoDetalhado.demandStatus)}
+                  </span>
+                </div>
+              </div>
+
+              {pedidoDetalhado.professional?.name && (
+                <div>
+                  <label style={{ fontSize: '12px', fontWeight: '700', color: '#888', textTransform: 'uppercase' }}>Profissional Designado</label>
+                  <p style={{ fontSize: '14px', color: '#111', margin: '4px 0 0 0' }}><strong>{pedidoDetalhado.professional.name}</strong> ({pedidoDetalhado.professional.phone || 'Sem telefone'})</p>
+                </div>
+              )}
+
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: '700', color: '#888', textTransform: 'uppercase' }}>Descrição Detalhada do Problema</label>
+                <div style={{ fontSize: '14px', color: '#333', background: '#f8f9fa', padding: '15px', borderRadius: '10px', marginTop: '4px', lineHeight: '1.6', whiteSpace: 'pre-wrap', border: '1px solid #eee' }}>
+                  {pedidoDetalhado.description}
+                </div>
+              </div>
+
+              <div style={{ marginTop: '10px', borderTop: '1px solid #eee', paddingTop: '15px' }}>
+                {(String(pedidoDetalhado.demandStatus).toUpperCase() === 'OPENED' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'ABERTO' || String(pedidoDetalhado.demandStatus).toUpperCase() === '1') && (
+                  <button 
+                    className="btn-confirmar" 
+                    style={{ width: '100%', padding: '12px' }}
+                    onClick={() => {
+                      setPedidoDetalhado(null);
+                      navigate(`/editar-demanda/${pedidoDetalhado.id}`);
+                    }}
+                  >
+                    <i className="bi bi-pencil-square"></i> Editar Esta Solicitação
+                  </button>
+                )}
+
+                {/* BOTÃO DE REATRIBUÍÇÃO: Redireciona para escolher um novo profissional repassando o ID da demanda rejeitada */}
+                {(String(pedidoDetalhado.demandStatus).toUpperCase() === 'REJECTED' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'REJEITADO' || String(pedidoDetalhado.demandStatus).toUpperCase() === '2') && (
+                  <button 
+                    className="btn-confirmar" 
+                    style={{ width: '100%', padding: '12px', background: '#28a745', border: '1px solid #28a745' }}
+                    onClick={() => {
+                      setPedidoDetalhado(null);
+                      navigate('/lista-profissionais', { state: { reassignDemandId: pedidoDetalhado.id } });
+                    }}
+                  >
+                    <i className="bi bi-arrow-left-right"></i> Solicitar a Outro Profissional
+                  </button>
+                )}
+
+                {(String(pedidoDetalhado.demandStatus).toUpperCase() === 'IN_WAITING' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'AGURADANDO' || String(pedidoDetalhado.demandStatus).toUpperCase() === '3') && (
+                  <DetalhesSolicitacao demanda={pedidoDetalhado} modo="CLIENTE" />
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

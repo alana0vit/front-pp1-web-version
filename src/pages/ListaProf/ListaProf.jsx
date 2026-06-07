@@ -1,15 +1,20 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
 import imagemBusca from "../../assets/ImgLista1.jpg";
 import api from "../../services/api";
 import "./ListaProf.css";
 
 function ListaProf() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [profissionais, setProfissionais] = useState([]);
   const [termoBusca, setTermoBusca] = useState("");
   const [categorias, setCategorias] = useState([]);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState("");
+
+  // Captura o id da demanda rejeitada caso o cliente queira reatribuir
+  const reassignDemandId = location.state?.reassignDemandId || null;
 
   // Estado para controlar a exibição do pop-up informativo "Perto de mim"
   const [mostrarPopUpLocalizacao, setMostrarPopUpLocalizacao] = useState(false);
@@ -84,10 +89,40 @@ function ListaProf() {
     );
   };
 
+  // Executa a reatribuição chamando o PATCH do backend
+  const lidarComSelecaoProfissional = async (professionalId) => {
+    if (reassignDemandId) {
+      try {
+        // Dispara a rota exatamente como mapeada no DemandController.java do backend
+        await api.patch(`/api/demand/${reassignDemandId}/reassign`, {
+          professionalId: professionalId
+        });
+        
+        toast.success("Demanda reatribuída com sucesso para o novo profissional!");
+        navigate("/dashboard-cliente"); // Retorna ao painel principal
+      } catch (error) {
+        console.error("Erro ao reatribuir demanda:", error);
+        toast.error("Erro ao reatribuir este chamado. Tente novamente.");
+      }
+    } else {
+      // Fluxo normal: Envia para o formulário criar uma do zero
+      navigate("/solicitar-servico", {
+        state: { professionalIdSelecionado: professionalId },
+      });
+    }
+  };
+
   const coresTopo = ["#e6f0ff", "#e6ffe6", "#fff0e6", "#f0e6ff"];
 
   return (
     <div className="pagina-lista-profissionais">
+      {/* Alerta visual caso esteja em modo de reatribuição */}
+      {reassignDemandId && (
+        <div style={{ background: '#d4edda', color: '#155724', padding: '12px', textAlign: 'center', fontWeight: '600', borderBottom: '1px solid #c3e6cb' }}>
+          <i className="bi bi-info-circle-fill"></i> Modo de Reatribuição Ativo: Escolha um novo profissional abaixo para assumir o seu chamado recusado.
+        </div>
+      )}
+
       <section className="topo-busca-dividido">
         <div className="conteudo-topo-busca">
           <div className="lado-esquerdo-busca">
@@ -212,16 +247,13 @@ function ListaProf() {
                       </span>
                     </div>
 
-                    {/* CORREÇÃO DO NOME DO PARÂMETRO: Alinhado exatamente com o state de SolicServico.jsx */}
+                    {/* CLIQUE MODIFICADO: Avalia dinamicamente se o intuito é criar ou reatribuir */}
                     <button
                       className="btn-ponto-cartao"
-                      onClick={() =>
-                        navigate("/solicitar-servico", {
-                          state: { professionalIdSelecionado: prof.id },
-                        })
-                      }
+                      style={{ backgroundColor: reassignDemandId ? '#28a745' : '', borderColor: reassignDemandId ? '#28a745' : '' }}
+                      onClick={() => lidarComSelecaoProfissional(prof.id)}
                     >
-                      Solicitar Serviço
+                      {reassignDemandId ? 'Reatribuir a Este' : 'Solicitar Serviço'}
                     </button>
                   </div>
                 </div>
