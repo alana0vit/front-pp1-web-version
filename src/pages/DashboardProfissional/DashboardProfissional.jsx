@@ -11,10 +11,11 @@ function DashboardProfissional() {
   const [loading, setLoading] = useState(true);
   const [abaAtiva, setAbaAtiva] = useState("ATIVAS");
   const [pedidoDetalhado, setPedidoDetalhado] = useState(null);
-  const [buscaTexto, setBuscaTexto] = useState("");
-  
-  // NOVO: Estado para gerenciar o botão seletor isolado de Status
+  const [buscaTexto, setBuscaTexto] = useState('');
   const [statusFiltro, setStatusFiltro] = useState("TODOS");
+  
+  // NOVO: Estado para guardar os dados frescos de perfil do profissional (reputação/rating)
+  const [dadosPerfil, setDadosPerfil] = useState(null);
 
   const userStorage = localStorage.getItem("@ConectaPro:user");
   const usuarioLogado =
@@ -36,9 +37,14 @@ function DashboardProfissional() {
         .sort((a, b) => b.id - a.id);
 
       setPedidos(meusPedidos);
+
+      // NOVO: Aproveita o refresh e busca os dados de perfil atualizados do próprio profissional para ler a média de estrelas
+      const resPerfil = await api.get(`/api/user/${profesionalId}`);
+      setDadosPerfil(resPerfil.data);
+
       return meusPedidos;
     } catch (err) {
-      console.error("Erro ao carregar demandas:", err);
+      console.error("Erro ao carregar demandas ou reputação:", err);
       toast.error("Erro ao carregar as solicitações.");
       return null;
     } finally {
@@ -150,6 +156,19 @@ function DashboardProfissional() {
           <div className="welcome-box">
             <h1>Painel de Controle</h1>
             <p>Olá, <strong>{usuarioLogado?.name}</strong>. Veja como está sua agenda.</p>
+            
+            {/* NOVO: INDICADOR VISUAL DE AVALIAÇÃO DO PRESTADOR */}
+            {dadosPerfil && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px', background: '#fff', padding: '6px 14px', borderRadius: '50px', width: 'fit-content', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
+                <i className="bi bi-star-fill" style={{ color: '#ffc107' }}></i>
+                <span style={{ fontSize: '14px', color: '#333', fontWeight: '700' }}>
+                  Sua Reputação: {dadosPerfil.rating ? dadosPerfil.rating.toFixed(1) : "5.0"}
+                </span>
+                <span style={{ fontSize: '12px', color: '#666' }}>
+                  ({dadosPerfil.rating ? "Média Atual" : "Sem avaliações"})
+                </span>
+              </div>
+            )}
           </div>
           <button className="btn-config" onClick={() => navigate("/editar-perfil")}>
             <i className="bi bi-gear-wide-connected"></i> Ajustes
@@ -176,8 +195,6 @@ function DashboardProfissional() {
             <h2>Fluxo de Demandas</h2>
             
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flex: 1, maxWidth: '550px', marginLeft: 'auto' }}>
-              
-              {/* BOTÃO FILTRO DE STATUS COMPATÍVEL */}
               <select 
                 value={statusFiltro}
                 onChange={(e) => setStatusFiltro(e.target.value)}

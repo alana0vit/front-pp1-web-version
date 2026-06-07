@@ -13,6 +13,9 @@ function ListaProf() {
   const [categorias, setCategorias] = useState([]);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState("");
 
+  // Estado para gerenciar o filtro de avaliação por estrelas
+  const [filtroEstrelas, setFiltroEstrelas] = useState("TODOS");
+
   // Captura o id da demanda rejeitada caso o cliente queira reatribuir
   const reassignDemandId = location.state?.reassignDemandId || null;
 
@@ -89,34 +92,41 @@ function ListaProf() {
     );
   };
 
-  // Executa a reatribuição chamando o PATCH do backend
   const lidarComSelecaoProfissional = async (professionalId) => {
     if (reassignDemandId) {
       try {
-        // Dispara a rota exatamente como mapeada no DemandController.java do backend
         await api.patch(`/api/demand/${reassignDemandId}/reassign`, {
           professionalId: professionalId
         });
         
         toast.success("Demanda reatribuída com sucesso para o novo profissional!");
-        navigate("/dashboard-cliente"); // Retorna ao painel principal
+        navigate("/dashboard-cliente");
       } catch (error) {
         console.error("Erro ao reatribuir demanda:", error);
         toast.error("Erro ao reatribuir este chamado. Tente novamente.");
       }
     } else {
-      // Fluxo normal: Envia para o formulário criar uma do zero
       navigate("/solicitar-servico", {
         state: { professionalIdSelecionado: professionalId },
       });
     }
   };
 
+  // Aplicação da filtragem local por Estrelas (Rating) combinada com os dados da API
+  const profissionaisFiltrados = profissionais.filter((prof) => {
+    const notaProf = prof.rating !== undefined && prof.rating !== null ? prof.rating : 5.0;
+
+    if (filtroEstrelas === "4PLUS") return notaProf >= 4.0;
+    if (filtroEstrelas === "3PLUS") return notaProf >= 3.0;
+    if (filtroEstrelas === "NEW") return prof.rating === null || prof.rating === undefined;
+
+    return true;
+  });
+
   const coresTopo = ["#e6f0ff", "#e6ffe6", "#fff0e6", "#f0e6ff"];
 
   return (
     <div className="pagina-lista-profissionais">
-      {/* Alerta visual caso esteja em modo de reatribuição */}
       {reassignDemandId && (
         <div style={{ background: '#d4edda', color: '#155724', padding: '12px', textAlign: 'center', fontWeight: '600', borderBottom: '1px solid #c3e6cb' }}>
           <i className="bi bi-info-circle-fill"></i> Modo de Reatribuição Ativo: Escolha um novo profissional abaixo para assumir o seu chamado recusado.
@@ -151,7 +161,7 @@ function ListaProf() {
                 </button>
               </form>
 
-              <div className="filtros-linha" style={{ position: "relative" }}>
+              <div className="filtros-linha" style={{ position: "relative", display: "flex", gap: "10px", flexWrap: "wrap" }}>
                 <select
                   className="select-categoria"
                   value={categoriaSelecionada}
@@ -163,6 +173,19 @@ function ListaProf() {
                       {cat.name}
                     </option>
                   ))}
+                </select>
+
+                {/* NOVO: SELECTOR DE FILTRO POR AVALIAÇÃO DE ESTRELAS */}
+                <select
+                  className="select-categoria"
+                  value={filtroEstrelas}
+                  onChange={(e) => setFiltroEstrelas(e.target.value)}
+                  style={{ border: "1px solid #0066ff", color: "#0066ff", fontWeight: "600" }}
+                >
+                  <option value="TODOS">⭐ Todas as Notas</option>
+                  <option value="4PLUS">⭐ 4.0 estrelas ou mais</option>
+                  <option value="3PLUS">⭐ 3.0 estrelas ou mais</option>
+                  <option value="NEW">⭐ Apenas Novos (Sem Nota)</option>
                 </select>
 
                 <div
@@ -179,7 +202,6 @@ function ListaProf() {
                     📍 Perto de mim
                   </button>
 
-                  {/* POP-UP INFORMATIVO DO FILTRO PERTO DE MIM */}
                   {mostrarPopUpLocalizacao && (
                     <div className="pop-up-informativo-localizacao">
                       <div className="seta-pop-up"></div>
@@ -210,54 +232,55 @@ function ListaProf() {
         <div className="container-alinhado">
           <h2 className="titulo-sessao">Profissionais Disponíveis</h2>
 
-          {profissionais.length === 0 ? (
+          {profissionaisFiltrados.length === 0 ? (
             <p style={{ textAlign: "center", marginTop: "2rem" }}>
-              Nenhum profissional encontrado.
+              Nenhum profissional encontrado para os filtros selecionados.
             </p>
           ) : (
             <div className="grade-profissionais">
-              {profissionais.map((prof, index) => (
-                <div key={prof.id} className="cartao-profissional-moderno">
-                  <div
-                    className="topo-colorido-cartao"
-                    style={{
-                      backgroundColor: coresTopo[index % coresTopo.length],
-                    }}
-                  ></div>
+              {profissionaisFiltrados.map((prof, index) => {
+                const notaExibida = prof.rating !== undefined && prof.rating !== null ? prof.rating.toFixed(1) : "5.0";
+                
+                return (
+                  <div key={prof.id} className="cartao-profissional-moderno">
+                    <div
+                      className="topo-colorido-cartao"
+                      style={{
+                        backgroundColor: coresTopo[index % coresTopo.length],
+                      }}
+                    ></div>
 
-                  <div className="corpo-cartao">
-                    <div className="avatar-profissional-sobreposto">
-                      <span>
-                        {prof.name ? prof.name.charAt(0).toUpperCase() : "U"}
-                      </span>
+                    <div className="corpo-cartao">
+                      <div className="avatar-profissional-sobreposto">
+                        <span>
+                          {prof.name ? prof.name.charAt(0).toUpperCase() : "U"}
+                        </span>
+                      </div>
+
+                      <h3 className="nome-profissional">{prof.name}</h3>
+                      <p className="especialidade-cartao">
+                        {prof.phone || "Telefone não informado"}
+                      </p>
+
+                      <div className="avaliacao-profissional">
+                        <i className="bi bi-star-fill"></i>
+                        <strong>{notaExibida}</strong>
+                        <span className="total-avaliacoes">
+                          ({prof.rating !== null && prof.rating !== undefined ? "Avaliado" : "Novo"})
+                        </span>
+                      </div>
+
+                      <button
+                        className="btn-ponto-cartao"
+                        style={{ backgroundColor: reassignDemandId ? '#28a745' : '', borderColor: reassignDemandId ? '#28a745' : '' }}
+                        onClick={() => lidarComSelecaoProfissional(prof.id)}
+                      >
+                        {reassignDemandId ? 'Reatribuir a Este' : 'Solicitar Serviço'}
+                      </button>
                     </div>
-
-                    <h3 className="nome-profissional">{prof.name}</h3>
-                    <p className="especialidade-cartao">
-                      {prof.phone || "Telefone não informado"}
-                    </p>
-
-                    <div className="avaliacao-profissional">
-                      <i className="bi bi-star-fill"></i>
-                      <strong>
-                        {prof.rating ? prof.rating.toFixed(1) : "5.0"}
-                      </strong>
-                      <span className="total-avaliacoes">
-                        ({prof.rating ? "Avaliado" : "Novo"})
-                      </span>
-                    </div>
-
-                    {/* CLIQUE MODIFICADO: Avalia dinamicamente se o intuito é criar ou reatribuir */}
-                    <button
-                      className="btn-ponto-cartao"
-                      style={{ backgroundColor: reassignDemandId ? '#28a745' : '', borderColor: reassignDemandId ? '#28a745' : '' }}
-                      onClick={() => lidarComSelecaoProfissional(prof.id)}
-                    >
-                      {reassignDemandId ? 'Reatribuir a Este' : 'Solicitar Serviço'}
-                    </button>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

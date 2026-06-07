@@ -13,6 +13,16 @@ function DashboardCliente() {
   const [pedidoDetalhado, setPedidoDetalhado] = useState(null);
   const [buscaTexto, setBuscaTexto] = useState('');
 
+  // Estados para o Modal de Avaliação
+  const [pedidoParaAvaliar, setPedidoParaAvaliar] = useState(null);
+  const [estrelas, setEstrelas] = useState(5);
+  const [comentario, setComentario] = useState('');
+  const [anonimo, setAnonimo] = useState(false);
+  const [enviandoAvaliacao, setEnviandoAvaliacao] = useState(false);
+  
+  // Estado para sumir com o botão imediatamente após avaliar
+  const [demandasAvaliadas, setDemandasAvaliadas] = useState([]);
+
   const userStorage = localStorage.getItem('@ConectaPro:user');
   const usuarioLogado = userStorage && userStorage !== "undefined" ? JSON.parse(userStorage) : null;
   const clienteId = usuarioLogado?.id;
@@ -53,6 +63,61 @@ function DashboardCliente() {
     if (s === 'FECHADO' || s === '0' || s === 'CLOSED') return 'Concluída';
     if (s === 'REJEITADO' || s === '2' || s === 'REJECTED') return 'Recusada';
     return s;
+  };
+
+  const enviarAvaliacaoSistema = async (e) => {
+    e.preventDefault();
+    if (!pedidoParaAvaliar) return;
+
+    const professionalId = pedidoParaAvaliar.professional?.id || pedidoParaAvaliar.professionalId?.id || pedidoParaAvaliar.professionalId;
+
+    if (!professionalId) {
+      toast.error("Não foi possível identificar o profissional associado a este serviço.");
+      return;
+    }
+
+    try {
+      setEnviandoAvaliacao(true);
+
+      // Passo 1: Criar a avaliação pendente vinculando as partes
+      const payloadCriar = {
+        service: Number(pedidoParaAvaliar.id),
+        evaluatingPerson: Number(clienteId),
+        personEvaluated: Number(professionalId)
+      };
+
+      const resRating = await api.post("/api/rating", payloadCriar);
+      const ratingIdGerado = resRating.data.id;
+
+      // Passo 2: Enviar a nota (points) e consolidar
+      const payloadConcluir = {
+        approved: true,
+        points: Number(estrelas),
+        description: comentario.trim(),
+        anonymous: Boolean(anonimo)
+      };
+
+      await api.put(`/api/rating/${ratingIdGerado}`, payloadConcluir);
+
+      // Adiciona o ID do chamado na lista de avaliados para sumir com o botão visualmente
+      setDemandasAvaliadas(prev => [...prev, Number(pedidoParaAvaliar.id)]);
+
+      toast.success("Avaliação enviada com sucesso! Obrigado pelo seu feedback.");
+      
+      // Resetar os campos do formulário e fechar modal
+      setPedidoParaAvaliar(null);
+      setComentario('');
+      setEstrelas(5);
+      setAnonimo(false);
+      
+      // Atualiza a lista do dashboard
+      buscarMeusPedidos();
+    } catch (err) {
+      console.error("Erro ao processar avaliação:", err);
+      toast.error("Ocorreu uma falha ao registrar sua avaliação no banco.");
+    } finally {
+      setEnviandoAvaliacao(false);
+    }
   };
 
   const pedidosFiltrados = pedidos.filter(p => {
@@ -201,6 +266,7 @@ function DashboardCliente() {
                 <div className="lista-real">
                   {pedidosFiltrados.map(pedido => {
                     const statusAtual = String(pedido.demandStatus || '').toUpperCase();
+                    const jaAvaliado = demandasAvaliadas.includes(Number(pedido.id));
                     
                     return (
                       <div 
@@ -226,9 +292,28 @@ function DashboardCliente() {
                           {pedido.description}
                         </p>
                         
-                        <span style={{ fontSize: '12px', color: '#0066ff', fontWeight: '600' }}>
-                          <i className="bi bi-eye"></i> Clique para ver a descrição completa
-                        </span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }} onClick={(e) => e.stopPropagation()}>
+                          <span style={{ fontSize: '12px', color: '#0066ff', fontWeight: '600' }} onClick={() => setPedidoDetalhado(pedido)}>
+                            <i className="bi bi-eye"></i> Ver mais detalhes
+                          </span>
+
+                          {/* LOGICA DO BOTÃO SUMIR APÓS AVALIAR */}
+                          {(statusAtual === '0' || statusAtual === 'FECHADO' || statusAtual === 'CLOSED') && (
+                            jaAvaliado ? (
+                              <span style={{ fontSize: '13px', color: '#28a745', fontWeight: '700' }}>
+                                <i className="bi bi-check-circle-fill"></i> Avaliado
+                              </span>
+                            ) : (
+                              <button 
+                                className="btn-azul-solicitar"
+                                style={{ padding: '6px 14px', fontSize: '12px', borderRadius: '50px', background: '#ffc107', borderColor: '#ffc107', color: '#000', fontWeight: '700' }}
+                                onClick={() => setPedidoParaAvaliar(pedido)}
+                              >
+                                <i className="bi bi-star-fill"></i> Avaliar Serviço
+                              </button>
+                            )
+                          )}
+                        </div>
                       </div>
                     );
                   })}
@@ -291,7 +376,6 @@ function DashboardCliente() {
                   </button>
                 )}
 
-                {/* BOTÃO DE REATRIBUÍÇÃO: Redireciona para escolher um novo profissional repassando o ID da demanda rejeitada */}
                 {(String(pedidoDetalhado.demandStatus).toUpperCase() === 'REJECTED' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'REJEITADO' || String(pedidoDetalhado.demandStatus).toUpperCase() === '2') && (
                   <button 
                     className="btn-confirmar" 
@@ -310,6 +394,75 @@ function DashboardCliente() {
                 )}
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= MODAL DE FORMULÁRIO DE AVALIAÇÃO ================= */}
+      {pedidoParaAvaliar && (
+        <div className="modal-overlay" onClick={() => setPedidoParaAvaliar(null)}>
+          <div className="modal-container" style={{ maxWidth: '480px' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
+              <h3 className="modal-title" style={{ margin: 0, fontSize: '18px' }}>Avaliar Prestador de Serviço</h3>
+              <button className="btn-cancelar" style={{ padding: '5px 10px', borderRadius: '50%' }} onClick={() => setPedidoParaAvaliar(null)}>X</button>
+            </div>
+
+            <form onSubmit={enviarAvaliacaoSistema} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <p style={{ margin: 0, fontSize: '14px', color: '#555' }}>
+                Conte-nos como foi a sua experiência com o profissional <strong>{pedidoParaAvaliar.professional?.name || 'parceiro'}</strong> no serviço <em>"{pedidoParaAvaliar.title}"</em>.
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px', padding: '10px', background: '#f8f9fa', borderRadius: '10px' }}>
+                <label style={{ fontSize: '12px', fontWeight: '700', color: '#666' }}>SUA NOTA</label>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  {[1, 2, 3, 4, 5].map((num) => (
+                    <i 
+                      key={num}
+                      className={num <= estrelas ? "bi bi-star-fill" : "bi bi-star"}
+                      style={{ fontSize: '28px', color: '#ffc107', cursor: 'pointer', transition: 'transform 0.1s' }}
+                      onClick={() => setEstrelas(num)}
+                    ></i>
+                  ))}
+                </div>
+                <span style={{ fontSize: '13px', fontWeight: '700', color: '#333', marginTop: '4px' }}>
+                  {estrelas === 5 ? 'Excelente!' : estrelas === 4 ? 'Muito Bom' : estrelas === 3 ? 'Regular' : estrelas === 2 ? 'Ruim' : 'Muito Ruim'}
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label style={{ fontSize: '12px', fontWeight: '700', color: '#666' }}>COMENTÁRIO / CRÍTICA</label>
+                <textarea
+                  rows="4"
+                  placeholder="Deixe o seu feedback detalhado aqui..."
+                  value={comentario}
+                  onChange={(e) => setComentario(e.target.value)}
+                  required
+                  style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #ddd', fontSize: '14px', outline: 'none', resize: 'none', fontFamily: 'inherit' }}
+                ></textarea>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                <input 
+                  type="checkbox" 
+                  id="chkAnonimo" 
+                  checked={anonimo} 
+                  onChange={(e) => setAnonimo(e.target.checked)}
+                  style={{ cursor: 'pointer', width: '16px', height: '16px' }}
+                />
+                <label htmlFor="chkAnonimo" style={{ fontSize: '13px', color: '#444', cursor: 'pointer', userSelect: 'none' }}>
+                  Enviar esta avaliação de forma anônima
+                </label>
+              </div>
+
+              <button 
+                type="submit" 
+                className="btn-confirmar" 
+                style={{ width: '100%', padding: '12px', background: '#ffc107', borderColor: '#ffc107', color: '#000', fontWeight: '700' }}
+                disabled={enviandoAvaliacao}
+              >
+                {enviandoAvaliacao ? "Registrando Nota..." : "Submeter Avaliação"}
+              </button>
+            </form>
           </div>
         </div>
       )}
