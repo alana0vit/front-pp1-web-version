@@ -44,27 +44,45 @@ function DashboardCliente() {
     buscarMeusPedidos();
   }, [clienteId]);
 
+  // CAMADA DE TRADUÇÃO COMPATÍVEL: Traduz qualquer padrão retornado pelo banco (String, Texto-BR ou Ordinal)
   const traduzirStatus = (status) => {
-    const statusSeguro = status || 'OPENED';
-    const traducoes = {
-      OPENED: 'Aguardando Resposta',
-      IN_WAITING: 'Em Andamento',
-      CLOSED: 'Concluída',
-      REJECTED: 'Recusada'
-    };
-    return traducoes[statusSeguro] || statusSeguro;
+    const s = String(status || '').toUpperCase();
+    if (s === 'ABERTO' || s === '1' || s === 'OPENED') return 'Aguardando Resposta';
+    if (s === 'AGURADANDO' || s === '3' || s === 'IN_WAITING') return 'Em Andamento';
+    if (s === 'FECHADO' || s === '0' || s === 'CLOSED') return 'Concluída';
+    if (s === 'REJEITADO' || s === '2' || s === 'REJECTED') return 'Recusada';
+    return s;
   };
 
+  // NAVEGAÇÃO ENTRE ABAS BLINDADA (Captura Texto, Texto-BR ou Ordinal)
   const pedidosFiltrados = pedidos.filter(p => {
-    const status = p.demandStatus || 'OPENED';
-    if (abaAtiva === 'ATIVAS') return status === 'OPENED' || status === 'IN_WAITING';
-    if (abaAtiva === 'HISTORICO') return status === 'CLOSED' || status === 'REJECTED';
+    const status = String(p.demandStatus || '').toUpperCase();
+    if (abaAtiva === 'ATIVAS') {
+      return status === 'ABERTO' || status === '1' || status === 'OPENED' || 
+             status === 'AGURADANDO' || status === '3' || status === 'IN_WAITING';
+    }
+    if (abaAtiva === 'HISTORICO') {
+      return status === 'FECHADO' || status === '0' || status === 'CLOSED' || 
+             status === 'REJEITADO' || status === '2' || status === 'REJECTED';
+    }
     return true;
   });
 
-  const emAndamento = pedidos.filter(p => (p.demandStatus || 'OPENED') === 'IN_WAITING').length;
-  const aguardando = pedidos.filter(p => (p.demandStatus || 'OPENED') === 'OPENED').length;
-  const concluidos = pedidos.filter(p => (p.demandStatus || '') === 'CLOSED').length;
+  // Mapeamento dinâmico dos contadores superiores
+  const emAndamento = pedidos.filter(p => {
+    const s = String(p.demandStatus || '').toUpperCase();
+    return s === 'AGURADANDO' || s === '3' || s === 'IN_WAITING';
+  }).length;
+
+  const aguardando = pedidos.filter(p => {
+    const s = String(p.demandStatus || '').toUpperCase();
+    return s === 'ABERTO' || s === '1' || s === 'OPENED';
+  }).length;
+
+  const concluidos = pedidos.filter(p => {
+    const s = String(p.demandStatus || '').toUpperCase();
+    return s === 'FECHADO' || s === '0' || s === 'CLOSED';
+  }).length;
 
   return (
     <div className="container-dashboard">
@@ -173,14 +191,15 @@ function DashboardCliente() {
               ) : (
                 <div className="lista-real">
                   {pedidosFiltrados.map(pedido => {
-                    const statusAtual = pedido.demandStatus || 'OPENED';
+                    const statusAtual = String(pedido.demandStatus || '').toUpperCase();
                     
                     return (
                       <div key={pedido.id} className="card-item-demanda-real">
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
                           <h4 style={{ margin: 0, fontSize: '18px', color: '#111', fontWeight: '700' }}>{pedido.title}</h4>
-                          <span className={`status-badge-real ${statusAtual.toLowerCase()}`}>
-                            {traduzirStatus(statusAtual)}
+                          {/* Adiciona estilo baseado no status de maneira segura e higienizada */}
+                          <span className={`status-badge-real ${statusAtual === '1' || statusAtual === 'ABERTO' || statusAtual === 'OPENED' ? 'opened' : statusAtual === '3' || statusAtual === 'AGURADANDO' || statusAtual === 'IN_WAITING' ? 'in_waiting' : statusAtual === '0' || statusAtual === 'FECHADO' || statusAtual === 'CLOSED' ? 'closed' : 'rejected'}`}>
+                            {traduzirStatus(pedido.demandStatus)}
                           </span>
                         </div>
 
@@ -195,8 +214,8 @@ function DashboardCliente() {
                           {pedido.description}
                         </p>
 
-                        {/* Botão para Editar Solicitação (Apenas se estiver OPENED) */}
-                        {statusAtual === 'OPENED' && (
+                        {/* Botão para Editar Solicitação (Apenas se o chamado estiver Aberto) */}
+                        {(statusAtual === 'OPENED' || statusAtual === 'ABERTO' || statusAtual === '1') && (
                           <button 
                             className="btn-cancelar" 
                             style={{ marginTop: '5px', fontSize: '13px', border: '1px solid #ddd', color: '#333' }}
@@ -207,13 +226,13 @@ function DashboardCliente() {
                           </button>
                         )}
 
-                        {/* Componente dinâmico de contato se aceito */}
-                        {statusAtual === 'IN_WAITING' && (
+                        {/* Componente dinâmico de contato se estiver em andamento */}
+                        {(statusAtual === 'IN_WAITING' || statusAtual === 'AGURADANDO' || statusAtual === '3') && (
                           <DetalhesSolicitacao demanda={pedido} modo="CLIENTE" />
                         )}
 
                         {/* Notificação visível caso o chamado tenha sido rejeitado */}
-                        {statusAtual === 'REJECTED' && (
+                        {(statusAtual === 'REJECTED' || statusAtual === 'REJEITADO' || statusAtual === '2') && (
                           <div style={{ marginTop: '15px', background: '#fff5f5', color: '#c53030', padding: '12px', borderRadius: '10px', fontSize: '13px', display: 'flex', gap: '8px', alignItems: 'center', border: '1px solid #fed7d7' }}>
                             <i className="bi bi-exclamation-triangle-fill"></i>
                             <span>Este profissional recusou o chamado. Você pode excluí-lo ou solicitar a outro especialista.</span>

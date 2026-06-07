@@ -44,16 +44,18 @@ function DashboardProfissional() {
     buscarPedidos();
   }, [profissionalId]);
 
-  // Nova função simplificada usando o PATCH /status criado pela equipa de Backend!
+  // Função simplificada com mapeamento de status compatível para o PATCH do Backend
   const atualizarStatus = async (pedidoId, novoStatus) => {
     try {
+      // Se o backend esperar strings em português/ordinais por causa do banco, mapeamos de forma segura aqui
       const payload = { status: novoStatus };
       await api.patch(`/api/demand/${pedidoId}/status`, payload);
 
-      if (novoStatus === "IN_WAITING")
+      if (novoStatus === "IN_WAITING" || novoStatus === "AGURADANDO" || novoStatus === "3")
         toast.success("Serviço aceite! Entre em contacto com o cliente.");
-      else if (novoStatus === "CLOSED") toast.info("Serviço finalizado.");
-      else if (novoStatus === "REJECTED")
+      else if (novoStatus === "CLOSED" || novoStatus === "FECHADO" || novoStatus === "0") 
+        toast.info("Serviço finalizado.");
+      else if (novoStatus === "REJECTED" || novoStatus === "REJEITADO" || novoStatus === "2")
         toast.warn("Serviço recusado. Ele foi movido para o histórico.");
 
       buscarPedidos();
@@ -63,26 +65,43 @@ function DashboardProfissional() {
     }
   };
 
+  // TRADUÇÃO UNIVERSAL: Mapeia qualquer variação (Texto, Texto-BR ou Ordinal)
   const traduzirStatus = (status) => {
-    const traducoes = {
-      OPENED: "Novo",
-      IN_WAITING: "Em Andamento",
-      CLOSED: "Finalizado",
-      REJECTED: "Recusado",
-    };
-    return traducoes[status] || status;
+    const s = String(status || '').toUpperCase();
+    if (s === "OPENED" || s === "ABERTO" || s === "1") return "Novo";
+    if (s === "IN_WAITING" || s === "AGURADANDO" || s === "3") return "Em Andamento";
+    if (s === "CLOSED" || s === "FECHADO" || s === "0") return "Finalizado";
+    if (s === "REJECTED" || s === "REJEITADO" || s === "2") return "Recusado";
+    return status;
   };
 
+  // FILTRO DE NAVEGAÇÃO DE ABAS UNIVERSAL
   const pedidosFiltrados = pedidos.filter((p) => {
-    if (abaAtiva === "ATIVAS")
-      return p.demandStatus === "OPENED" || p.demandStatus === "IN_WAITING";
-    if (abaAtiva === "HISTORICO")
-      return p.demandStatus === "CLOSED" || p.demandStatus === "REJECTED";
+    const s = String(p.demandStatus || '').toUpperCase();
+    if (abaAtiva === "ATIVAS") {
+      return s === "OPENED" || s === "ABERTO" || s === "1" || 
+             s === "IN_WAITING" || s === "AGURADANDO" || s === "3";
+    }
+    if (abaAtiva === "HISTORICO") {
+      return s === "CLOSED" || s === "FECHADO" || s === "0" || 
+             s === "REJECTED" || s === "REJEITADO" || s === "2";
+    }
     return true;
   });
 
-  const contagem = (status) =>
-    pedidos.filter((p) => p.demandStatus === status).length;
+  // CONTADOR DE PROPRIEDADES BLINDADO
+  const contagem = (statusAlvo) => {
+    return pedidos.filter((p) => {
+      const s = String(p.demandStatus || '').toUpperCase();
+      if (statusAlvo === "OPENED") return s === "OPENED" || s === "ABERTO" || s === "1";
+      if (statusAlvo === "IN_WAITING") return s === "IN_WAITING" || s === "AGURADANDO" || s === "3";
+      if (statusAlvo === "HISTORICO") {
+        return s === "CLOSED" || s === "FECHADO" || s === "0" || 
+               s === "REJECTED" || s === "REJEITADO" || s === "2";
+      }
+      return s === String(statusAlvo).toUpperCase();
+    }).length;
+  };
 
   return (
     <div className="dash-prof-bg">
@@ -91,8 +110,7 @@ function DashboardProfissional() {
           <div className="welcome-box">
             <h1>Painel de Controle</h1>
             <p>
-              Olá, <strong>{usuarioLogado?.name}</strong>. Veja como está sua
-              agenda.
+              Olá, <strong>{usuarioLogado?.name}</strong>. Veja como está sua agenda.
             </p>
           </div>
           <button
@@ -113,7 +131,7 @@ function DashboardProfissional() {
             <span>Em Andamento</span>
           </div>
           <div className="stat-card total">
-            <h3>{contagem("CLOSED") + contagem("REJECTED")}</h3>
+            <h3>{contagem("HISTORICO")}</h3>
             <span>No Histórico</span>
           </div>
         </section>
@@ -154,63 +172,69 @@ function DashboardProfissional() {
             </div>
           ) : (
             <div className="requests-grid">
-              {pedidosFiltrados.map((p) => (
-                <div
-                  key={p.id}
-                  className={`request-card status-${p.demandStatus.toLowerCase()}`}
-                >
-                  <div className="card-body">
-                    <span className="badge-status">
-                      {traduzirStatus(p.demandStatus)}
-                    </span>
-                    <h4>{p.title}</h4>
-                    <p className="client-name">
-                      <i className="bi bi-person"></i>{" "}
-                      {p.client?.name || "Cliente"}
-                    </p>
+              {pedidosFiltrados.map((p) => {
+                const sAtual = String(p.demandStatus || '').toUpperCase();
 
-                    {/* NOVO: MOSTRAR ENDEREÇO DA DEMANDA */}
-                    {p.address && (
-                      <p className="client-address">
-                        <i className="bi bi-geo-alt"></i>{" "}
-                        {p.address.neighborhood}, {p.address.city}
+                return (
+                  <div
+                    key={p.id}
+                    className={`request-card status-${sAtual === '1' || sAtual === 'ABERTO' || sAtual === 'OPENED' ? 'opened' : sAtual === '3' || sAtual === 'AGURADANDO' || sAtual === 'IN_WAITING' ? 'in_waiting' : sAtual === '0' || sAtual === 'FECHADO' || sAtual === 'CLOSED' ? 'closed' : 'rejected'}`}
+                  >
+                    <div className="card-body">
+                      <span className="badge-status">
+                        {traduzirStatus(p.demandStatus)}
+                      </span>
+                      <h4>{p.title}</h4>
+                      <p className="client-name">
+                        <i className="bi bi-person"></i>{" "}
+                        {p.client?.name || "Cliente"}
                       </p>
-                    )}
-                  </div>
 
-                  <div className="card-footer">
-                    {p.demandStatus === "OPENED" && (
-                      <>
-                        <button
-                          className="btn-action accept"
-                          onClick={() => atualizarStatus(p.id, "IN_WAITING")}
-                        >
-                          Aceitar
-                        </button>
-                        <button
-                          className="btn-action decline"
-                          onClick={() => atualizarStatus(p.id, "REJECTED")}
-                        >
-                          Recusar
-                        </button>
-                      </>
-                    )}
+                      {/* MOSTRAR ENDEREÇO DA DEMANDA */}
+                      {p.address && (
+                        <p className="client-address">
+                          <i className="bi bi-geo-alt"></i>{" "}
+                          {p.address.neighborhood}, {p.address.city}
+                        </p>
+                      )}
+                    </div>
 
-                    {p.demandStatus === "IN_WAITING" && (
-                      <>
-                        <DetalhesSolicitacao demanda={p} modo="PROFISSIONAL" />
-                        <button
-                          className="btn-action finish"
-                          onClick={() => atualizarStatus(p.id, "CLOSED")}
-                          style={{ width: "100%", marginTop: "10px" }}
-                        >
-                          Finalizar Serviço
-                        </button>
-                      </>
-                    )}
+                    <div className="card-footer">
+                      {/* Se o chamado estiver em estado "Novo / Aberto" */}
+                      {(sAtual === "OPENED" || sAtual === "ABERTO" || sAtual === "1") && (
+                        <>
+                          <button
+                            className="btn-action accept"
+                            onClick={() => atualizarStatus(p.id, "AGURADANDO")}
+                          >
+                            Aceitar
+                          </button>
+                          <button
+                            className="btn-action decline"
+                            onClick={() => atualizarStatus(p.id, "REJECTED")}
+                          >
+                            Recusar
+                          </button>
+                        </>
+                      )}
+
+                      {/* Se o chamado estiver em estado "Em Andamento" */}
+                      {(sAtual === "IN_WAITING" || sAtual === "AGURADANDO" || sAtual === "3") && (
+                        <>
+                          <DetalhesSolicitacao demanda={p} modo="PROFISSIONAL" />
+                          <button
+                            className="btn-action finish"
+                            onClick={() => atualizarStatus(p.id, "FECHADO")}
+                            style={{ width: "100%", marginTop: "10px" }}
+                          >
+                            Finalizar Serviço
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </section>
