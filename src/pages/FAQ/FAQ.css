@@ -6,7 +6,19 @@
 
 .faq-header {
     text-align: center;
-    margin-bottom: 3rem;
+    margin-bottom: 40px;
+    margin-top: 20px;
+}
+
+.faq-header h2 {
+    margin-bottom: 12px;
+    font-size: 2rem;
+    color: #1a1a1a;
+}
+
+.faq-header p {
+    color: #555;
+    font-size: 1rem;
 }
 
 .faq-item {
@@ -73,6 +85,6 @@
 
 .btn-action:hover {
     background-color: #0056b3;
-    transform: translateY(-2px); /* Efeito sutil de levantar ao passar o mouse */
+    transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(0, 123, 255, 0.3);
 }
