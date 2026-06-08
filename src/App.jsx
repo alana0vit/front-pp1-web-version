@@ -2,6 +2,10 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 
+// IMPORTAÇÕES DO TOASTIFY ADICIONADAS AQUI
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 // Páginas
 import Cadastro from "./pages/Cadastro/Cadastro";
 import DashboardCliente from "./pages/DashboardCliente/DashboardCliente";
@@ -82,6 +86,20 @@ function App() {
       </Routes>
 
       <Footer />
+
+      {/* COMPONENTE TOASTCONTAINER ADICIONADO AQUI */}
+      <ToastContainer 
+        position="top-right"
+        autoClose={4000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
     </BrowserRouter>
   );
 }

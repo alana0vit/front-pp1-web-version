@@ -23,6 +23,9 @@ function DashboardCliente() {
   // Estado para sumir com o botão imediatamente após avaliar
   const [demandasAvaliadas, setDemandasAvaliadas] = useState([]);
 
+  // Controle visual exclusivo dos cards para não tocar na lógica de negócio
+  const [cardSelecionado, setCardSelecionado] = useState('ANDAMENTO');
+
   const userStorage = localStorage.getItem('@ConectaPro:user');
   const usuarioLogado = userStorage && userStorage !== "undefined" ? JSON.parse(userStorage) : null;
   const clienteId = usuarioLogado?.id;
@@ -79,7 +82,6 @@ function DashboardCliente() {
     try {
       setEnviandoAvaliacao(true);
 
-      // Passo 1: Criar a avaliação pendente vinculando as partes
       const payloadCriar = {
         service: Number(pedidoParaAvaliar.id),
         evaluatingPerson: Number(clienteId),
@@ -89,7 +91,6 @@ function DashboardCliente() {
       const resRating = await api.post("/api/rating", payloadCriar);
       const ratingIdGerado = resRating.data.id;
 
-      // Passo 2: Enviar a nota (points) e consolidar
       const payloadConcluir = {
         approved: true,
         points: Number(estrelas),
@@ -99,18 +100,15 @@ function DashboardCliente() {
 
       await api.put(`/api/rating/${ratingIdGerado}`, payloadConcluir);
 
-      // Adiciona o ID do chamado na lista de avaliados para sumir com o botão visualmente
       setDemandasAvaliadas(prev => [...prev, Number(pedidoParaAvaliar.id)]);
 
       toast.success("Avaliação enviada com sucesso! Obrigado pelo seu feedback.");
       
-      // Resetar os campos do formulário e fechar modal
       setPedidoParaAvaliar(null);
       setComentario('');
       setEstrelas(5);
       setAnonimo(false);
       
-      // Atualiza a lista do dashboard
       buscarMeusPedidos();
     } catch (err) {
       console.error("Erro ao processar avaliação:", err);
@@ -120,6 +118,7 @@ function DashboardCliente() {
     }
   };
 
+  // Mantida a sua exata lógica de filtragem por abas originais sem nenhuma alteração
   const pedidosFiltrados = pedidos.filter(p => {
     const status = String(p.demandStatus || '').toUpperCase();
     const matchesTexto = p.title.toLowerCase().includes(buscaTexto.toLowerCase());
@@ -153,220 +152,251 @@ function DashboardCliente() {
   }).length;
 
   return (
-    <div className="container-dashboard">
+    <div className="premium-dashboard-wrapper">
       
-      <section className="secao-topo-branco">
-        <div className="conteudo-introducao">
-          <div className="lado-esquerdo-texto">
-            <h1 className="titulo-principal-destaque">
-              Olá, <span className="sublinhado-azul-transparente">{usuarioLogado?.name || 'Cliente'}</span>
-            </h1>
-            <p className="subtitulo-detalhado">
-              Acompanhe cada etapa com total segurança, integridade e transparência.
-            </p>
-          </div>
-          <div className="lado-direito-imagem">
-            <button 
-              className="btn-cancelar" 
-              style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', borderRadius: '50px' }}
-              onClick={() => navigate('/editar-perfil')}
-            >
-              <i className="bi bi-person-gear" style={{ color: '#0066ff', fontSize: '18px' }}></i>
-              Editar Meu Perfil
-            </button>
-          </div>
+      <header className="dashboard-welcome-banner">
+        <div className="welcome-left-content">
+          <h1>
+            Olá, <span className="user-name-highlight">{usuarioLogado?.name || 'Cliente'}</span>
+          </h1>
+          <p>Acompanhe cada etapa com total segurança, integridade e transparência.</p>
         </div>
-      </section>
-
-      <section className="secao-servicos-cinza">
-        <div className="cabecalho-servicos">
-          <h2>Como estão seus serviços?</h2>
-        </div>
-
-        <button className="btn-azul-solicitar" onClick={() => navigate('/lista-profissionais')}>
-          <i className="bi bi-plus-circle"></i> Solicitar Novo Serviço
+        <button className="btn-edit-profile-top" onClick={() => navigate('/editar-perfil')}>
+          <i className="bi bi-person-gear"></i>
+          Editar Meu Perfil
         </button>
+      </header>
 
-        <div className="layout-dashboard-baixo">
-          
-          <aside className="coluna-status">
-            <div className="cartao-contador-status" onClick={() => setAbaAtiva('ATIVAS')}>
-              <span className="numero-status">{emAndamento}</span>
-              <div>
-                <strong style={{ display: 'block', color: '#111' }}>Em Andamento</strong>
-                <span style={{ fontSize: '13px', color: '#666' }}>Serviços ativos em execução</span>
+      <div className="section-context-title">
+        <h2>Como estão seus serviços?</h2>
+      </div>
+
+      <div className="dashboard-main-grid-layout">
+        
+        <aside className="sidebar-status-controls">
+          <button className="btn-primary-solicitar-new" onClick={() => navigate('/lista-profissionais')}>
+            <i className="bi bi-plus-circle-fill"></i> Solicitar Novo Serviço
+          </button>
+
+          <div className="status-cards-vertical-stack">
+            {/* CARD 1: EM ANDAMENTO - Texto e estrutura 100% fiéis ao print */}
+            <div 
+              className={`premium-status-card card-blue-theme ${abaAtiva === 'ATIVAS' && cardSelecionado === 'ANDAMENTO' ? 'active-card' : ''}`} 
+              onClick={() => {
+                setAbaAtiva('ATIVAS');
+                setCardSelecionado('ANDAMENTO');
+              }}
+            >
+              <span className="status-counter-number">{emAndamento}</span>
+              <div className="status-meta-info">
+                <span className="status-counter-label">Em Andamento</span>
+                <span className="status-counter-subtext">Serviços ativos em execução</span>
               </div>
-              <i className="bi bi-play-circle-fill icone-status-azul"></i>
+              <div className="status-icon-box"><i className="bi bi-play-circle-fill"></i></div>
             </div>
 
-            <div className="cartao-contador-status" onClick={() => setAbaAtiva('ATIVAS')}>
-              <span className="numero-status">{aguardando}</span>
-              <div>
-                <strong style={{ display: 'block', color: '#111' }}>Aguardando Aceitação</strong>
-                <span style={{ fontSize: '13px', color: '#666' }}>Aguardando retorno do profissional</span>
+            {/* CARD 2: AGUARDANDO ACEITAÇÃO - Texto e estrutura 100% fiéis ao print */}
+            <div 
+              className={`premium-status-card card-amber-theme ${abaAtiva === 'ATIVAS' && cardSelecionado === 'AGUARDANDO' ? 'active-card' : ''}`} 
+              onClick={() => {
+                setAbaAtiva('ATIVAS');
+                setCardSelecionado('AGUARDANDO');
+              }}
+            >
+              <span className="status-counter-number">{aguardando}</span>
+              <div className="status-meta-info">
+                <span className="status-counter-label">Aguardando Aceitação</span>
+                <span className="status-counter-subtext">Aguardando retorno do profissional</span>
               </div>
-              <i className="bi bi-clock-fill icone-status-amarelo"></i>
+              <div className="status-icon-box"><i className="bi bi-clock-fill"></i></div>
             </div>
 
-            <div className="cartao-contador-status" onClick={() => setAbaAtiva('HISTORICO')}>
-              <span className="numero-status">{concluidos}</span>
-              <div>
-                <strong style={{ display: 'block', color: '#111' }}>Serviços Finalizados</strong>
-                <span style={{ fontSize: '13px', color: '#666' }}>Histórico de chamados encerrados</span>
+            {/* CARD 3: SERVIÇOS FINALIZADOS - Texto e estrutura 100% fiéis ao print */}
+            <div 
+              className={`premium-status-card card-green-theme ${abaAtiva === 'HISTORICO' ? 'active-card' : ''}`} 
+              onClick={() => {
+                setAbaAtiva('HISTORICO');
+                setCardSelecionado('FINALIZADOS');
+              }}
+            >
+              <span className="status-counter-number">{concluidos}</span>
+              <div className="status-meta-info">
+                <span className="status-counter-label">Serviços Finalizados</span>
+                <span className="status-counter-subtext">Histórico de chamados encerrados</span>
               </div>
-              <i className="bi bi-check-circle-fill icone-status-verde"></i>
+              <div className="status-icon-box"><i className="bi bi-check-circle-fill"></i></div>
             </div>
-          </aside>
+          </div>
+        </aside>
 
-          <main className="coluna-pedidos-recentes">
-            <div className="cartao-pedidos-painel">
+        <main className="main-content-orders-area">
+          <div className="orders-board-card">
+            
+            <div className="orders-board-header">
+              <h3>Listagem de Pedidos</h3>
               
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '15px' }}>
-                <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '700' }}>Listagem de Pedidos</h3>
-                
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flex: 1, maxWidth: '350px', marginLeft: 'auto' }}>
-                  <div style={{ position: 'relative', width: '100%' }}>
-                    <i className="bi bi-search" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }}></i>
-                    <input 
-                      type="text" 
-                      placeholder="Filtrar por título..." 
-                      value={buscaTexto}
-                      onChange={(e) => setBuscaTexto(e.target.value)}
-                      style={{ width: '100%', padding: '8px 12px 8px 35px', borderRadius: '50px', border: '1px solid #ddd', fontSize: '14px', outline: 'none' }}
-                    />
-                  </div>
-                  <button 
-                    className="btn-cancelar" 
-                    style={{ padding: '8px 14px', fontSize: '13px', whiteSpace: 'nowrap' }} 
-                    onClick={buscarMeusPedidos} 
-                    disabled={loading}
-                  >
-                    <i className={`bi bi-arrow-clockwise ${loading ? 'spin' : ''}`}></i>
-                  </button>
+              <div className="search-and-refresh-container">
+                <div className="search-input-relative-box">
+                  <i className="bi bi-search search-inner-icon"></i>
+                  <input 
+                    type="text" 
+                    placeholder="Filtrar por título..." 
+                    value={buscaTexto}
+                    onChange={(e) => setBuscaTexto(e.target.value)}
+                    className="premium-search-input"
+                  />
                 </div>
-              </div>
-
-              <div className="tabs-container-dashboard">
-                <button className={`tab-btn-dash ${abaAtiva === 'ATIVAS' ? 'active' : ''}`} onClick={() => setAbaAtiva('ATIVAS')}>
-                  Chamados Ativos
-                </button>
-                <button className={`tab-btn-dash ${abaAtiva === 'HISTORICO' ? 'active' : ''}`} onClick={() => setAbaAtiva('HISTORICO')}>
-                  Histórico e Rejeitados
+                <button 
+                  className="btn-refresh-dashboard" 
+                  onClick={buscarMeusPedidos} 
+                  disabled={loading}
+                  title="Atualizar chamados"
+                >
+                  <i className={`bi bi-arrow-clockwise ${loading ? 'spin' : ''}`}></i>
                 </button>
               </div>
-
-              {loading ? (
-                <p style={{ textAlign: 'center', color: '#666', marginTop: '20px' }}>Buscando solicitações...</p>
-              ) : pedidosFiltrados.length === 0 ? (
-                <div className="conteudo-vazio-pedidos">
-                  <i className="bi bi-inbox" style={{ fontSize: '40px', marginBottom: '10px' }}></i>
-                  <p>Nenhum chamado encontrado.</p>
-                </div>
-              ) : (
-                <div className="lista-real">
-                  {pedidosFiltrados.map(pedido => {
-                    const statusAtual = String(pedido.demandStatus || '').toUpperCase();
-                    const jaAvaliado = demandasAvaliadas.includes(Number(pedido.id));
-                    
-                    return (
-                      <div 
-                        key={pedido.id} 
-                        className="card-item-demanda-real" 
-                        style={{ cursor: 'pointer' }}
-                        onClick={() => setPedidoDetalhado(pedido)}
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
-                          <h4 style={{ margin: 0, fontSize: '18px', color: '#111', fontWeight: '700' }}>{pedido.title}</h4>
-                          <span className={`status-badge-real ${statusAtual === '1' || statusAtual === 'ABERTO' || statusAtual === 'OPENED' ? 'opened' : statusAtual === '3' || statusAtual === 'AGURADANDO' || statusAtual === 'IN_WAITING' ? 'in_waiting' : statusAtual === '0' || statusAtual === 'FECHADO' || statusAtual === 'CLOSED' ? 'closed' : 'rejected'}`}>
-                            {traduzirStatus(pedido.demandStatus)}
-                          </span>
-                        </div>
-
-                        {pedido.professional?.name && (
-                          <p className="texto-card-profissional">
-                            <i className="bi bi-person-badge"></i> Profissional: <strong>{pedido.professional.name}</strong>
-                          </p>
-                        )}
-
-                        <p style={{ fontSize: '14px', color: '#555', margin: '10px 0', lineHeight: '1.4', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {pedido.description}
-                        </p>
-                        
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }} onClick={(e) => e.stopPropagation()}>
-                          <span style={{ fontSize: '12px', color: '#0066ff', fontWeight: '600' }} onClick={() => setPedidoDetalhado(pedido)}>
-                            <i className="bi bi-eye"></i> Ver mais detalhes
-                          </span>
-
-                          {/* LOGICA DO BOTÃO SUMIR APÓS AVALIAR */}
-                          {(statusAtual === '0' || statusAtual === 'FECHADO' || statusAtual === 'CLOSED') && (
-                            jaAvaliado ? (
-                              <span style={{ fontSize: '13px', color: '#28a745', fontWeight: '700' }}>
-                                <i className="bi bi-check-circle-fill"></i> Avaliado
-                              </span>
-                            ) : (
-                              <button 
-                                className="btn-azul-solicitar"
-                                style={{ padding: '6px 14px', fontSize: '12px', borderRadius: '50px', background: '#ffc107', borderColor: '#ffc107', color: '#000', fontWeight: '700' }}
-                                onClick={() => setPedidoParaAvaliar(pedido)}
-                              >
-                                <i className="bi bi-star-fill"></i> Avaliar Serviço
-                              </button>
-                            )
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
             </div>
-          </main>
-        </div>
-      </section>
 
+            <div className="premium-tabs-bar">
+              <button 
+                className={`tab-link-item ${abaAtiva === 'ATIVAS' ? 'is-active' : ''}`} 
+                onClick={() => {
+                  setAbaAtiva('ATIVAS');
+                  setCardSelecionado('ANDAMENTO');
+                }}
+              >
+                Chamados Ativos
+              </button>
+              <button 
+                className={`tab-link-item ${abaAtiva === 'HISTORICO' ? 'is-active' : ''}`} 
+                onClick={() => {
+                  setAbaAtiva('HISTORICO');
+                  setCardSelecionado('FINALIZADOS');
+                }}
+              >
+                Histórico e Rejeitados
+              </button>
+            </div>
+
+            {loading ? (
+              <div className="dashboard-state-feedback">
+                <div className="spinner-loader-sml"></div>
+                <p>Buscando suas solicitações com segurança...</p>
+              </div>
+            ) : pedidosFiltrados.length === 0 ? (
+              <div className="premium-empty-state-container">
+                <div className="empty-state-icon-circle">
+                  <i className="bi bi-inbox"></i>
+                </div>
+                <h4>Nenhum chamado encontrado</h4>
+                <p>Não há registros correspondentes para exibir nesta aba no momento.</p>
+              </div>
+            ) : (
+              <div className="premium-dynamic-list-container">
+                {pedidosFiltrados.map(pedido => {
+                  const statusAtual = String(pedido.demandStatus || '').toUpperCase();
+                  const jaAvaliado = demandasAvaliadas.includes(Number(pedido.id));
+                  
+                  return (
+                    <div 
+                      key={pedido.id} 
+                      className="premium-order-row-item" 
+                      onClick={() => setPedidoDetalhado(pedido)}
+                    >
+                      <div className="row-item-top-flex">
+                        <h4>{pedido.title}</h4>
+                        <span className={`status-pill-badge ${statusAtual === '1' || statusAtual === 'ABERTO' || statusAtual === 'OPENED' ? 'pill-opened' : statusAtual === '3' || statusAtual === 'AGURADANDO' || statusAtual === 'IN_WAITING' ? 'pill-waiting' : statusAtual === '0' || statusAtual === 'FECHADO' || statusAtual === 'CLOSED' ? 'pill-closed' : 'pill-rejected'}`}>
+                          {traduzirStatus(pedido.demandStatus)}
+                        </span>
+                      </div>
+
+                      {pedido.professional?.name && (
+                        <p className="row-item-professional-meta">
+                          <i className="bi bi-person-badge"></i> Profissional: <strong>{pedido.professional.name}</strong>
+                        </p>
+                      )}
+
+                      <p className="row-item-truncated-description">
+                        {pedido.description}
+                      </p>
+                      
+                      <div className="row-item-footer-actions" onClick={(e) => e.stopPropagation()}>
+                        <span className="btn-trigger-view-more" onClick={() => setPedidoDetalhado(pedido)}>
+                          <i className="bi bi-eye"></i> Ver mais detalhes
+                        </span>
+
+                        {(statusAtual === '0' || statusAtual === 'FECHADO' || statusAtual === 'CLOSED') && (
+                          jaAvaliado ? (
+                            <span className="badge-evaluated-success">
+                              <i className="bi bi-check-circle-fill"></i> Avaliado
+                            </span>
+                          ) : (
+                            <button 
+                              className="btn-action-trigger-rating"
+                              onClick={() => setPedidoParaAvaliar(pedido)}
+                            >
+                              <i className="bi bi-star-fill"></i> Avaliar Serviço
+                            </button>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+          </div>
+        </main>
+      </div>
+
+      {/* ================= MODAL DETALHES DA SOLICITAÇÃO ================= */}
       {pedidoDetalhado && (
-        <div className="modal-overlay" onClick={() => setPedidoDetalhado(null)}>
-          <div className="modal-container" style={{ maxWidth: '550px' }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
-              <h3 className="modal-title" style={{ margin: 0 }}>Detalhes da Solicitação</h3>
-              <button className="btn-cancelar" style={{ padding: '5px 10px', borderRadius: '50%' }} onClick={() => setPedidoDetalhado(null)}>X</button>
+        <div className="modal-overlay-blur" onClick={() => setPedidoDetalhado(null)}>
+          <div className="modal-sheet-container" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-sheet-header">
+              <h3>Detalhes da Solicitação</h3>
+              <button className="btn-modal-close-round" onClick={() => setPedidoDetalhado(null)}>
+                <i className="bi bi-x-lg"></i>
+              </button>
             </div>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <div>
-                <label style={{ fontSize: '12px', fontWeight: '700', color: '#888', textTransform: 'uppercase' }}>Título do Chamado</label>
-                <p style={{ fontSize: '18px', fontWeight: '700', color: '#111', margin: '4px 0 0 0' }}>{pedidoDetalhado.title}</p>
+            <div className="modal-sheet-body">
+              <div className="meta-field-group">
+                <label>Título do Chamado</label>
+                <p className="field-title-highlight">{pedidoDetalhado.title}</p>
               </div>
 
-              <div>
-                <label style={{ fontSize: '12px', fontWeight: '700', color: '#888', textTransform: 'uppercase' }}>Status Atual</label>
-                <div style={{ marginTop: '5px' }}>
-                  <span className={`status-badge-real ${String(pedidoDetalhado.demandStatus).toUpperCase() === '1' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'ABERTO' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'OPENED' ? 'opened' : String(pedidoDetalhado.demandStatus).toUpperCase() === '3' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'AGURADANDO' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'IN_WAITING' ? 'in_waiting' : String(pedidoDetalhado.demandStatus).toUpperCase() === '0' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'FECHADO' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'CLOSED' ? 'closed' : 'rejected'}`}>
+              <div className="meta-field-group">
+                <label>Status Atual</label>
+                <div style={{ marginTop: '6px' }}>
+                  <span className={`status-pill-badge ${String(pedidoDetalhado.demandStatus).toUpperCase() === '1' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'ABERTO' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'OPENED' ? 'pill-opened' : String(pedidoDetalhado.demandStatus).toUpperCase() === '3' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'AGURADANDO' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'IN_WAITING' ? 'pill-waiting' : String(pedidoDetalhado.demandStatus).toUpperCase() === '0' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'FECHADO' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'CLOSED' ? 'pill-closed' : 'pill-rejected'}`}>
                     {traduzirStatus(pedidoDetalhado.demandStatus)}
                   </span>
                 </div>
               </div>
 
               {pedidoDetalhado.professional?.name && (
-                <div>
-                  <label style={{ fontSize: '12px', fontWeight: '700', color: '#888', textTransform: 'uppercase' }}>Profissional Designado</label>
-                  <p style={{ fontSize: '14px', color: '#111', margin: '4px 0 0 0' }}><strong>{pedidoDetalhado.professional.name}</strong> ({pedidoDetalhado.professional.phone || 'Sem telefone'})</p>
+                <div className="meta-field-group">
+                  <label>Profissional Designado</label>
+                  <p className="field-text-normal">
+                    <strong>{pedidoDetalhado.professional.name}</strong> 
+                    <span className="phone-sub-span"><i className="bi bi-telephone"></i> {pedidoDetalhado.professional.phone || 'Sem telefone'}</span>
+                  </p>
                 </div>
               )}
 
-              <div>
-                <label style={{ fontSize: '12px', fontWeight: '700', color: '#888', textTransform: 'uppercase' }}>Descrição Detalhada do Problema</label>
-                <div style={{ fontSize: '14px', color: '#333', background: '#f8f9fa', padding: '15px', borderRadius: '10px', marginTop: '4px', lineHeight: '1.6', whiteSpace: 'pre-wrap', border: '1px solid #eee' }}>
+              <div className="meta-field-group">
+                <label>Descrição Detalhada do Problema</label>
+                <div className="field-box-description-content">
                   {pedidoDetalhado.description}
                 </div>
               </div>
 
-              <div style={{ marginTop: '10px', borderTop: '1px solid #eee', paddingTop: '15px' }}>
+              <div className="modal-sheet-footer-actions">
                 {(String(pedidoDetalhado.demandStatus).toUpperCase() === 'OPENED' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'ABERTO' || String(pedidoDetalhado.demandStatus).toUpperCase() === '1') && (
                   <button 
-                    className="btn-confirmar" 
-                    style={{ width: '100%', padding: '12px' }}
+                    className="btn-modal-submit-primary" 
                     onClick={() => {
                       setPedidoDetalhado(null);
                       navigate(`/editar-demanda/${pedidoDetalhado.id}`);
@@ -378,8 +408,7 @@ function DashboardCliente() {
 
                 {(String(pedidoDetalhado.demandStatus).toUpperCase() === 'REJECTED' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'REJEITADO' || String(pedidoDetalhado.demandStatus).toUpperCase() === '2') && (
                   <button 
-                    className="btn-confirmar" 
-                    style={{ width: '100%', padding: '12px', background: '#28a745', border: '1px solid #28a745' }}
+                    className="btn-modal-submit-success" 
                     onClick={() => {
                       setPedidoDetalhado(null);
                       navigate('/lista-profissionais', { state: { reassignDemandId: pedidoDetalhado.id } });
@@ -400,67 +429,71 @@ function DashboardCliente() {
 
       {/* ================= MODAL DE FORMULÁRIO DE AVALIAÇÃO ================= */}
       {pedidoParaAvaliar && (
-        <div className="modal-overlay" onClick={() => setPedidoParaAvaliar(null)}>
-          <div className="modal-container" style={{ maxWidth: '480px' }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
-              <h3 className="modal-title" style={{ margin: 0, fontSize: '18px' }}>Avaliar Prestador de Serviço</h3>
-              <button className="btn-cancelar" style={{ padding: '5px 10px', borderRadius: '50%' }} onClick={() => setPedidoParaAvaliar(null)}>X</button>
+        <div className="modal-overlay-blur" onClick={() => setPedidoParaAvaliar(null)}>
+          <div className="modal-sheet-container" style={{ maxWidth: '480px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-sheet-header">
+              <h3>Avaliar Prestador de Serviço</h3>
+              <button className="btn-modal-close-round" onClick={() => setPedidoParaAvaliar(null)}>
+                <i className="bi bi-x-lg"></i>
+              </button>
             </div>
 
-            <form onSubmit={enviarAvaliacaoSistema} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <p style={{ margin: 0, fontSize: '14px', color: '#555' }}>
+            <form onSubmit={enviarAvaliacaoSistema} className="modal-sheet-body form-gap-layout">
+              <p className="form-intro-context-text">
                 Conte-nos como foi a sua experiência com o profissional <strong>{pedidoParaAvaliar.professional?.name || 'parceiro'}</strong> no serviço <em>"{pedidoParaAvaliar.title}"</em>.
               </p>
 
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px', padding: '10px', background: '#f8f9fa', borderRadius: '10px' }}>
-                <label style={{ fontSize: '12px', fontWeight: '700', color: '#666' }}>SUA NOTA</label>
-                <div style={{ display: 'flex', gap: '8px' }}>
+              <div className="rating-selector-score-box">
+                <label>SUA NOTA</label>
+                <div className="stars-row-layout">
                   {[1, 2, 3, 4, 5].map((num) => (
                     <i 
                       key={num}
-                      className={num <= estrelas ? "bi bi-star-fill" : "bi bi-star"}
-                      style={{ fontSize: '28px', color: '#ffc107', cursor: 'pointer', transition: 'transform 0.1s' }}
+                      className={num <= estrelas ? "bi bi-star-fill active-star" : "bi bi-star regular-star"}
                       onClick={() => setEstrelas(num)}
                     ></i>
                   ))}
                 </div>
-                <span style={{ fontSize: '13px', fontWeight: '700', color: '#333', marginTop: '4px' }}>
+                <span className="rating-score-qualifier-label">
                   {estrelas === 5 ? 'Excelente!' : estrelas === 4 ? 'Muito Bom' : estrelas === 3 ? 'Regular' : estrelas === 2 ? 'Ruim' : 'Muito Ruim'}
                 </span>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <label style={{ fontSize: '12px', fontWeight: '700', color: '#666' }}>COMENTÁRIO / CRÍTICA</label>
+              <div className="meta-field-group">
+                <label>COMENTÁRIO / CRÍTICA</label>
                 <textarea
                   rows="4"
                   placeholder="Deixe o seu feedback detalhado aqui..."
                   value={comentario}
                   onChange={(e) => setComentario(e.target.value)}
                   required
-                  style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #ddd', fontSize: '14px', outline: 'none', resize: 'none', fontFamily: 'inherit' }}
+                  className="premium-textarea-input"
                 ></textarea>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+              <div className="anonymous-checkbox-row-wrapper">
                 <input 
                   type="checkbox" 
                   id="chkAnonimo" 
                   checked={anonimo} 
                   onChange={(e) => setAnonimo(e.target.checked)}
-                  style={{ cursor: 'pointer', width: '16px', height: '16px' }}
                 />
-                <label htmlFor="chkAnonimo" style={{ fontSize: '13px', color: '#444', cursor: 'pointer', userSelect: 'none' }}>
+                <label htmlFor="chkAnonimo">
                   Enviar esta avaliação de forma anônima
                 </label>
               </div>
 
               <button 
                 type="submit" 
-                className="btn-confirmar" 
-                style={{ width: '100%', padding: '12px', background: '#ffc107', borderColor: '#ffc107', color: '#000', fontWeight: '700' }}
+                className="btn-submit-rating-form"
                 disabled={enviandoAvaliacao}
               >
-                {enviandoAvaliacao ? "Registrando Nota..." : "Submeter Avaliação"}
+                {enviandoAvaliacao ? (
+                  <>
+                    <span className="spinner-loader-sml input-loader"></span> 
+                    Registrando Nota...
+                  </>
+                ) : "Submeter Avaliação"}
               </button>
             </form>
           </div>

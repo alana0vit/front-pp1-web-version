@@ -13,13 +13,10 @@ function ListaProf() {
   const [categorias, setCategorias] = useState([]);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState("");
 
-  // Estado para gerenciar o filtro de avaliação por estrelas
   const [filtroEstrelas, setFiltroEstrelas] = useState("TODOS");
 
-  // Captura o id da demanda rejeitada caso o cliente queira reatribuir
   const reassignDemandId = location.state?.reassignDemandId || null;
 
-  // Estado para controlar a exibição do pop-up informativo "Perto de mim"
   const [mostrarPopUpLocalizacao, setMostrarPopUpLocalizacao] = useState(false);
 
   const buscarProfissionais = async (filtros = {}) => {
@@ -112,7 +109,6 @@ function ListaProf() {
     }
   };
 
-  // Aplicação da filtragem local por Estrelas (Rating) combinada com os dados da API
   const profissionaisFiltrados = profissionais.filter((prof) => {
     const notaProf = prof.rating !== undefined && prof.rating !== null ? prof.rating : 5.0;
 
@@ -174,8 +170,7 @@ function ListaProf() {
                     </option>
                   ))}
                 </select>
-
-                {/* NOVO: SELECTOR DE FILTRO POR AVALIAÇÃO DE ESTRELAS */}
+                
                 <select
                   className="select-categoria"
                   value={filtroEstrelas}
@@ -212,6 +207,7 @@ function ListaProf() {
                         coordenadas GPS do seu dispositivo.
                       </p>
                     </div>
+                    
                   )}
                 </div>
               </div>

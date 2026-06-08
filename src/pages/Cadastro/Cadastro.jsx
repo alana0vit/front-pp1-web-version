@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { IMaskInput } from "react-imask";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../../services/api";
 import "./Cadastro.css";
@@ -9,8 +9,15 @@ import "./Cadastro.css";
 const Cadastro = () => {
   const [tipoPerfil, setTipoPerfil] = useState(null);
   const [categoriasBanco, setCategoriasBanco] = useState([]);
+  const [mostrarModalSucesso, setMostrarModalSucesso] = useState(false);
   
-  const { register, handleSubmit, reset, control, formState: { errors } } = useForm();
+  const navigate = useNavigate();
+
+  const { register, handleSubmit, reset, control, watch, formState: { errors } } = useForm({
+    mode: "onChange"
+  });
+
+  const senhaAtual = watch("password");
 
   useEffect(() => {
     const buscarCategorias = async () => {
@@ -30,8 +37,11 @@ const Cadastro = () => {
       const telefoneLimpo = data.phone.replace(/\D/g, "");
       const cepLimpo = data.zipCode.replace(/\D/g, "");
 
-      const [ano, mes, dia] = data.birthDate.split('-');
-      const dataFormatada = `${dia}/${mes}/${ano}`;
+      let dataFormatada = data.birthDate;
+      if (data.birthDate && data.birthDate.includes('-')) {
+        const [ano, mes, dia] = data.birthDate.split('-');
+        dataFormatada = `${dia}/${mes}/${ano}`;
+      }
 
       const usuarioPayload = {
         name: data.name,
@@ -53,13 +63,20 @@ const Cadastro = () => {
       };
 
       await api.post("/api/user", usuarioPayload);
-      toast.success("Conta criada com sucesso! Faça o login.");
+      
+      setMostrarModalSucesso(true);
       reset();
-      setTipoPerfil(null);
     } catch (error) {
       const mensagemErro = error.response?.data?.message || "Erro no cadastro. Verifique os dados.";
       toast.error(mensagemErro);
     }
+  };
+
+
+  const lidarComSucessoLogin = () => {
+    setMostrarModalSucesso(false);
+    setTipoPerfil(null);
+    navigate("/login");
   };
   
   if (!tipoPerfil) {
@@ -161,9 +178,43 @@ const Cadastro = () => {
                 <label>Data de Nascimento</label>
                 <input type="date" {...register("birthDate", { required: true })} />
               </div>
+            </div>
+
+            <div className="row">
               <div className="input-group w-50">
                 <label>Senha</label>
-                <input type="password" {...register("password", { required: true, minLength: 6 })} placeholder="Mínimo 6 dígitos" />
+                <input 
+                  type="password" 
+                  className={errors.password ? "input-error" : ""}
+                  {...register("password", { 
+                    required: "A senha é obrigatória", 
+                    minLength: { value: 6, message: "Mínimo 6 dígitos" } 
+                  })} 
+                  placeholder="Mínimo 6 dígitos" 
+                />
+                {errors.password && (
+                  <span className="error-message">
+                    <i className="bi bi-exclamation-circle"></i> {errors.password.message}
+                  </span>
+                )}
+              </div>
+
+              <div className="input-group w-50">
+                <label>Confirme sua Senha</label>
+                <input 
+                  type="password" 
+                  className={errors.confirmarPassword ? "input-error" : ""}
+                  placeholder="Repita a senha digitada"
+                  {...register("confirmarPassword", { 
+                    required: "A confirmação é obrigatória",
+                    validate: (value) => value === senhaAtual || "As senhas não conferem"
+                  })} 
+                />
+                {errors.confirmarPassword && (
+                  <span className="error-message">
+                    <i className="bi bi-exclamation-circle"></i> {errors.confirmarPassword.message}
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -215,7 +266,6 @@ const Cadastro = () => {
                   <option value="">UF</option>
                   <option value="PE">PE</option>
                   <option value="SP">SP</option>
-                  {/* Outros estados... */}
                 </select>
               </div>
             </div>
@@ -242,6 +292,76 @@ const Cadastro = () => {
           <button type="submit" className="btn-submit">Finalizar Cadastro</button>
         </form>
       </div>
+      {mostrarModalSucesso && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          zIndex: 10000
+        }}>
+          <div style={{
+            backgroundColor: "#fff",
+            padding: "32px",
+            borderRadius: "12px",
+            textAlign: "center",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+            maxWidth: "450px",
+            width: "90%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "20px"
+          }}>
+            <div style={{
+              backgroundColor: "#28a745",
+              color: "#fff",
+              borderRadius: "50%",
+              width: "70px",
+              height: "70px",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              fontSize: "36px"
+            }}>
+              <i className="bi bi-check-lg"></i>
+            </div>
+            
+            <h3 style={{ 
+              fontSize: "24px", 
+              fontWeight: "bold", 
+              color: "#212529",
+              margin: 0 
+            }}>
+              Seu cadastro foi criado com sucesso!
+            </h3>
+            <button 
+              onClick={lidarComSucessoLogin}
+              style={{
+                backgroundColor: "#17a2b8",
+                color: "#fff",
+                border: "none",
+                borderRadius: "8px",
+                padding: "12px 24px",
+                fontSize: "16px",
+                fontWeight: "600",
+                width: "100%",
+                cursor: "pointer",
+                transition: "background-color 0.2s",
+              }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = "#138496"}
+              onMouseLeave={(e) => e.target.style.backgroundColor = "#17a2b8"}
+            >
+              Fazer Login
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
