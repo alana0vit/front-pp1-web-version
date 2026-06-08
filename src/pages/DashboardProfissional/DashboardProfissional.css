@@ -1,4 +1,3 @@
-/* Fundo da Página e Container Principal */
 .dash-prof-bg {
   background-color: #f8fafc;
   padding: 40px 20px;
@@ -11,9 +10,6 @@
   margin: 0 auto;
 }
 
-/* =========================================
-   1. CABEÇALHO (HEADER)
-   ========================================= */
 .dash-prof-header {
   display: flex;
   justify-content: space-between;
@@ -53,9 +49,6 @@
   background: #e2e8f0;
 }
 
-/* =========================================
-   2. GRADE DE ESTATÍSTICAS (STATS)
-   ========================================= */
 .stats-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -105,9 +98,6 @@
   letter-spacing: 0.5px;
 }
 
-/* =========================================
-   3. TÍTULO DA LISTA DE DEMANDAS
-   ========================================= */
 .list-header {
   display: flex;
   justify-content: space-between;
@@ -139,15 +129,11 @@
   background: #eff6ff;
 }
 
-/* =========================================
-   4. GRADE DE CARDS DE SERVIÇO
-   ========================================= */
 .requests-grid {
   display: grid;
-  /* Aumentamos de 320px para 340px para dar mais espaço aos botões */
   grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
   gap: 24px;
-  align-items: stretch; /* Faz os cards esticarem juntos na mesma linha */
+  align-items: stretch;
 }
 
 .request-card {
@@ -205,9 +191,6 @@
   margin-top: auto; 
 }
 
-/* =========================================
-   5. RODAPÉ DO CARD (BOTÕES DE AÇÃO)
-   ========================================= */
 .card-footer {
   padding: 16px 24px;
   background: #f8fafc;
@@ -251,9 +234,6 @@
 .btn-action.finish { background: #3b82f6; color: white; }
 .btn-action.finish:hover { background: #2563eb; }
 
-/* =========================================
-   6. MENSAGEM VAZIA (EMPTY STATE)
-   ========================================= */
 .empty-state {
   text-align: center;
   padding: 60px 20px;
@@ -273,7 +253,6 @@
   font-size: 16px;
 }
 
-/* SISTEMA DE ABAS (TABS) */
 .tabs-container {
   display: flex;
   gap: 15px;

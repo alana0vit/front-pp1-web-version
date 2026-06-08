@@ -14,7 +14,6 @@ function DashboardProfissional() {
   const [buscaTexto, setBuscaTexto] = useState('');
   const [statusFiltro, setStatusFiltro] = useState("TODOS");
   
-  // NOVO: Estado para guardar os dados frescos de perfil do profissional (reputação/rating)
   const [dadosPerfil, setDadosPerfil] = useState(null);
 
   const userStorage = localStorage.getItem("@ConectaPro:user");
@@ -38,7 +37,6 @@ function DashboardProfissional() {
 
       setPedidos(meusPedidos);
 
-      // NOVO: Aproveita o refresh e busca os dados de perfil atualizados do próprio profissional para ler a média de estrelas
       const resPerfil = await api.get(`/api/user/${profesionalId}`);
       setDadosPerfil(resPerfil.data);
 
@@ -157,7 +155,6 @@ function DashboardProfissional() {
             <h1>Painel de Controle</h1>
             <p>Olá, <strong>{usuarioLogado?.name}</strong>. Veja como está sua agenda.</p>
             
-            {/* NOVO: INDICADOR VISUAL DE AVALIAÇÃO DO PRESTADOR */}
             {dadosPerfil && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px', background: '#fff', padding: '6px 14px', borderRadius: '50px', width: 'fit-content', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
                 <i className="bi bi-star-fill" style={{ color: '#ffc107' }}></i>
@@ -171,7 +168,7 @@ function DashboardProfissional() {
             )}
           </div>
           <button className="btn-config" onClick={() => navigate("/editar-perfil")}>
-            <i className="bi bi-gear-wide-connected"></i> Ajustes
+            <i className="bi bi-gear-wide-connected"></i> Editar Perfil
           </button>
         </header>
 

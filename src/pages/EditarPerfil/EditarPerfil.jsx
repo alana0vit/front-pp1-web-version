@@ -202,15 +202,12 @@ function EditarPerfil() {
 
             <section className="form-section confirm-section">
               <div className="input-group">
-                <label className="label-confirm">* Digite a sua Senha para confirmar as alterações</label>
+                <label className="label-confirm">Digite a sua Senha para confirmar as alterações</label>
                 <input type="password" placeholder="Sua senha atual" {...register("password", { required: true, minLength: 6 })} />
               </div>
             </section>
 
             <div className="form-actions">
-              <button type="button" className="btn-cancel" onClick={() => navigate(-1)}>
-                Cancelar
-              </button>
               <button type="submit" className="btn-submit">
                 Salvar Alterações
               </button>

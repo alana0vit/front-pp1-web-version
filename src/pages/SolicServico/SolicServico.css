@@ -1,4 +1,3 @@
-/* Container que centraliza o formulário na tela cinza padrão do projeto */
 .solic-container {
   background-color: #f8f9fa;
   min-height: calc(100vh - 80px);
@@ -9,7 +8,6 @@
   font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
 }
 
-/* Card centralizado e flutuante com bordas suaves e sombra leve */
 .solic-card {
   background: #ffffff;
   width: 100%;
@@ -21,7 +19,6 @@
   position: relative;
 }
 
-/* Botão voltar estilizado de forma discreta e elegante */
 .btn-voltar-solic {
   display: inline-flex;
   align-items: center;
@@ -49,7 +46,6 @@
   font-size: 16px;
 }
 
-/* Títulos principais */
 .solic-card h2 {
   font-family: "Georgia", "Times New Roman", serif;
   font-size: 32px;
@@ -58,7 +54,6 @@
   margin-bottom: 8px;
 }
 
-/* Texto de destaque para o profissional selecionado */
 .prof-destaque-solic {
   font-size: 15px;
   color: #555555;
@@ -73,14 +68,12 @@
   color: #0052cc;
 }
 
-/* Estrutura do formulário */
 .solic-form {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-/* Grupos de labels e inputs */
 .solic-form .input-group {
   display: flex;
   flex-direction: column;
@@ -94,7 +87,6 @@
   color: #333333;
 }
 
-/* Inputs, Textareas e Selects padronizados e modernos */
 .solic-form .input-group input,
 .solic-form .input-group textarea,
 .solic-form .input-group select {
@@ -110,13 +102,11 @@
   transition: all 0.2s ease;
 }
 
-/* Textarea redimensionável verticalmente */
 .solic-form .input-group textarea {
   resize: vertical;
   min-height: 120px;
 }
 
-/* Estados de foco alinhados com o azul padrão do ConectaPro */
 .solic-form .input-group input:focus,
 .solic-form .input-group textarea:focus,
 .solic-form .input-group select:focus {
@@ -125,7 +115,6 @@
   background-color: #ffffff;
 }
 
-/* Botão principal de envio azul */
 .btn-enviar-solic {
   background-color: #0066ff;
   color: #ffffff;

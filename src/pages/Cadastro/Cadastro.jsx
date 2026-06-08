@@ -31,7 +31,7 @@ const Cadastro = () => {
     buscarCategorias();
   }, []);
 
-  const onSubmit = async (data) => {
+const onSubmit = async (data) => {
     try {
       const documentoLimpo = data.documento.replace(/\D/g, "");
       const telefoneLimpo = data.phone.replace(/\D/g, "");
@@ -64,14 +64,22 @@ const Cadastro = () => {
 
       await api.post("/api/user", usuarioPayload);
       
+      toast.success("Usuário cadastrado com sucesso! Você será direcionado para o login.");
+
+      // Abre o modal
       setMostrarModalSucesso(true);
+
+      // Redireciona para o login após 3 segundos
+      setTimeout(() => {
+        navigate("/login");
+      }, 3000);
+      
       reset();
     } catch (error) {
       const mensagemErro = error.response?.data?.message || "Erro no cadastro. Verifique os dados.";
       toast.error(mensagemErro);
     }
   };
-
 
   const lidarComSucessoLogin = () => {
     setMostrarModalSucesso(false);
@@ -292,77 +300,7 @@ const Cadastro = () => {
           <button type="submit" className="btn-submit">Finalizar Cadastro</button>
         </form>
       </div>
-      {mostrarModalSucesso && (
-        <div style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "rgba(0, 0, 0, 0.5)",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          zIndex: 10000
-        }}>
-          <div style={{
-            backgroundColor: "#fff",
-            padding: "32px",
-            borderRadius: "12px",
-            textAlign: "center",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-            maxWidth: "450px",
-            width: "90%",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "20px"
-          }}>
-            <div style={{
-              backgroundColor: "#28a745",
-              color: "#fff",
-              borderRadius: "50%",
-              width: "70px",
-              height: "70px",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              fontSize: "36px"
-            }}>
-              <i className="bi bi-check-lg"></i>
-            </div>
-            
-            <h3 style={{ 
-              fontSize: "24px", 
-              fontWeight: "bold", 
-              color: "#212529",
-              margin: 0 
-            }}>
-              Seu cadastro foi criado com sucesso!
-            </h3>
-            <button 
-              onClick={lidarComSucessoLogin}
-              style={{
-                backgroundColor: "#17a2b8",
-                color: "#fff",
-                border: "none",
-                borderRadius: "8px",
-                padding: "12px 24px",
-                fontSize: "16px",
-                fontWeight: "600",
-                width: "100%",
-                cursor: "pointer",
-                transition: "background-color 0.2s",
-              }}
-              onMouseEnter={(e) => e.target.style.backgroundColor = "#138496"}
-              onMouseLeave={(e) => e.target.style.backgroundColor = "#17a2b8"}
-            >
-              Fazer Login
-            </button>
           </div>
-        </div>
-      )}
-    </div>
   );
 };
 

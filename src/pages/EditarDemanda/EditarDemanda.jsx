@@ -19,8 +19,6 @@ function EditarDemanda() {
         setCarregando(true);
         const response = await api.get(`/api/demand/user`);
         const todasDemandas = Array.isArray(response.data) ? response.data : [];
-        
-        // Encontra a demanda específica pelo ID vindo da URL
         const demandaAlvo = todasDemandas.find((d) => Number(d.id) === Number(id));
 
         if (demandaAlvo) {
@@ -57,7 +55,6 @@ function EditarDemanda() {
         description: description.trim()
       };
 
-      // Dispara o PUT exatamente como mapeado no DemandController do seu Backend
       await api.put(`/api/demand/${id}`, payload);
 
       toast.success("Solicitação atualizada com sucesso!");

@@ -2,15 +2,11 @@ import React from "react";
 import "./DetalhesSolicitacao.css";
 
 function DetalhesSolicitacao({ demanda, modo }) {
-  // 'modo' pode ser 'CLIENTE' (vendo dados do prof) ou 'PROFISSIONAL' (vendo dados do cliente)
 
-  // Extração segura das entidades para evitar quebras se vierem nulas do banco
   const exibirPessoa =
     modo === "CLIENTE" ? demanda?.professional : demanda?.client;
   const tituloRelacao =
     modo === "CLIENTE" ? "Profissional Designado" : "Dados do Solicitante";
-
-  // Fallback para a inicial do avatar
   const inicialNome = exibirPessoa?.name
     ? exibirPessoa.name.charAt(0).toUpperCase()
     : "U";
@@ -53,7 +49,6 @@ function DetalhesSolicitacao({ demanda, modo }) {
           </div>
         </div>
 
-        {/* O profissional precisa de ver a morada completa para ir fazer o serviço */}
         {modo === "PROFISSIONAL" && demanda?.address && (
           <div className="endereco-servico">
             <i className="bi bi-geo-alt"></i>

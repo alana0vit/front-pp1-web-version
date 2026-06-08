@@ -13,17 +13,12 @@ function DashboardCliente() {
   const [pedidoDetalhado, setPedidoDetalhado] = useState(null);
   const [buscaTexto, setBuscaTexto] = useState('');
 
-  // Estados para o Modal de Avaliação
   const [pedidoParaAvaliar, setPedidoParaAvaliar] = useState(null);
   const [estrelas, setEstrelas] = useState(5);
   const [comentario, setComentario] = useState('');
   const [anonimo, setAnonimo] = useState(false);
   const [enviandoAvaliacao, setEnviandoAvaliacao] = useState(false);
-  
-  // Estado para sumir com o botão imediatamente após avaliar
   const [demandasAvaliadas, setDemandasAvaliadas] = useState([]);
-
-  // Controle visual exclusivo dos cards para não tocar na lógica de negócio
   const [cardSelecionado, setCardSelecionado] = useState('ANDAMENTO');
 
   const userStorage = localStorage.getItem('@ConectaPro:user');
@@ -118,7 +113,6 @@ function DashboardCliente() {
     }
   };
 
-  // Mantida a sua exata lógica de filtragem por abas originais sem nenhuma alteração
   const pedidosFiltrados = pedidos.filter(p => {
     const status = String(p.demandStatus || '').toUpperCase();
     const matchesTexto = p.title.toLowerCase().includes(buscaTexto.toLowerCase());
@@ -126,8 +120,8 @@ function DashboardCliente() {
     if (!matchesTexto) return false;
 
     if (abaAtiva === 'ATIVAS') {
-      return status === 'ABERTO' || status === '1' || status === 'OPENED' || 
-             status === 'AGURADANDO' || status === '3' || status === 'IN_WAITING';
+  return status === 'ABERTO' || status === '1' || status === 'OPENED' || 
+         status === 'AGURADANDO' || status === 'AGUARDANDO' || status === '3' || status === 'IN_WAITING';
     }
     if (abaAtiva === 'HISTORICO') {
       return status === 'FECHADO' || status === '0' || status === 'CLOSED' || 
@@ -179,7 +173,6 @@ function DashboardCliente() {
           </button>
 
           <div className="status-cards-vertical-stack">
-            {/* CARD 1: EM ANDAMENTO - Texto e estrutura 100% fiéis ao print */}
             <div 
               className={`premium-status-card card-blue-theme ${abaAtiva === 'ATIVAS' && cardSelecionado === 'ANDAMENTO' ? 'active-card' : ''}`} 
               onClick={() => {
@@ -195,7 +188,6 @@ function DashboardCliente() {
               <div className="status-icon-box"><i className="bi bi-play-circle-fill"></i></div>
             </div>
 
-            {/* CARD 2: AGUARDANDO ACEITAÇÃO - Texto e estrutura 100% fiéis ao print */}
             <div 
               className={`premium-status-card card-amber-theme ${abaAtiva === 'ATIVAS' && cardSelecionado === 'AGUARDANDO' ? 'active-card' : ''}`} 
               onClick={() => {
@@ -211,7 +203,6 @@ function DashboardCliente() {
               <div className="status-icon-box"><i className="bi bi-clock-fill"></i></div>
             </div>
 
-            {/* CARD 3: SERVIÇOS FINALIZADOS - Texto e estrutura 100% fiéis ao print */}
             <div 
               className={`premium-status-card card-green-theme ${abaAtiva === 'HISTORICO' ? 'active-card' : ''}`} 
               onClick={() => {
@@ -350,7 +341,6 @@ function DashboardCliente() {
         </main>
       </div>
 
-      {/* ================= MODAL DETALHES DA SOLICITAÇÃO ================= */}
       {pedidoDetalhado && (
         <div className="modal-overlay-blur" onClick={() => setPedidoDetalhado(null)}>
           <div className="modal-sheet-container" onClick={(e) => e.stopPropagation()}>
@@ -427,7 +417,6 @@ function DashboardCliente() {
         </div>
       )}
 
-      {/* ================= MODAL DE FORMULÁRIO DE AVALIAÇÃO ================= */}
       {pedidoParaAvaliar && (
         <div className="modal-overlay-blur" onClick={() => setPedidoParaAvaliar(null)}>
           <div className="modal-sheet-container" style={{ maxWidth: '480px' }} onClick={(e) => e.stopPropagation()}>

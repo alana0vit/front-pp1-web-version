@@ -15,7 +15,7 @@
   gap: 4px;
   background: none;
   border: none;
-  color: #64748b;
+  color: #007bff;
   font-weight: 600;
   cursor: pointer;
   margin-bottom: 20px;
@@ -113,19 +113,10 @@
   margin-top: 20px;
 }
 
-.btn-cancel {
-  padding: 12px 24px;
-  background: #f1f5f9;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s;
-}
 
 .btn-submit {
   padding: 12px 30px;
-  background: #1e293b;
+  background: #007bff;
   color: white;
   border: none;
   border-radius: 8px;

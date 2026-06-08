@@ -12,12 +12,8 @@ function SolicServico() {
   const [loading, setLoading] = useState(false);
   const [enderecos, setEnderecos] = useState([]);
   const [profissional, setProfissional] = useState(null);
-
-  // Captura o ID do profissional de forma flexível vindo da navegação
   const profesionalIdSelecionado =
     location.state?.professionalIdSelecionado || location.state?.profId;
-
-  // Recupera dados do cliente logado no LocalStorage
   const userStorage = localStorage.getItem("@ConectaPro:user");
   const usuarioLogado =
     userStorage && userStorage !== "undefined" ? JSON.parse(userStorage) : null;
@@ -30,7 +26,6 @@ function SolicServico() {
       return;
     }
 
-    // 1. Carrega os endereços cadastrados do Cliente logado
     const carregarEnderecos = async () => {
       try {
         const res = await api.get(`/api/user/${clienteId}/addresses`);
@@ -40,7 +35,6 @@ function SolicServico() {
       }
     };
 
-    // 2. Carrega os dados do Profissional selecionado para capturar a Categoria dele automaticamente
     const carregarDadosProfissional = async () => {
       if (!profesionalIdSelecionado) {
         toast.warn("Nenhum profissional foi selecionado.");
@@ -66,7 +60,6 @@ function SolicServico() {
       return;
     }
 
-    // Captura de forma segura a categoria associada ao profissional
     const categoriaId =
       profissional?.categories?.length > 0
         ? profissional.categories[0].id
@@ -79,8 +72,6 @@ function SolicServico() {
 
     try {
       setLoading(true);
-
-      // MONTAGEM DO PAYLOAD ENXUTO E TOTALMENTE COMPATÍVEL COM O DEMANDREQUEST.JAVA
       const demandPayload = {
         title: data.title.trim(),
         description: data.description.trim(),
@@ -93,8 +84,6 @@ function SolicServico() {
       };
 
       console.log("📤 Enviando payload limpo para o Servidor:", demandPayload);
-
-      // Dispara a requisição HTTP POST para salvar a demanda
       await api.post("/api/demand", demandPayload);
 
       toast.success("Solicitação de serviço enviada com sucesso!");
