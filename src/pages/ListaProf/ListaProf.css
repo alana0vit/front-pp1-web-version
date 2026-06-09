@@ -206,12 +206,12 @@
 
 .filtros-linha {
   display: flex;
-  gap: 10px;
-  margin-top: 10px;
   align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  flex-wrap: wrap; 
 }
 
-/* SELECT */
 .select-categoria {
   padding: 10px 14px;
   border-radius: 20px;
@@ -300,4 +300,11 @@
     opacity: 1;
     transform: translate(-50__, 0);
   }
+}
+.bloco-busca-e-filtros {
+  display: flex;
+  flex-direction: column;
+  gap: 15px; 
+  width: 100%;
+  max-width: 500px;
 }

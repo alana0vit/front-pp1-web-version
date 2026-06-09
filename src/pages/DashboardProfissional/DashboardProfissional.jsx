@@ -197,7 +197,7 @@ function DashboardProfissional() {
                 onChange={(e) => setStatusFiltro(e.target.value)}
                 style={{ padding: '8px 12px', borderRadius: '50px', border: '1px solid #ddd', fontSize: '14px', outline: 'none', background: '#fff', cursor: 'pointer', color: '#333', fontWeight: '600' }}
               >
-                <option value="TODOS">🎯 Todos os Status</option>
+                <option value="TODOS">Todos os Status</option>
                 {abaAtiva === "ATIVAS" ? (
                   <>
                     <option value="NOVO">🔵 Novos</option>

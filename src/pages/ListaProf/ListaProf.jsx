@@ -157,7 +157,7 @@ function ListaProf() {
                 </button>
               </form>
 
-              <div className="filtros-linha" style={{ position: "relative", display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              <div className="filtros-linha">
                 <select
                   className="select-categoria"
                   value={categoriaSelecionada}

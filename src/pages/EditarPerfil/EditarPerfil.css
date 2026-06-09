@@ -113,7 +113,6 @@
   margin-top: 20px;
 }
 
-
 .btn-submit {
   padding: 12px 30px;
   background: #007bff;
@@ -126,3 +125,22 @@
 }
 
 .btn-submit:hover { background: #0f172a; }
+
+/* ========================================= */
+/* RESPONSIVIDADE PARA CELULARES E TABLETS   */
+/* ========================================= */
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr; /* Transforma as colunas em 1 só */
+    gap: 15px;
+  }
+
+  .full-width, 
+  .span-2 {
+    grid-column: span 1; /* Força os itens grandes a caberem na tela pequena */
+  }
+
+  .editar-perfil-card {
+    padding: 20px; /* Reduz as bordas internas para ganhar mais espaço no celular */
+  }
+}
