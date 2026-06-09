@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
-import DetalhesSolicitacao from '../DetalhesSolicitacao/DetalhesSolicitacao'; 
+import DetalhesSolicitacao from '../DetalhesSolicitacao/DetalhesSolicitacao';
 import './DashboardCliente.css';
 
 function DashboardCliente() {
@@ -31,16 +31,16 @@ function DashboardCliente() {
     try {
       setLoading(true);
       const response = await api.get('/api/demand/user');
-      
+
       const dadosSeguros = Array.isArray(response.data) ? response.data : [];
-      
+
       const meusPedidos = dadosSeguros
         .filter(d => {
           const idCli = d.client?.id || d.clientId?.id || d.clientId;
           return Number(idCli) === Number(clienteId);
         })
         .sort((a, b) => (b.id || 0) - (a.id || 0));
-      
+
       setPedidos(meusPedidos);
     } catch (err) {
       console.error("Erro ao carregar demandas:", err);
@@ -57,7 +57,7 @@ function DashboardCliente() {
   const traduzirStatus = (status) => {
     const s = String(status || '').toUpperCase();
     if (s === 'ABERTO' || s === '1' || s === 'OPENED') return 'Aguardando Resposta';
-    if (s === 'AGURADANDO' || s === '3' || s === 'IN_WAITING') return 'Em Andamento';
+    if (s === 'AGUARDANDO' || s === '3' || s === 'IN_WAITING') return 'Em Andamento';
     if (s === 'FECHADO' || s === '0' || s === 'CLOSED') return 'Concluída';
     if (s === 'REJEITADO' || s === '2' || s === 'REJECTED') return 'Recusada';
     return s;
@@ -98,12 +98,12 @@ function DashboardCliente() {
       setDemandasAvaliadas(prev => [...prev, Number(pedidoParaAvaliar.id)]);
 
       toast.success("Avaliação enviada com sucesso! Obrigado pelo seu feedback.");
-      
+
       setPedidoParaAvaliar(null);
       setComentario('');
       setEstrelas(5);
       setAnonimo(false);
-      
+
       buscarMeusPedidos();
     } catch (err) {
       console.error("Erro ao processar avaliação:", err);
@@ -116,23 +116,23 @@ function DashboardCliente() {
   const pedidosFiltrados = pedidos.filter(p => {
     const status = String(p.demandStatus || '').toUpperCase();
     const matchesTexto = p.title.toLowerCase().includes(buscaTexto.toLowerCase());
-    
+
     if (!matchesTexto) return false;
 
     if (abaAtiva === 'ATIVAS') {
-  return status === 'ABERTO' || status === '1' || status === 'OPENED' || 
-         status === 'AGURADANDO' || status === 'AGUARDANDO' || status === '3' || status === 'IN_WAITING';
+      return status === 'ABERTO' || status === '1' || status === 'OPENED' ||
+        status === 'AGUARDANDO' || status === 'AGUARDANDO' || status === '3' || status === 'IN_WAITING';
     }
     if (abaAtiva === 'HISTORICO') {
-      return status === 'FECHADO' || status === '0' || status === 'CLOSED' || 
-             status === 'REJEITADO' || status === '2' || status === 'REJECTED';
+      return status === 'FECHADO' || status === '0' || status === 'CLOSED' ||
+        status === 'REJEITADO' || status === '2' || status === 'REJECTED';
     }
     return true;
   });
 
   const emAndamento = pedidos.filter(p => {
     const s = String(p.demandStatus || '').toUpperCase();
-    return s === 'AGURADANDO' || s === '3' || s === 'IN_WAITING';
+    return s === 'AGUARDANDO' || s === '3' || s === 'IN_WAITING';
   }).length;
 
   const aguardando = pedidos.filter(p => {
@@ -147,7 +147,7 @@ function DashboardCliente() {
 
   return (
     <div className="premium-dashboard-wrapper">
-      
+
       <header className="dashboard-welcome-banner">
         <div className="welcome-left-content">
           <h1>
@@ -166,15 +166,15 @@ function DashboardCliente() {
       </div>
 
       <div className="dashboard-main-grid-layout">
-        
+
         <aside className="sidebar-status-controls">
           <button className="btn-primary-solicitar-new" onClick={() => navigate('/lista-profissionais')}>
             <i className="bi bi-plus-circle-fill"></i> Solicitar Novo Serviço
           </button>
 
           <div className="status-cards-vertical-stack">
-            <div 
-              className={`premium-status-card card-blue-theme ${abaAtiva === 'ATIVAS' && cardSelecionado === 'ANDAMENTO' ? 'active-card' : ''}`} 
+            <div
+              className={`premium-status-card card-blue-theme ${abaAtiva === 'ATIVAS' && cardSelecionado === 'ANDAMENTO' ? 'active-card' : ''}`}
               onClick={() => {
                 setAbaAtiva('ATIVAS');
                 setCardSelecionado('ANDAMENTO');
@@ -188,8 +188,8 @@ function DashboardCliente() {
               <div className="status-icon-box"><i className="bi bi-play-circle-fill"></i></div>
             </div>
 
-            <div 
-              className={`premium-status-card card-amber-theme ${abaAtiva === 'ATIVAS' && cardSelecionado === 'AGUARDANDO' ? 'active-card' : ''}`} 
+            <div
+              className={`premium-status-card card-amber-theme ${abaAtiva === 'ATIVAS' && cardSelecionado === 'AGUARDANDO' ? 'active-card' : ''}`}
               onClick={() => {
                 setAbaAtiva('ATIVAS');
                 setCardSelecionado('AGUARDANDO');
@@ -203,8 +203,8 @@ function DashboardCliente() {
               <div className="status-icon-box"><i className="bi bi-clock-fill"></i></div>
             </div>
 
-            <div 
-              className={`premium-status-card card-green-theme ${abaAtiva === 'HISTORICO' ? 'active-card' : ''}`} 
+            <div
+              className={`premium-status-card card-green-theme ${abaAtiva === 'HISTORICO' ? 'active-card' : ''}`}
               onClick={() => {
                 setAbaAtiva('HISTORICO');
                 setCardSelecionado('FINALIZADOS');
@@ -222,24 +222,24 @@ function DashboardCliente() {
 
         <main className="main-content-orders-area">
           <div className="orders-board-card">
-            
+
             <div className="orders-board-header">
               <h3>Listagem de Pedidos</h3>
-              
+
               <div className="search-and-refresh-container">
                 <div className="search-input-relative-box">
                   <i className="bi bi-search search-inner-icon"></i>
-                  <input 
-                    type="text" 
-                    placeholder="Filtrar por título..." 
+                  <input
+                    type="text"
+                    placeholder="Filtrar por título..."
                     value={buscaTexto}
                     onChange={(e) => setBuscaTexto(e.target.value)}
                     className="premium-search-input"
                   />
                 </div>
-                <button 
-                  className="btn-refresh-dashboard" 
-                  onClick={buscarMeusPedidos} 
+                <button
+                  className="btn-refresh-dashboard"
+                  onClick={buscarMeusPedidos}
                   disabled={loading}
                   title="Atualizar chamados"
                 >
@@ -249,8 +249,8 @@ function DashboardCliente() {
             </div>
 
             <div className="premium-tabs-bar">
-              <button 
-                className={`tab-link-item ${abaAtiva === 'ATIVAS' ? 'is-active' : ''}`} 
+              <button
+                className={`tab-link-item ${abaAtiva === 'ATIVAS' ? 'is-active' : ''}`}
                 onClick={() => {
                   setAbaAtiva('ATIVAS');
                   setCardSelecionado('ANDAMENTO');
@@ -258,8 +258,8 @@ function DashboardCliente() {
               >
                 Chamados Ativos
               </button>
-              <button 
-                className={`tab-link-item ${abaAtiva === 'HISTORICO' ? 'is-active' : ''}`} 
+              <button
+                className={`tab-link-item ${abaAtiva === 'HISTORICO' ? 'is-active' : ''}`}
                 onClick={() => {
                   setAbaAtiva('HISTORICO');
                   setCardSelecionado('FINALIZADOS');
@@ -287,16 +287,16 @@ function DashboardCliente() {
                 {pedidosFiltrados.map(pedido => {
                   const statusAtual = String(pedido.demandStatus || '').toUpperCase();
                   const jaAvaliado = demandasAvaliadas.includes(Number(pedido.id));
-                  
+
                   return (
-                    <div 
-                      key={pedido.id} 
-                      className="premium-order-row-item" 
+                    <div
+                      key={pedido.id}
+                      className="premium-order-row-item"
                       onClick={() => setPedidoDetalhado(pedido)}
                     >
                       <div className="row-item-top-flex">
                         <h4>{pedido.title}</h4>
-                        <span className={`status-pill-badge ${statusAtual === '1' || statusAtual === 'ABERTO' || statusAtual === 'OPENED' ? 'pill-opened' : statusAtual === '3' || statusAtual === 'AGURADANDO' || statusAtual === 'IN_WAITING' ? 'pill-waiting' : statusAtual === '0' || statusAtual === 'FECHADO' || statusAtual === 'CLOSED' ? 'pill-closed' : 'pill-rejected'}`}>
+                        <span className={`status-pill-badge ${statusAtual === '1' || statusAtual === 'ABERTO' || statusAtual === 'OPENED' ? 'pill-opened' : statusAtual === '3' || statusAtual === 'AGUARDANDO' || statusAtual === 'IN_WAITING' ? 'pill-waiting' : statusAtual === '0' || statusAtual === 'FECHADO' || statusAtual === 'CLOSED' ? 'pill-closed' : 'pill-rejected'}`}>
                           {traduzirStatus(pedido.demandStatus)}
                         </span>
                       </div>
@@ -310,7 +310,7 @@ function DashboardCliente() {
                       <p className="row-item-truncated-description">
                         {pedido.description}
                       </p>
-                      
+
                       <div className="row-item-footer-actions" onClick={(e) => e.stopPropagation()}>
                         <span className="btn-trigger-view-more" onClick={() => setPedidoDetalhado(pedido)}>
                           <i className="bi bi-eye"></i> Ver mais detalhes
@@ -322,7 +322,7 @@ function DashboardCliente() {
                               <i className="bi bi-check-circle-fill"></i> Avaliado
                             </span>
                           ) : (
-                            <button 
+                            <button
                               className="btn-action-trigger-rating"
                               onClick={() => setPedidoParaAvaliar(pedido)}
                             >
@@ -350,7 +350,7 @@ function DashboardCliente() {
                 <i className="bi bi-x-lg"></i>
               </button>
             </div>
-            
+
             <div className="modal-sheet-body">
               <div className="meta-field-group">
                 <label>Título do Chamado</label>
@@ -360,7 +360,7 @@ function DashboardCliente() {
               <div className="meta-field-group">
                 <label>Status Atual</label>
                 <div style={{ marginTop: '6px' }}>
-                  <span className={`status-pill-badge ${String(pedidoDetalhado.demandStatus).toUpperCase() === '1' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'ABERTO' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'OPENED' ? 'pill-opened' : String(pedidoDetalhado.demandStatus).toUpperCase() === '3' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'AGURADANDO' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'IN_WAITING' ? 'pill-waiting' : String(pedidoDetalhado.demandStatus).toUpperCase() === '0' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'FECHADO' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'CLOSED' ? 'pill-closed' : 'pill-rejected'}`}>
+                  <span className={`status-pill-badge ${String(pedidoDetalhado.demandStatus).toUpperCase() === '1' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'ABERTO' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'OPENED' ? 'pill-opened' : String(pedidoDetalhado.demandStatus).toUpperCase() === '3' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'AGUARDANDO' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'IN_WAITING' ? 'pill-waiting' : String(pedidoDetalhado.demandStatus).toUpperCase() === '0' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'FECHADO' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'CLOSED' ? 'pill-closed' : 'pill-rejected'}`}>
                     {traduzirStatus(pedidoDetalhado.demandStatus)}
                   </span>
                 </div>
@@ -370,7 +370,7 @@ function DashboardCliente() {
                 <div className="meta-field-group">
                   <label>Profissional Designado</label>
                   <p className="field-text-normal">
-                    <strong>{pedidoDetalhado.professional.name}</strong> 
+                    <strong>{pedidoDetalhado.professional.name}</strong>
                     <span className="phone-sub-span"><i className="bi bi-telephone"></i> {pedidoDetalhado.professional.phone || 'Sem telefone'}</span>
                   </p>
                 </div>
@@ -385,8 +385,8 @@ function DashboardCliente() {
 
               <div className="modal-sheet-footer-actions">
                 {(String(pedidoDetalhado.demandStatus).toUpperCase() === 'OPENED' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'ABERTO' || String(pedidoDetalhado.demandStatus).toUpperCase() === '1') && (
-                  <button 
-                    className="btn-modal-submit-primary" 
+                  <button
+                    className="btn-modal-submit-primary"
                     onClick={() => {
                       setPedidoDetalhado(null);
                       navigate(`/editar-demanda/${pedidoDetalhado.id}`);
@@ -397,8 +397,8 @@ function DashboardCliente() {
                 )}
 
                 {(String(pedidoDetalhado.demandStatus).toUpperCase() === 'REJECTED' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'REJEITADO' || String(pedidoDetalhado.demandStatus).toUpperCase() === '2') && (
-                  <button 
-                    className="btn-modal-submit-success" 
+                  <button
+                    className="btn-modal-submit-success"
                     onClick={() => {
                       setPedidoDetalhado(null);
                       navigate('/lista-profissionais', { state: { reassignDemandId: pedidoDetalhado.id } });
@@ -408,7 +408,7 @@ function DashboardCliente() {
                   </button>
                 )}
 
-                {(String(pedidoDetalhado.demandStatus).toUpperCase() === 'IN_WAITING' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'AGURADANDO' || String(pedidoDetalhado.demandStatus).toUpperCase() === '3') && (
+                {(String(pedidoDetalhado.demandStatus).toUpperCase() === 'IN_WAITING' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'AGUARDANDO' || String(pedidoDetalhado.demandStatus).toUpperCase() === '3') && (
                   <DetalhesSolicitacao demanda={pedidoDetalhado} modo="CLIENTE" />
                 )}
               </div>
@@ -436,7 +436,7 @@ function DashboardCliente() {
                 <label>SUA NOTA</label>
                 <div className="stars-row-layout">
                   {[1, 2, 3, 4, 5].map((num) => (
-                    <i 
+                    <i
                       key={num}
                       className={num <= estrelas ? "bi bi-star-fill active-star" : "bi bi-star regular-star"}
                       onClick={() => setEstrelas(num)}
@@ -461,10 +461,10 @@ function DashboardCliente() {
               </div>
 
               <div className="anonymous-checkbox-row-wrapper">
-                <input 
-                  type="checkbox" 
-                  id="chkAnonimo" 
-                  checked={anonimo} 
+                <input
+                  type="checkbox"
+                  id="chkAnonimo"
+                  checked={anonimo}
                   onChange={(e) => setAnonimo(e.target.checked)}
                 />
                 <label htmlFor="chkAnonimo">
@@ -472,14 +472,14 @@ function DashboardCliente() {
                 </label>
               </div>
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="btn-submit-rating-form"
                 disabled={enviandoAvaliacao}
               >
                 {enviandoAvaliacao ? (
                   <>
-                    <span className="spinner-loader-sml input-loader"></span> 
+                    <span className="spinner-loader-sml input-loader"></span>
                     Registrando Nota...
                   </>
                 ) : "Submeter Avaliação"}
