@@ -31,7 +31,7 @@ const Cadastro = () => {
     buscarCategorias();
   }, []);
 
-const onSubmit = async (data) => {
+  const onSubmit = async (data) => {
     try {
       const documentoLimpo = data.documento.replace(/\D/g, "");
       const telefoneLimpo = data.phone.replace(/\D/g, "");
@@ -51,6 +51,7 @@ const onSubmit = async (data) => {
         phone: telefoneLimpo,
         userType: tipoPerfil,
         registryId: documentoLimpo,
+        companyName: tipoPerfil === "PROFESSIONAL" ? data.companyName?.trim() : null,
         categoriesIds: tipoPerfil === "PROFESSIONAL" && data.categoryId ? [Number(data.categoryId)] : [],
         address: {
           street: data.street,
@@ -62,14 +63,13 @@ const onSubmit = async (data) => {
         }
       };
 
+      console.log("Enviando payload de cadastro:", usuarioPayload);
       await api.post("/api/user", usuarioPayload);
       
       toast.success("Usuário cadastrado com sucesso! Você será direcionado para o login.");
 
-      // Abre o modal
       setMostrarModalSucesso(true);
 
-      // Redireciona para o login após 3 segundos
       setTimeout(() => {
         navigate("/login");
       }, 3000);
@@ -81,12 +81,6 @@ const onSubmit = async (data) => {
     }
   };
 
-  const lidarComSucessoLogin = () => {
-    setMostrarModalSucesso(false);
-    setTipoPerfil(null);
-    navigate("/login");
-  };
-  
   if (!tipoPerfil) {
     return (
       <div className="cadastro-container">
@@ -122,10 +116,24 @@ const onSubmit = async (data) => {
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="form-section">
             <h4>Dados Pessoais</h4>
-            <div className="input-group">
-              <label>Nome Completo</label>
-              <input {...register("name", { required: true })} placeholder="Ex: Marian Lopes" />
-            </div>
+            
+            {tipoPerfil === "PROFESSIONAL" ? (
+              <div className="row">
+                <div className="input-group w-50">
+                  <label>Nome Completo</label>
+                  <input {...register("name", { required: true })} placeholder="Ex: Marian Lopes" />
+                </div>
+                <div className="input-group w-50">
+                  <label>Nome da Empresa (opcional)</label>
+                  <input {...register("companyName")} placeholder="Ex: Conecta Reparos LTDA" />
+                </div>
+              </div>
+            ) : (
+              <div className="input-group">
+                <label>Nome Completo</label>
+                <input {...register("name", { required: true })} placeholder="Ex: Marian Lopes" />
+              </div>
+            )}
 
             <div className="row">
               <div className="input-group w-50">
@@ -231,7 +239,7 @@ const onSubmit = async (data) => {
             <h4>Endereço</h4>
             <div className="row">
               <div className="input-group w-30">
-                <label>CEP</label>
+                <label>CEP *</label>
                 <Controller
                   name="zipCode"
                   control={control}
@@ -259,7 +267,7 @@ const onSubmit = async (data) => {
               </div>
               <div className="input-group w-70">
                 <label>Bairro</label>
-                <input {...register("neighborhood", { required: true })} placeholder="Ex: Boa Viagem" />
+                <input {...register("neighborhood", { required: true })} placeholder="Bairro do local" />
               </div>
             </div>
 
@@ -300,7 +308,7 @@ const onSubmit = async (data) => {
           <button type="submit" className="btn-submit">Finalizar Cadastro</button>
         </form>
       </div>
-          </div>
+    </div>
   );
 };
 

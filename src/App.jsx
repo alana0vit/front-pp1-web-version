@@ -1,8 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
-
-// IMPORTAÇÕES DO TOASTIFY ADICIONADAS AQUI
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -24,7 +22,6 @@ import TermosDeUso from "./pages/TermosDeUso/TermosDeUso";
 import DetalhesSolicitacao from "./pages/DetalhesSolicitacao/DetalhesSolicitacao";
 import EditarDemanda from "./pages/EditarDemanda/EditarDemanda";
 
-// GUARDA 1: Apenas Clientes
 const RotaPrivadaCliente = ({ children }) => {
   const userStorage = localStorage.getItem("@ConectaPro:user");
   const user = userStorage ? JSON.parse(userStorage) : null;
@@ -33,7 +30,6 @@ const RotaPrivadaCliente = ({ children }) => {
   return children;
 };
 
-// GUARDA 2: Apenas Profissionais
 const RotaPrivadaProfissional = ({ children }) => {
   const userStorage = localStorage.getItem("@ConectaPro:user");
   const user = userStorage ? JSON.parse(userStorage) : null;
@@ -42,7 +38,6 @@ const RotaPrivadaProfissional = ({ children }) => {
   return children;
 };
 
-// GUARDA 3: Qualquer Usuário Logado (Usado para o Editar Perfil)
 const RotaPrivadaGeral = ({ children }) => {
   const userStorage = localStorage.getItem("@ConectaPro:user");
   const user = userStorage ? JSON.parse(userStorage) : null;
@@ -66,7 +61,6 @@ function App() {
         <Route path="/esqueceu-senha" element={<EsqueceuSenha />} />
         <Route path="/termos-de-uso" element={<TermosDeUso />} />
 
-        {/* Rotas Privadas - CLIENTE */}
         <Route path="/dashboard-cliente" element={<RotaPrivadaCliente><DashboardCliente /></RotaPrivadaCliente>} />
         <Route path="/lista-profissionais" element={<RotaPrivadaCliente><ListaProf /></RotaPrivadaCliente>} />
         <Route path="/solicitar-servico" element={<RotaPrivadaCliente><SolicServico /></RotaPrivadaCliente>} />
@@ -74,20 +68,16 @@ function App() {
         <Route path="/detalhes-solicitacao" element={<RotaPrivadaCliente><DetalhesSolicitacao /></RotaPrivadaCliente>} />
         <Route path="/editar-demanda/:id" element={<RotaPrivadaCliente><EditarDemanda /></RotaPrivadaCliente>} />
 
-        {/* Rotas Privadas - PROFISSIONAL */}
         <Route path="/dashboard-profissional" element={<RotaPrivadaProfissional><DashboardProfissional /></RotaPrivadaProfissional>} />
         <Route path="/perfil-profissional" element={<RotaPrivadaProfissional><PerfilProfissional /></RotaPrivadaProfissional>} />
 
-        {/* Rotas Privadas - GERAIS (Ambos acessam) */}
         <Route path="/editar-perfil" element={<RotaPrivadaGeral><EditarPerfil /></RotaPrivadaGeral>} />
 
-        {/* Rota de fallback */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
 
       <Footer />
 
-      {/* COMPONENTE TOASTCONTAINER ADICIONADO AQUI */}
       <ToastContainer 
         position="top-right"
         autoClose={4000}
