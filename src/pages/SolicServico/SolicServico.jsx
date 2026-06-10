@@ -1,159 +1,213 @@
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { useNavigate, useLocation } from "react-router-dom";
-import { toast } from "react-toastify";
-import api from "../../services/api";
-import "./SolicServico.css";
+import { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import api from '../../services/api';
+import './SolicServico.css';
 
 function SolicServico() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { register, handleSubmit } = useForm();
-  const [loading, setLoading] = useState(false);
-  const [enderecos, setEnderecos] = useState([]);
-  const [profissional, setProfissional] = useState(null);
-  const profesionalIdSelecionado =
-    location.state?.professionalIdSelecionado || location.state?.profId;
-  const userStorage = localStorage.getItem("@ConectaPro:user");
-  const usuarioLogado =
-    userStorage && userStorage !== "undefined" ? JSON.parse(userStorage) : null;
-  const clienteId = usuarioLogado?.id;
+
+  // ID do profissional vindo da tela anterior
+  const professionalId = location.state?.professionalIdSelecionado;
+
+  // Campos do formulário
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [addressId, setAddressId] = useState('');
+  const [categoryId, setCategoryId] = useState('');       // definido automaticamente
+  const [suggestedValue, setSuggestedValue] = useState('');
+  const [suggestedDate, setSuggestedDate] = useState('');
+  const [imagem, setImagem] = useState(null);
+
+  // Dados auxiliares
+  const [addresses, setAddresses] = useState([]);
+  const [categorias, setCategorias] = useState([]);
+  const [profName, setProfName] = useState('');
+
+  // ID do cliente logado
+  const userStorage = localStorage.getItem('@ConectaPro:user');
+  const usuarioLogado = userStorage ? JSON.parse(userStorage) : null;
+  const clientId = usuarioLogado?.id;
+
+  // Valores para restrição de data
+  const hoje = new Date().toISOString().split('T')[0];                // YYYY-MM-DD
+  const maxDate = new Date();
+  maxDate.setFullYear(maxDate.getFullYear() + 1);
+  const maxDateStr = maxDate.toISOString().split('T')[0];
 
   useEffect(() => {
-    if (!clienteId) {
-      toast.error("Sessão expirada. Por favor, refaça o login.");
-      navigate("/login");
+    const carregarDados = async () => {
+      if (!clientId) return;
+      try {
+        const [addrRes, catRes, profRes] = await Promise.all([
+          api.get(`/api/user/${clientId}/addresses`),
+          api.get('/api/category'),
+          professionalId
+            ? api.get(`/api/user/${professionalId}`)
+            : Promise.resolve({ data: { name: '', categories: [] } }),
+        ]);
+        setAddresses(addrRes.data);
+        if (addrRes.data.length > 0) setAddressId(addrRes.data[0].id);
+        setCategorias(catRes.data);
+        setProfName(profRes.data.name);
+
+        // Categoria automática: primeira categoria do profissional
+        const primeiraCategoria = profRes.data.categories?.[0];
+        if (primeiraCategoria) {
+          setCategoryId(primeiraCategoria.id);
+        } else if (catRes.data.length > 0) {
+          setCategoryId(catRes.data[0].id);   // fallback
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados', error);
+      }
+    };
+    carregarDados();
+  }, [clientId, professionalId]);
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    if (!title || !description || !addressId || !categoryId) {
+      toast.error('Preencha todos os campos obrigatórios.');
       return;
     }
 
-    const carregarEnderecos = async () => {
-      try {
-        const res = await api.get(`/api/user/${clienteId}/addresses`);
-        setEnderecos(Array.isArray(res.data) ? res.data : []);
-      } catch (err) {
-        console.error("Erro ao carregar endereços do cliente:", err);
-      }
-    };
+    // Validação da data sugerida
+    if (suggestedDate) {
+      const dataSelecionada = new Date(suggestedDate + 'T00:00:00');
+      const hojeDate = new Date(hoje + 'T00:00:00');
+      const maxDateObj = new Date(maxDateStr + 'T00:00:00');
 
-    const carregarDadosProfissional = async () => {
-      if (!profesionalIdSelecionado) {
-        toast.warn("Nenhum profissional foi selecionado.");
-        navigate("/lista-profissionais");
+      if (dataSelecionada <= hojeDate) {
+        toast.error('A data sugerida deve ser futura.');
         return;
       }
-      try {
-        const res = await api.get(`/api/user/${profesionalIdSelecionado}`);
-        setProfissional(res.data);
-      } catch (err) {
-        console.error("Erro ao carregar dados do profissional:", err);
-        toast.error("Não foi possível identificar o especialista selecionado.");
+      if (dataSelecionada > maxDateObj) {
+        toast.error('A data sugerida não pode ultrapassar 1 ano a partir de hoje.');
+        return;
       }
-    };
-
-    carregarEnderecos();
-    carregarDadosProfissional();
-  }, [clienteId, profesionalIdSelecionado, navigate]);
-
-  const onSubmit = async (data) => {
-    if (!data.addressId) {
-      toast.warning("Por favor, selecione um endereço cadastrado para o local do serviço.");
-      return;
     }
 
-    const categoriaId =
-      profissional?.categories?.length > 0
-        ? profissional.categories[0].id
-        : null;
-
-    if (!categoriaId) {
-      toast.error("Este profissional não possui uma categoria válida vinculada no banco.");
-      return;
-    }
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('addressId', addressId);
+    formData.append('categoryId', categoryId);
+    formData.append('clientId', clientId);
+    formData.append('professionalId', professionalId);
+    if (suggestedValue) formData.append('suggestedValue', suggestedValue);
+    if (suggestedDate) formData.append('suggestedDate', suggestedDate);
+    if (imagem) formData.append('imagem', imagem);
 
     try {
-      setLoading(true);
-      const demandPayload = {
-        title: data.title.trim(),
-        description: data.description.trim(),
-        addressId: Number(data.addressId),
-        categoryId: Number(categoriaId),
-        clientId: Number(clienteId),
-        professionalId: Number(profesionalIdSelecionado),
-        imgUrl: null // 🌟 REMOVIDO: Campo de imagem anulado por padrão para evitar quebra no backend
-        // 🌟 REMOVIDO: demandStatus omitido. O DemandService.java injetará o valor nativo direto por código!
-      };
-
-      console.log("📤 Enviando payload limpo para o Servidor:", demandPayload);
-      await api.post("/api/demand", demandPayload);
-
-      toast.success("Solicitação de serviço enviada com sucesso!");
-      navigate("/dashboard-cliente"); 
+      await api.post('/api/demand', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      toast.success('Solicitação enviada com sucesso!');
+      navigate('/dashboard-cliente');
     } catch (error) {
-      console.error("Erro completo ao criar demanda:", error);
-      
-      const msgBackend =
-        error.response?.data?.message ||
-        error.response?.data ||
-        "Verifique se preencheu todos os campos obrigatórios corretamente.";
-        
-      toast.error(`Falha no envio: ${msgBackend}`);
-    } finally {
-      setLoading(false);
+      console.error('Erro ao criar demanda:', error);
+      toast.error('Erro ao enviar solicitação.');
     }
   };
+
+  if (!professionalId) {
+    return <p>Nenhum profissional selecionado.</p>;
+  }
 
   return (
     <div className="solic-container">
       <div className="solic-card">
-        <button
-          type="button"
-          className="btn-voltar-solic"
-          onClick={() => navigate(-1)}
-        >
+        <button className="btn-voltar-solic" onClick={() => navigate(-1)}>
           <i className="bi bi-arrow-left"></i> Voltar
         </button>
 
         <h2>Solicitar Serviço</h2>
-        {profissional && (
+        {profName && (
           <p className="prof-destaque-solic">
-            Você está enviando esta solicitação para:{" "}
-            <strong>{profissional.name}</strong>
+            Profissional: <strong>{profName}</strong>
           </p>
         )}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="solic-form">
+        <form onSubmit={onSubmit} className="solic-form">
           <div className="input-group">
             <label>Título do Chamado *</label>
             <input
               type="text"
-              placeholder="Ex: Reparo em infiltração no banheiro"
-              {...register("title", { required: true })}
+              placeholder="Ex: Conserto de torneira"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
             />
           </div>
 
           <div className="input-group">
-            <label>Descrição Detalhada *</label>
+            <label>Descrição *</label>
             <textarea
               rows="5"
-              placeholder="Descreva o que precisa ser feito com o máximo de detalhes possível..."
-              {...register("description", { required: true })}
-            ></textarea>
+              placeholder="Descreva o serviço detalhadamente..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
           </div>
 
           <div className="input-group">
-            <label>Selecione o Local do Serviço *</label>
-            <select {...register("addressId", { required: true })}>
-              <option value="">Selecione um endereço cadastrado...</option>
-              {enderecos.map((end) => (
-                <option key={end.id} value={end.id}>
-                  {end.street}, {end.number} - {end.neighborhood} ({end.city})
+            <label>Endereço *</label>
+            <select value={addressId} onChange={(e) => setAddressId(e.target.value)}>
+              {addresses.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.street}, {a.number} - {a.neighborhood}
                 </option>
               ))}
             </select>
           </div>
 
-          <button type="submit" className="btn-enviar-solic" disabled={loading}>
-            {loading ? "Enviando Chamado..." : "Confirmar e Enviar Solicitação"}
+          {/* Categoria preenchida automaticamente – exibida apenas como informação */}
+          <div className="input-group">
+            <label>Categoria (definida pelo profissional)</label>
+            <select value={categoryId} disabled>
+              {categorias.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="input-group">
+            <label>Valor sugerido (R$)</label>
+            <input
+              type="number"
+              step="0.01"
+              placeholder="Opcional"
+              value={suggestedValue}
+              onChange={(e) => setSuggestedValue(e.target.value)}
+            />
+          </div>
+
+          <div className="input-group">
+            <label>Data sugerida</label>
+            <input
+              type="date"
+              value={suggestedDate}
+              min={hoje}             // não permite datas passadas
+              max={maxDateStr}       // no máximo 1 ano à frente
+              onChange={(e) => setSuggestedDate(e.target.value)}
+            />
+          </div>
+
+          <div className="input-group">
+            <label>Imagem (opcional)</label>
+            <input
+              type="file"
+              id="imagemDemanda"
+              accept="image/*"
+              onChange={(e) => setImagem(e.target.files[0])}
+            />
+          </div>
+
+          <button type="submit" className="btn-enviar-solic">
+            Enviar Solicitação
           </button>
         </form>
       </div>
