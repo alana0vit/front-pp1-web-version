@@ -2,14 +2,16 @@ import React from "react";
 import "./DetalhesSolicitacao.css";
 
 function DetalhesSolicitacao({ demanda, modo }) {
-
+  // Acessar os objetos aninhados corretos
   const exibirPessoa =
-    modo === "CLIENTE" ? demanda?.professional : demanda?.client;
+    modo === "CLIENTE" ? demanda?.professionalId : demanda?.clientId;
   const tituloRelacao =
     modo === "CLIENTE" ? "Profissional Designado" : "Dados do Solicitante";
   const inicialNome = exibirPessoa?.name
     ? exibirPessoa.name.charAt(0).toUpperCase()
     : "U";
+
+  const endereco = demanda?.addressId; // endereço está em addressId
 
   return (
     <div className="card-detalhes-contato">
@@ -25,7 +27,7 @@ function DetalhesSolicitacao({ demanda, modo }) {
             <h4>{exibirPessoa?.name || "Usuário ConectaPro"}</h4>
             <p className="especialidade">
               {modo === "CLIENTE"
-                ? demanda?.category?.name || "Especialista Parceiro"
+                ? demanda?.categoryId?.name || "Especialista Parceiro"
                 : "Cliente Verificado"}
             </p>
           </div>
@@ -49,18 +51,18 @@ function DetalhesSolicitacao({ demanda, modo }) {
           </div>
         </div>
 
-        {modo === "PROFISSIONAL" && demanda?.address && (
+        {modo === "PROFISSIONAL" && endereco && (
           <div className="endereco-servico">
             <i className="bi bi-geo-alt"></i>
             <div>
               <span>Local do Serviço</span>
               <p>
-                {demanda.address.street || "Rua não informada"},{" "}
-                {demanda.address.number || "S/N"}
-                {demanda.address.neighborhood
-                  ? ` - ${demanda.address.neighborhood}`
+                {endereco.street || "Rua não informada"},{" "}
+                {endereco.number || "S/N"}
+                {endereco.neighborhood
+                  ? ` - ${endereco.neighborhood}`
                   : ""}
-                {demanda.address.city ? ` - ${demanda.address.city}` : ""}
+                {endereco.city ? ` - ${endereco.city}` : ""}
               </p>
             </div>
           </div>
