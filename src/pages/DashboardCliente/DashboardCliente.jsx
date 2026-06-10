@@ -13,12 +13,15 @@ function DashboardCliente() {
   const [pedidoDetalhado, setPedidoDetalhado] = useState(null);
   const [buscaTexto, setBuscaTexto] = useState('');
 
+  // Avaliação
   const [pedidoParaAvaliar, setPedidoParaAvaliar] = useState(null);
   const [estrelas, setEstrelas] = useState(5);
   const [comentario, setComentario] = useState('');
   const [anonimo, setAnonimo] = useState(false);
   const [enviandoAvaliacao, setEnviandoAvaliacao] = useState(false);
-  const [demandasAvaliadas, setDemandasAvaliadas] = useState([]);
+
+  const [avaliacoes, setAvaliacoes] = useState({});
+
   const [cardSelecionado, setCardSelecionado] = useState('ANDAMENTO');
 
   const userStorage = localStorage.getItem('@ConectaPro:user');
@@ -50,8 +53,25 @@ function DashboardCliente() {
     }
   };
 
+  const buscarAvaliacoes = async () => {
+    if (!clienteId) return;
+    try {
+      const res = await api.get(`/api/rating/user/${clienteId}/evaluator`);
+      const ratings = Array.isArray(res.data) ? res.data : [];
+      const mapa = {};
+      ratings.forEach(r => {
+        if (r.service && r.service.id && r.points != null) {
+          mapa[r.service.id] = r.points;
+        }
+      });
+      setAvaliacoes(mapa);
+    } catch (err) {
+      console.error("Erro ao carregar avaliações:", err);
+    }
+  };
   useEffect(() => {
     buscarMeusPedidos();
+    buscarAvaliacoes();
   }, [clienteId]);
 
   const traduzirStatus = (status) => {
@@ -67,7 +87,7 @@ function DashboardCliente() {
     e.preventDefault();
     if (!pedidoParaAvaliar) return;
 
-    const professionalId = pedidoParaAvaliar.professional?.id || pedidoParaAvaliar.professionalId?.id || pedidoParaAvaliar.professionalId;
+    const professionalId = pedidoParaAvaliar.professionalId?.id || pedidoParaAvaliar.professionalId;
 
     if (!professionalId) {
       toast.error("Não foi possível identificar o profissional associado a este serviço.");
@@ -95,7 +115,7 @@ function DashboardCliente() {
 
       await api.put(`/api/rating/${ratingIdGerado}`, payloadConcluir);
 
-      setDemandasAvaliadas(prev => [...prev, Number(pedidoParaAvaliar.id)]);
+      setAvaliacoes(prev => ({ ...prev, [pedidoParaAvaliar.id]: Number(estrelas) }));
 
       toast.success("Avaliação enviada com sucesso! Obrigado pelo seu feedback.");
 
@@ -103,8 +123,6 @@ function DashboardCliente() {
       setComentario('');
       setEstrelas(5);
       setAnonimo(false);
-
-      buscarMeusPedidos();
     } catch (err) {
       console.error("Erro ao processar avaliação:", err);
       toast.error("Ocorreu uma falha ao registrar sua avaliação no banco.");
@@ -115,13 +133,13 @@ function DashboardCliente() {
 
   const pedidosFiltrados = pedidos.filter(p => {
     const status = String(p.demandStatus || '').toUpperCase();
-    const matchesTexto = p.title.toLowerCase().includes(buscaTexto.toLowerCase());
+    const matchesTexto = p.title?.toLowerCase().includes(buscaTexto.toLowerCase());
 
     if (!matchesTexto) return false;
 
     if (abaAtiva === 'ATIVAS') {
       return status === 'ABERTO' || status === '1' || status === 'OPENED' ||
-        status === 'AGUARDANDO' || status === 'AGUARDANDO' || status === '3' || status === 'IN_WAITING';
+        status === 'AGUARDANDO' || status === '3' || status === 'IN_WAITING';
     }
     if (abaAtiva === 'HISTORICO') {
       return status === 'FECHADO' || status === '0' || status === 'CLOSED' ||
@@ -239,7 +257,7 @@ function DashboardCliente() {
                 </div>
                 <button
                   className="btn-refresh-dashboard"
-                  onClick={buscarMeusPedidos}
+                  onClick={() => { buscarMeusPedidos(); buscarAvaliacoes(); }}
                   disabled={loading}
                   title="Atualizar chamados"
                 >
@@ -286,7 +304,7 @@ function DashboardCliente() {
               <div className="premium-dynamic-list-container">
                 {pedidosFiltrados.map(pedido => {
                   const statusAtual = String(pedido.demandStatus || '').toUpperCase();
-                  const jaAvaliado = demandasAvaliadas.includes(Number(pedido.id));
+                  const notaAvaliacao = avaliacoes[pedido.id];  // undefined se não avaliado, número se avaliado
 
                   return (
                     <div
@@ -301,9 +319,14 @@ function DashboardCliente() {
                         </span>
                       </div>
 
-                      {pedido.professional?.name && (
+                      {pedido.professionalId?.name && (
                         <p className="row-item-professional-meta">
-                          <i className="bi bi-person-badge"></i> Profissional: <strong>{pedido.professional.name}</strong>
+                          <i className="bi bi-person-badge"></i> Profissional: <strong>{pedido.professionalId.name}</strong>
+                          {pedido.professionalId.phone && (
+                            <span className="phone-sub-span">
+                              <i className="bi bi-telephone"></i> {pedido.professionalId.phone}
+                            </span>
+                          )}
                         </p>
                       )}
 
@@ -316,10 +339,16 @@ function DashboardCliente() {
                           <i className="bi bi-eye"></i> Ver mais detalhes
                         </span>
 
-                        {(statusAtual === '0' || statusAtual === 'FECHADO' || statusAtual === 'CLOSED') && (
-                          jaAvaliado ? (
-                            <span className="badge-evaluated-success">
-                              <i className="bi bi-check-circle-fill"></i> Avaliado
+                        {(statusAtual === 'FECHADO' || statusAtual === 'CLOSED' || statusAtual === '0') && (
+                          notaAvaliacao != null ? (
+                            <span className="avaliacao-exibida">
+                              {[1, 2, 3, 4, 5].map(star => (
+                                <i
+                                  key={star}
+                                  className={`bi ${star <= notaAvaliacao ? 'bi-star-fill' : 'bi-star'} ${star <= notaAvaliacao ? 'active-star' : 'regular-star'}`}
+                                ></i>
+                              ))}
+                              <span className="avaliado-texto">Avaliado</span>
                             </span>
                           ) : (
                             <button
@@ -366,12 +395,14 @@ function DashboardCliente() {
                 </div>
               </div>
 
-              {pedidoDetalhado.professional?.name && (
+              {pedidoDetalhado.professionalId?.name && (
                 <div className="meta-field-group">
                   <label>Profissional Designado</label>
                   <p className="field-text-normal">
-                    <strong>{pedidoDetalhado.professional.name}</strong>
-                    <span className="phone-sub-span"><i className="bi bi-telephone"></i> {pedidoDetalhado.professional.phone || 'Sem telefone'}</span>
+                    <strong>{pedidoDetalhado.professionalId.name}</strong>
+                    <span className="phone-sub-span">
+                      <i className="bi bi-telephone"></i> {pedidoDetalhado.professionalId.phone || 'Sem telefone'}
+                    </span>
                   </p>
                 </div>
               )}
@@ -429,7 +460,7 @@ function DashboardCliente() {
 
             <form onSubmit={enviarAvaliacaoSistema} className="modal-sheet-body form-gap-layout">
               <p className="form-intro-context-text">
-                Conte-nos como foi a sua experiência com o profissional <strong>{pedidoParaAvaliar.professional?.name || 'parceiro'}</strong> no serviço <em>"{pedidoParaAvaliar.title}"</em>.
+                Conte-nos como foi a sua experiência com o profissional <strong>{pedidoParaAvaliar.professionalId?.name || 'parceiro'}</strong> no serviço <em>"{pedidoParaAvaliar.title}"</em>.
               </p>
 
               <div className="rating-selector-score-box">

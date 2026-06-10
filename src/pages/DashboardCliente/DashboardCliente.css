@@ -789,3 +789,26 @@
     justify-content: center;
   }
 }
+
+.avaliacao-exibida {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.avaliacao-exibida .active-star {
+  color: #f59f00;
+  font-size: 0.9rem;
+}
+
+.avaliacao-exibida .regular-star {
+  color: #ced4da;
+  font-size: 0.9rem;
+}
+
+.avaliado-texto {
+  font-weight: 600;
+  color: #2b8a3e;
+  margin-left: 6px;
+  font-size: 0.8rem;
+}
