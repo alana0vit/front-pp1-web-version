@@ -13,7 +13,6 @@ function DashboardCliente() {
   const [pedidoDetalhado, setPedidoDetalhado] = useState(null);
   const [buscaTexto, setBuscaTexto] = useState('');
 
-  // Avaliação
   const [pedidoParaAvaliar, setPedidoParaAvaliar] = useState(null);
   const [estrelas, setEstrelas] = useState(5);
   const [comentario, setComentario] = useState('');

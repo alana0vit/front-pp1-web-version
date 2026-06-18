@@ -2,7 +2,6 @@ import React from "react";
 import "./DetalhesSolicitacao.css";
 
 function DetalhesSolicitacao({ demanda, modo }) {
-  // Acessar os objetos aninhados corretos
   const exibirPessoa =
     modo === "CLIENTE" ? demanda?.professionalId : demanda?.clientId;
   const tituloRelacao =
@@ -11,7 +10,7 @@ function DetalhesSolicitacao({ demanda, modo }) {
     ? exibirPessoa.name.charAt(0).toUpperCase()
     : "U";
 
-  const endereco = demanda?.addressId; // endereço está em addressId
+  const endereco = demanda?.addressId; 
 
   return (
     <div className="card-detalhes-contato">

@@ -4,7 +4,6 @@ import Header from "./components/Header";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-// Páginas
 import Cadastro from "./pages/Cadastro/Cadastro";
 import DashboardCliente from "./pages/DashboardCliente/DashboardCliente";
 import DashboardProfissional from './pages/DashboardProfissional/DashboardProfissional';

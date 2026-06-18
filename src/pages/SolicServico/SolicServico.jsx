@@ -8,30 +8,25 @@ function SolicServico() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // ID do profissional vindo da tela anterior
   const professionalId = location.state?.professionalIdSelecionado;
 
-  // Campos do formulário
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [addressId, setAddressId] = useState('');
-  const [categoryId, setCategoryId] = useState('');       // definido automaticamente
+  const [categoryId, setCategoryId] = useState('');       
   const [suggestedValue, setSuggestedValue] = useState('');
   const [suggestedDate, setSuggestedDate] = useState('');
   const [imagem, setImagem] = useState(null);
 
-  // Dados auxiliares
   const [addresses, setAddresses] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [profName, setProfName] = useState('');
 
-  // ID do cliente logado
   const userStorage = localStorage.getItem('@ConectaPro:user');
   const usuarioLogado = userStorage ? JSON.parse(userStorage) : null;
   const clientId = usuarioLogado?.id;
 
-  // Valores para restrição de data
-  const hoje = new Date().toISOString().split('T')[0];                // YYYY-MM-DD
+  const hoje = new Date().toISOString().split('T')[0];                
   const maxDate = new Date();
   maxDate.setFullYear(maxDate.getFullYear() + 1);
   const maxDateStr = maxDate.toISOString().split('T')[0];
@@ -52,12 +47,11 @@ function SolicServico() {
         setCategorias(catRes.data);
         setProfName(profRes.data.name);
 
-        // Categoria automática: primeira categoria do profissional
         const primeiraCategoria = profRes.data.categories?.[0];
         if (primeiraCategoria) {
           setCategoryId(primeiraCategoria.id);
         } else if (catRes.data.length > 0) {
-          setCategoryId(catRes.data[0].id);   // fallback
+          setCategoryId(catRes.data[0].id);   
         }
       } catch (error) {
         console.error('Erro ao carregar dados', error);
@@ -73,7 +67,6 @@ function SolicServico() {
       return;
     }
 
-    // Validação da data sugerida
     if (suggestedDate) {
       const dataSelecionada = new Date(suggestedDate + 'T00:00:00');
       const hojeDate = new Date(hoje + 'T00:00:00');
@@ -162,7 +155,6 @@ function SolicServico() {
             </select>
           </div>
 
-          {/* Categoria preenchida automaticamente – exibida apenas como informação */}
           <div className="input-group">
             <label>Categoria (definida pelo profissional)</label>
             <select value={categoryId} disabled>
@@ -190,8 +182,8 @@ function SolicServico() {
             <input
               type="date"
               value={suggestedDate}
-              min={hoje}             // não permite datas passadas
-              max={maxDateStr}       // no máximo 1 ano à frente
+              min={hoje}             
+              max={maxDateStr}       
               onChange={(e) => setSuggestedDate(e.target.value)}
             />
           </div>
