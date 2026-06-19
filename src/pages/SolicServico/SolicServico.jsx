@@ -167,7 +167,7 @@ function SolicServico() {
           </div>
 
           <div className="input-group">
-            <label>Valor sugerido (R$)</label>
+            <label>Valor máximo (R$)</label>
             <input
               type="number"
               step="0.01"
