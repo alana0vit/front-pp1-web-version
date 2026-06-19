@@ -125,7 +125,7 @@ function SolicServico() {
 
         <form onSubmit={onSubmit} className="solic-form">
           <div className="input-group">
-            <label>Título do Chamado *</label>
+            <label>Título da demanda*</label>
             <input
               type="text"
               placeholder="Ex: Conserto de torneira"
