@@ -93,10 +93,12 @@ function ListaProf() {
     if (reassignDemandId) {
       try {
         await api.patch(`/api/demand/${reassignDemandId}/reassign`, {
-          professionalId: professionalId
+          professionalId: professionalId,
         });
-        
-        toast.success("Demanda reatribuída com sucesso para o novo profissional!");
+
+        toast.success(
+          "Demanda reatribuída com sucesso para o novo profissional!",
+        );
         navigate("/dashboard-cliente");
       } catch (error) {
         console.error("Erro ao reatribuir demanda:", error);
@@ -110,11 +112,16 @@ function ListaProf() {
   };
 
   const profissionaisFiltrados = profissionais.filter((prof) => {
-    const notaProf = prof.rating !== undefined && prof.rating !== null ? prof.rating : 5.0;
-
-    if (filtroEstrelas === "4PLUS") return notaProf >= 4.0;
-    if (filtroEstrelas === "3PLUS") return notaProf >= 3.0;
-    if (filtroEstrelas === "NEW") return prof.rating === null || prof.rating === undefined;
+    if (filtroEstrelas === "4PLUS")
+      return (
+        prof.rating !== null && prof.rating !== undefined && prof.rating >= 4.0
+      );
+    if (filtroEstrelas === "3PLUS")
+      return (
+        prof.rating !== null && prof.rating !== undefined && prof.rating >= 3.0
+      );
+    if (filtroEstrelas === "NEW")
+      return prof.rating === null || prof.rating === undefined;
 
     return true;
   });
@@ -124,8 +131,19 @@ function ListaProf() {
   return (
     <div className="pagina-lista-profissionais">
       {reassignDemandId && (
-        <div style={{ background: '#d4edda', color: '#155724', padding: '12px', textAlign: 'center', fontWeight: '600', borderBottom: '1px solid #c3e6cb' }}>
-          <i className="bi bi-info-circle-fill"></i> Modo de Reatribuição Ativo: Escolha um novo profissional abaixo para assumir o seu chamado recusado.
+        <div
+          style={{
+            background: "#d4edda",
+            color: "#155724",
+            padding: "12px",
+            textAlign: "center",
+            fontWeight: "600",
+            borderBottom: "1px solid #c3e6cb",
+          }}
+        >
+          <i className="bi bi-info-circle-fill"></i> Modo de Reatribuição Ativo:
+          Escolha um novo profissional abaixo para assumir o seu chamado
+          recusado.
         </div>
       )}
 
@@ -170,12 +188,16 @@ function ListaProf() {
                     </option>
                   ))}
                 </select>
-                
+
                 <select
                   className="select-categoria"
                   value={filtroEstrelas}
                   onChange={(e) => setFiltroEstrelas(e.target.value)}
-                  style={{ border: "1px solid #0066ff", color: "#0066ff", fontWeight: "600" }}
+                  style={{
+                    border: "1px solid #0066ff",
+                    color: "#0066ff",
+                    fontWeight: "600",
+                  }}
                 >
                   <option value="TODOS">⭐ Todas as Notas</option>
                   <option value="4PLUS">⭐ 4.0 estrelas ou mais</option>
@@ -207,7 +229,6 @@ function ListaProf() {
                         coordenadas GPS do seu dispositivo.
                       </p>
                     </div>
-                    
                   )}
                 </div>
               </div>
@@ -235,8 +256,11 @@ function ListaProf() {
           ) : (
             <div className="grade-profissionais">
               {profissionaisFiltrados.map((prof, index) => {
-                const notaExibida = prof.rating !== undefined && prof.rating !== null ? prof.rating.toFixed(1) : "5.0";
-                
+                const notaExibida =
+                  prof.rating !== undefined && prof.rating !== null
+                    ? prof.rating.toFixed(1)
+                    : "5.0";
+
                 return (
                   <div key={prof.id} className="cartao-profissional-moderno">
                     <div
@@ -259,19 +283,36 @@ function ListaProf() {
                       </p>
 
                       <div className="avaliacao-profissional">
-                        <i className="bi bi-star-fill"></i>
-                        <strong>{notaExibida}</strong>
-                        <span className="total-avaliacoes">
-                          ({prof.rating !== null && prof.rating !== undefined ? "Avaliado" : "Novo"})
-                        </span>
+                        <i
+                          className="bi bi-star-fill"
+                          style={{ color: prof.rating ? "#ffc107" : "#ccc" }}
+                        ></i>
+                        {prof.rating !== null && prof.rating !== undefined ? (
+                          <>
+                            <strong>{prof.rating.toFixed(1)}</strong>
+                            <span className="total-avaliacoes">(Avaliado)</span>
+                          </>
+                        ) : (
+                          <span
+                            className="total-avaliacoes"
+                            style={{ fontWeight: "600", color: "#888" }}
+                          >
+                            Sem avaliação
+                          </span>
+                        )}
                       </div>
 
                       <button
                         className="btn-ponto-cartao"
-                        style={{ backgroundColor: reassignDemandId ? '#28a745' : '', borderColor: reassignDemandId ? '#28a745' : '' }}
+                        style={{
+                          backgroundColor: reassignDemandId ? "#28a745" : "",
+                          borderColor: reassignDemandId ? "#28a745" : "",
+                        }}
                         onClick={() => lidarComSelecaoProfissional(prof.id)}
                       >
-                        {reassignDemandId ? 'Reatribuir a Este' : 'Solicitar Serviço'}
+                        {reassignDemandId
+                          ? "Reatribuir a Este"
+                          : "Solicitar Serviço"}
                       </button>
                     </div>
                   </div>
