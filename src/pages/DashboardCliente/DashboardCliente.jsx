@@ -170,7 +170,7 @@ function DashboardCliente() {
           <h1>
             Olá, <span className="user-name-highlight">{usuarioLogado?.name || 'Cliente'}</span>
           </h1>
-          <p>Acompanhe cada etapa com total segurança, integridade e transparência.</p>
+          <p>Acompanhe o status e a execução dos seus serviços em tempo real.</p>
         </div>
         <button className="btn-edit-profile-top" onClick={() => navigate('/editar-perfil')}>
           <i className="bi bi-person-gear"></i>
