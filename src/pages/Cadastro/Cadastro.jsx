@@ -10,6 +10,10 @@ const Cadastro = () => {
   const [tipoPerfil, setTipoPerfil] = useState(null);
   const [categoriasBanco, setCategoriasBanco] = useState([]);
   const [mostrarModalSucesso, setMostrarModalSucesso] = useState(false);
+  const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false);
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const navigate = useNavigate();
 
@@ -32,6 +36,10 @@ const Cadastro = () => {
   }, []);
 
   const onSubmit = async (data) => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+
     try {
       const documentoLimpo = data.documento.replace(/\D/g, "");
       const telefoneLimpo = data.phone.replace(/\D/g, "");
@@ -66,8 +74,6 @@ const Cadastro = () => {
       console.log("Enviando payload de cadastro:", usuarioPayload);
       await api.post("/api/user", usuarioPayload);
       
-      toast.success("Usuário cadastrado com sucesso! Você será direcionado para o login.");
-
       setMostrarModalSucesso(true);
 
       setTimeout(() => {
@@ -76,6 +82,8 @@ const Cadastro = () => {
       
       reset();
     } catch (error) {
+      setIsSubmitting(false);
+
       const mensagemErro = error.response?.data?.message || "Erro no cadastro. Verifique os dados.";
       toast.error(mensagemErro);
     }
@@ -85,7 +93,7 @@ const Cadastro = () => {
     return (
       <div className="cadastro-container">
         <div className="escolha-perfil-card">
-          <h2>Como deseja usar o ConectaPro?</h2>
+          <h2 className="title-serif">Como deseja usar o ConectaPro?</h2>
           <div className="cards-container">
             <button className="perfil-card" onClick={() => setTipoPerfil("CLIENT")}>
               <i className="bi bi-person-badge"></i>
@@ -105,207 +113,250 @@ const Cadastro = () => {
 
   return (
     <div className="cadastro-container">
+      
+      {mostrarModalSucesso && (
+        <div className="modal-overlay">
+          <div className="modal-sucesso">
+            <i className="bi bi-check-circle-fill icon-sucesso"></i>
+            <h2 className="title-serif">Cadastro Realizado!</h2>
+            <p>Usuário cadastrado com sucesso.<br/>Você será direcionado para o login em instantes...</p>
+          </div>
+        </div>
+      )}
+
       <div className="form-card">
         <div className="form-header">
-          <button type="button" className="btn-voltar" onClick={() => setTipoPerfil(null)}>
-            <i className="bi bi-arrow-left"></i> Voltar
-          </button>
-          <h2>{tipoPerfil === "CLIENT" ? "Cadastro de Cliente" : "Cadastro de Profissional"}</h2>
+          <div className="header-titles">
+            <h2 className="title-serif">{tipoPerfil === "CLIENT" ? "Cadastro de Cliente" : "Cadastro de Profissional"}</h2>
+            <p className="subtitle">
+              {tipoPerfil === "CLIENT" 
+                ? "Crie sua conta para encontrar e contratar os melhores profissionais." 
+                : "Junte-se à nossa rede e conecte-se com clientes que precisam do seu talento."}
+            </p>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="form-section">
-            <h4>Dados Pessoais</h4>
+          <div className="form-columns">
             
-            {tipoPerfil === "PROFESSIONAL" ? (
-              <div className="row">
-                <div className="input-group w-50">
-                  <label>Nome Completo</label>
-                  <input {...register("name", { required: true })} placeholder="Ex: Marian Lopes" />
-                </div>
-                <div className="input-group w-50">
-                  <label>Nome da Empresa (opcional)</label>
-                  <input {...register("companyName")} placeholder="Ex: Conecta Reparos LTDA" />
-                </div>
-              </div>
-            ) : (
-              <div className="input-group">
+            <div className="form-left">
+              
+              <div className="input-group w-100">
                 <label>Nome Completo</label>
-                <input {...register("name", { required: true })} placeholder="Ex: Marian Lopes" />
-              </div>
-            )}
-
-            <div className="row">
-              <div className="input-group w-50">
-                <label>{tipoPerfil === "CLIENT" ? "CPF" : "CNPJ"}</label>
-                <Controller
-                  name="documento"
-                  control={control}
-                  rules={{ required: true }}
-                  render={({ field }) => (
-                    <IMaskInput
-                      {...field}
-                      mask={tipoPerfil === "CLIENT" ? "000.000.000-00" : "00.000.000/0000-00"}
-                      onAccept={(value) => field.onChange(value)}
-                      placeholder={tipoPerfil === "CLIENT" ? "000.000.000-00" : "00.000.000/0000-00"}
-                    />
-                  )}
-                />
+                <input {...register("name", { required: true })} placeholder="Digite seu nome completo" />
               </div>
 
               {tipoPerfil === "PROFESSIONAL" && (
+                <div className="input-group w-100">
+                  <label>Nome da Empresa (opcional)</label>
+                  <input {...register("companyName")} placeholder="Ex: Conecta Reparos LTDA" />
+                </div>
+              )}
+
+              <div className="input-group w-100">
+                <label>E-mail</label>
+                <input type="email" className="input-email-bg" {...register("email", { required: true })} placeholder="maria@gmail.com" />
+              </div>
+
+              {tipoPerfil === "PROFESSIONAL" ? (
+                <div className="input-group w-100">
+                  <label>CNPJ</label>
+                  <Controller
+                    name="documento"
+                    control={control}
+                    rules={{ required: true }}
+                    render={({ field }) => (
+                      <IMaskInput {...field} mask="00.000.000/0000-00" onAccept={(value) => field.onChange(value)} placeholder="00.000.000/0000-00" />
+                    )}
+                  />
+                </div>
+              ) : (
+                <div className="row">
+                  <div className="input-group w-50">
+                    <label>CPF</label>
+                    <Controller
+                      name="documento"
+                      control={control}
+                      rules={{ required: true }}
+                      render={({ field }) => (
+                        <IMaskInput {...field} mask="000.000.000-00" onAccept={(value) => field.onChange(value)} placeholder="000.000.000-00" />
+                      )}
+                    />
+                  </div>
+                  <div className="input-group w-50">
+                    <label>Data de Nascimento</label>
+                    <input type="date" className="input-date-placeholder" {...register("birthDate", { required: true })} />
+                  </div>
+                </div>
+              )}
+
+              {tipoPerfil === "PROFESSIONAL" ? (
+                 <div className="row">
+                   <div className="input-group w-50">
+                     <label>Telefone / WhatsApp</label>
+                     <Controller
+                       name="phone"
+                       control={control}
+                       rules={{ required: true }}
+                       render={({ field }) => (
+                         <IMaskInput {...field} mask="(00) 00000-0000" onAccept={(value) => field.onChange(value)} placeholder="(00) 00000-0000" />
+                       )}
+                     />
+                   </div>
+                   <div className="input-group w-50">
+                     <label>Data de Nascimento</label>
+                     <input type="date" className="input-date-placeholder" {...register("birthDate", { required: true })} />
+                   </div>
+                 </div>
+              ) : (
+                <div className="input-group w-100">
+                  <label>Telefone</label>
+                  <Controller
+                    name="phone"
+                    control={control}
+                    rules={{ required: true }}
+                    render={({ field }) => (
+                      <IMaskInput {...field} mask="(00) 00000-0000" onAccept={(value) => field.onChange(value)} placeholder="(00) 00000-0000" />
+                    )}
+                  />
+                </div>
+              )}
+
+              <div className="row">
                 <div className="input-group w-50">
+                  <label>Senha</label>
+                  <div className="password-wrapper">
+                    <input 
+                      type={mostrarSenha ? "text" : "password"} 
+                      className={errors.password ? "input-error" : ""}
+                      {...register("password", { 
+                        required: "A senha é obrigatória", 
+                        minLength: { value: 6, message: "Mínimo 6 dígitos" } 
+                      })} 
+                      placeholder="••••••" 
+                    />
+                    <i 
+                      className={`bi ${mostrarSenha ? "bi-eye-slash" : "bi-eye"} password-icon`}
+                      onClick={() => setMostrarSenha(!mostrarSenha)}
+                    ></i>
+                  </div>
+                  {errors.password && <span className="error-message">{errors.password.message}</span>}
+                </div>
+
+                <div className="input-group w-50">
+                  <label>Confirmar Senha</label>
+                  <div className="password-wrapper">
+                    <input 
+                      type={mostrarConfirmarSenha ? "text" : "password"} 
+                      className={errors.confirmarPassword ? "input-error" : ""}
+                      placeholder="••••••"
+                      {...register("confirmarPassword", { 
+                        required: "A confirmação é obrigatória",
+                        validate: (value) => value === senhaAtual || "As senhas não conferem"
+                      })} 
+                    />
+                    <i 
+                      className={`bi ${mostrarConfirmarSenha ? "bi-eye-slash" : "bi-eye"} password-icon`}
+                      onClick={() => setMostrarConfirmarSenha(!mostrarConfirmarSenha)}
+                    ></i>
+                  </div>
+                  {errors.confirmarPassword && <span className="error-message">{errors.confirmarPassword.message}</span>}
+                </div>
+              </div>
+
+            </div>
+
+            <div className="form-right">
+              
+              {tipoPerfil === "PROFESSIONAL" && (
+                <div className="input-group w-100">
                   <label>Especialidade</label>
                   <select {...register("categoryId", { required: true })}>
-                    <option value="">Selecione...</option>
+                    <option value="">Selecione a sua área...</option>
                     {categoriasBanco.map(cat => (
                       <option key={cat.id} value={cat.id}>{cat.name}</option>
                     ))}
                   </select>
                 </div>
               )}
-            </div>
 
-            <div className="row">
-              <div className="input-group w-50">
-                <label>E-mail</label>
-                <input type="email" {...register("email", { required: true })} placeholder="email@exemplo.com" />
-              </div>
-              <div className="input-group w-50">
-                <label>Telefone</label>
-                <Controller
-                  name="phone"
-                  control={control}
-                  rules={{ required: true }}
-                  render={({ field }) => (
-                    <IMaskInput
-                      {...field}
-                      mask="(00) 00000-0000"
-                      onAccept={(value) => field.onChange(value)}
-                      placeholder="(00) 00000-0000"
-                    />
-                  )}
-                />
-              </div>
-            </div>
-
-            <div className="row">
-              <div className="input-group w-50">
-                <label>Data de Nascimento</label>
-                <input type="date" {...register("birthDate", { required: true })} />
-              </div>
-            </div>
-
-            <div className="row">
-              <div className="input-group w-50">
-                <label>Senha</label>
-                <input 
-                  type="password" 
-                  className={errors.password ? "input-error" : ""}
-                  {...register("password", { 
-                    required: "A senha é obrigatória", 
-                    minLength: { value: 6, message: "Mínimo 6 dígitos" } 
-                  })} 
-                  placeholder="Mínimo 6 dígitos" 
-                />
-                {errors.password && (
-                  <span className="error-message">
-                    <i className="bi bi-exclamation-circle"></i> {errors.password.message}
-                  </span>
-                )}
-              </div>
-
-              <div className="input-group w-50">
-                <label>Confirme sua Senha</label>
-                <input 
-                  type="password" 
-                  className={errors.confirmarPassword ? "input-error" : ""}
-                  placeholder="Repita a senha digitada"
-                  {...register("confirmarPassword", { 
-                    required: "A confirmação é obrigatória",
-                    validate: (value) => value === senhaAtual || "As senhas não conferem"
-                  })} 
-                />
-                {errors.confirmarPassword && (
-                  <span className="error-message">
-                    <i className="bi bi-exclamation-circle"></i> {errors.confirmarPassword.message}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="form-section">
-            <h4>Endereço</h4>
-            <div className="row">
-              <div className="input-group w-30">
-                <label>CEP *</label>
+              <div className="input-group w-100">
+                <label>CEP</label>
                 <Controller
                   name="zipCode"
                   control={control}
                   rules={{ required: true }}
                   render={({ field }) => (
-                    <IMaskInput
-                      {...field}
-                      mask="00000-000"
-                      onAccept={(value) => field.onChange(value)}
-                      placeholder="00000-000"
-                    />
+                    <IMaskInput {...field} mask="00000-000" onAccept={(value) => field.onChange(value)} placeholder="00000-000" />
                   )}
                 />
               </div>
-              <div className="input-group w-70">
-                <label>Rua</label>
-                <input {...register("street", { required: true })} placeholder="Nome da rua ou avenida" />
-              </div>
-            </div>
 
-            <div className="row">
-              <div className="input-group w-30">
-                <label>Número</label>
-                <input {...register("number")} placeholder="123" />
+              <div className="row">
+                <div className="input-group w-70">
+                  <label>Rua</label>
+                  <input {...register("street", { required: true })} placeholder="Ex: Rua Jardim Veneza" />
+                </div>
+                <div className="input-group w-30">
+                  <label>Número</label>
+                  <input {...register("number")} placeholder="123" />
+                </div>
               </div>
-              <div className="input-group w-70">
+
+              <div className="input-group w-100">
                 <label>Bairro</label>
-                <input {...register("neighborhood", { required: true })} placeholder="Bairro do local" />
+                <input {...register("neighborhood", { required: true })} placeholder="Ex: Boa Viagem" />
               </div>
-            </div>
 
-            <div className="row">
-              <div className="input-group w-70">
-                <label>Cidade</label>
-                <input {...register("city", { required: true })} />
+              <div className="row">
+                <div className="input-group w-70">
+                  <label>Cidade</label>
+                  <input {...register("city", { required: true })} placeholder="Ex: Recife" />
+                </div>
+                <div className="input-group w-30">
+                  <label>Estado (UF)</label>
+                  <select {...register("state", { required: true })}>
+                    <option value="">UF</option>
+                    <option value="PE">PE</option>
+                    <option value="SP">SP</option>
+                  </select>
+                </div>
               </div>
-              <div className="input-group w-30">
-                <label>Estado (UF)</label>
-                <select {...register("state", { required: true })}>
-                  <option value="">UF</option>
-                  <option value="PE">PE</option>
-                  <option value="SP">SP</option>
-                </select>
+
+              <div className="terms-container">
+                <div className="checkbox-group">
+                  <input 
+                    type="checkbox" 
+                    id="termos" 
+                    {...register("aceitouTermos", { required: "Você precisa aceitar os termos de uso" })} 
+                  />
+                  <label htmlFor="termos">
+                    Eu li e aceito os <Link to="/termos-de-uso" target="_blank">Termos de Uso</Link>
+                  </label>
+                </div>
+                {errors.aceitouTermos && (
+                  <span className="error-message">
+                    <i className="bi bi-exclamation-circle"></i> {errors.aceitouTermos.message}
+                  </span>
+                )}
               </div>
+
             </div>
           </div>
 
-          <div className="terms-container">
-            <div className="checkbox-group">
-              <input 
-                type="checkbox" 
-                id="termos" 
-                {...register("aceitouTermos", { required: "Você precisa aceitar os termos de uso" })} 
-              />
-              <label htmlFor="termos">
-                Eu li e aceito os <Link to="/termos-de-uso" target="_blank">Termos de Uso</Link>
-              </label>
-            </div>
-            {errors.aceitouTermos && (
-              <span className="error-message">
-                <i className="bi bi-exclamation-circle"></i> {errors.aceitouTermos.message}
-              </span>
+          <button 
+            type="submit" 
+            className="btn-submit-centered" 
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <i className="bi bi-arrow-repeat spinner-icon"></i> Cadastrando...
+              </>
+            ) : (
+              "Finalizar Cadastro"
             )}
-          </div>
-
-          <button type="submit" className="btn-submit">Finalizar Cadastro</button>
+          </button>
         </form>
       </div>
     </div>
