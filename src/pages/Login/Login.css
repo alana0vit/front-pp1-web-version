@@ -126,3 +126,19 @@
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* Blinda o checkbox contra estilos globais e fixa o tamanho dele */
+.remember-me input[type="checkbox"] {
+    width: 16px !important;
+    height: 16px !important;
+    margin: 0; /* Remove margens indesejadas */
+    cursor: pointer;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #495057;
+    cursor: pointer;
+}

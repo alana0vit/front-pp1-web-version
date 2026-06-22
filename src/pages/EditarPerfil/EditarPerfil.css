@@ -66,13 +66,6 @@
   flex-direction: column;
 }
 
-.section-title {
-  color: #1a365d;
-  font-size: 17px;
-  margin-top: 0;
-  margin-bottom: 20px;
-}
-
 .form-vertical-stack {
   flex: 1;
   display: flex;
@@ -124,18 +117,9 @@
   width: 100%;
 }
 
-.input-wrapper i.bi {
-  position: absolute;
-  left: 14px;
-  color: #64748b;
-  font-size: 16px;
-  pointer-events: none;
-  z-index: 10;
-}
-
 .input-wrapper input, 
 .input-wrapper select {
-  padding: 10px 14px 10px 40px !important;
+  padding: 10px 14px !important;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   font-size: 15px;

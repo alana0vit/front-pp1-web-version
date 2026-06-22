@@ -135,13 +135,10 @@ function EditarPerfil() {
               
               <div className="form-layout-column">
                 <section className="form-section">
-                  <h4 className="section-title">Dados Pessoais</h4>
-                  
                   <div className="form-vertical-stack">
                     <div className="input-group">
                       <label>Nome Completo</label>
                       <div className="input-wrapper">
-                        <i className="bi bi-person"></i>
                         <input type="text" {...register("name", { required: true })} />
                       </div>
                     </div>
@@ -149,7 +146,6 @@ function EditarPerfil() {
                     <div className="input-group">
                       <label>E-mail</label>
                       <div className="input-wrapper">
-                        <i className="bi bi-envelope"></i>
                         <input type="email" {...register("email", { required: true })} />
                       </div>
                     </div>
@@ -157,7 +153,6 @@ function EditarPerfil() {
                     <div className="input-group">
                       <label>Telefone / WhatsApp</label>
                       <div className="input-wrapper">
-                        <i className="bi bi-telephone"></i>
                         <input type="text" {...register("phone", { required: true })} />
                       </div>
                     </div>
@@ -165,7 +160,6 @@ function EditarPerfil() {
                     <div className="input-group">
                       <label>Data de Nascimento</label>
                       <div className="input-wrapper">
-                        <i className="bi bi-calendar-event"></i>
                         <input type="date" {...register("birthDate", { required: true })} />
                       </div>
                     </div>
@@ -174,7 +168,6 @@ function EditarPerfil() {
                       <div className="input-group">
                         <label>Especialidade</label>
                         <div className="input-wrapper">
-                          <i className="bi bi-briefcase"></i>
                           <select {...register("categoryId", { required: true })}>
                             <option value="">Selecione...</option>
                             {categoriasBanco.map(cat => (
@@ -192,14 +185,11 @@ function EditarPerfil() {
 
               <div className="form-layout-column">
                 <section className="form-section">
-                  <h4 className="section-title">Endereço</h4>
-                  
                   <div className="form-vertical-stack">
                     
                     <div className="input-group">
                       <label>CEP</label>
                       <div className="input-wrapper">
-                        <i className="bi bi-geo-alt"></i>
                         <input type="text" {...register("zipCode", { required: true })} />
                       </div>
                     </div>
@@ -208,14 +198,12 @@ function EditarPerfil() {
                       <div className="input-group text-grow">
                         <label>Rua</label>
                         <div className="input-wrapper">
-                          <i className="bi bi-signpost-split"></i>
                           <input type="text" {...register("street", { required: true })} />
                         </div>
                       </div>
                       <div className="input-group text-short">
                         <label>Número</label>
                         <div className="input-wrapper">
-                          <i className="bi bi-hash"></i>
                           <input type="text" {...register("number")} />
                         </div>
                       </div>
@@ -224,7 +212,6 @@ function EditarPerfil() {
                     <div className="input-group">
                       <label>Bairro</label>
                       <div className="input-wrapper">
-                        <i className="bi bi-houses"></i>
                         <input type="text" {...register("neighborhood", { required: true })} />
                       </div>
                     </div>
@@ -233,14 +220,12 @@ function EditarPerfil() {
                       <div className="input-group text-grow">
                         <label>Cidade</label>
                         <div className="input-wrapper">
-                          <i className="bi bi-buildings"></i>
                           <input type="text" {...register("city", { required: true })} />
                         </div>
                       </div>
                       <div className="input-group text-short">
                         <label>Estado (UF)</label>
                         <div className="input-wrapper">
-                          <i className="bi bi-map"></i>
                           <input type="text" {...register("state", { required: true, maxLength: 2 })} />
                         </div>
                       </div>
@@ -249,7 +234,6 @@ function EditarPerfil() {
                     <div className="input-group">
                       <label className="label-confirm-danger">Confirme sua senha para salvar</label>
                       <div className="input-wrapper">
-                        <i className="bi bi-lock"></i>
                         <input 
                           type={mostrarSenha ? "text" : "password"}
                           className="password-input-field"
