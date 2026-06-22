@@ -98,7 +98,7 @@
 
 .botao-contato {
   width: 100%;
-  background-color: #000;
+  background-color: #007bff;
   color: #fff;
   padding: 16px;
   border-radius: 50px;
@@ -110,7 +110,7 @@
 }
 
 .botao-contato:hover {
-  background-color: #6390f0;
+  background-color: #0056b3;
   transform: translateY(-2px);
 }
 
