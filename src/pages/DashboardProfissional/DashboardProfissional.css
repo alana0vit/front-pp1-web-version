@@ -308,3 +308,64 @@
   transition: 0.2s;
 }
 .btn-editar-demanda:hover { background-color: #e2e8f0; }
+
+/* --- ESTILOS ESPECÍFICOS DO MODAL DE CONFIRMAÇÃO --- */
+.modal-container .btn-config,
+.modal-container .btn-action {
+  padding: 12px 20px; /* Define a mesma altura e preenchimento para ambos */
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  height: 45px; /* Força os dois a terem a mesma altura */
+  box-sizing: border-box; /* Garante que bordas e paddings não quebrem o tamanho */
+}
+
+/* Opcional: Para o botão cancelar não ficar com borda diferente do design principal */
+.modal-container .btn-config {
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+.modal-container .btn-config:hover {
+  background-color: #e2e8f0;
+}
+/* --- ESTILOS ESPECÍFICOS DO MODAL DE CONFIRMAÇÃO --- */
+
+/* Cria uma linha perfeita dividida ao meio para os botões */
+.modal-actions-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Divide exatamente 50% para cada */
+  gap: 12px;
+  width: 100%;
+}
+
+/* Força os dois botões a preencherem seu lado e terem a mesma altura */
+.modal-container .btn-config,
+.modal-container .btn-action {
+  width: 100%;
+  padding: 0; /* Remove padding que pode atrapalhar o grid */
+  height: 45px;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  box-sizing: border-box;
+  margin: 0; /* Remove margens extras */
+}
+
+/* Estilo do botão Cancelar */
+.modal-container .btn-config {
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+.modal-container .btn-config:hover {
+  background-color: #e2e8f0;
+}

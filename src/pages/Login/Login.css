@@ -127,11 +127,10 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Blinda o checkbox contra estilos globais e fixa o tamanho dele */
 .remember-me input[type="checkbox"] {
     width: 16px !important;
     height: 16px !important;
-    margin: 0; /* Remove margens indesejadas */
+    margin: 0;
     cursor: pointer;
 }
 

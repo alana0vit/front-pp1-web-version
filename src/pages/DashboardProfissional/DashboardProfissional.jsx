@@ -16,6 +16,12 @@ function DashboardProfissional() {
 
   const [dadosPerfil, setDadosPerfil] = useState(null);
 
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    pedidoId: null,
+    action: null,
+  });
+
   const userStorage = localStorage.getItem("@ConectaPro:user");
   const usuarioLogado =
     userStorage && userStorage !== "undefined" ? JSON.parse(userStorage) : null;
@@ -66,7 +72,7 @@ function DashboardProfissional() {
         novoStatus === "3"
       )
         toast.success(
-          "Serviço aceito! Buscando dados de contato do cliente...",
+          "Serviço aceito! Buscando dados de contato do cliente..."
         );
       else if (
         novoStatus === "CLOSED" ||
@@ -111,7 +117,7 @@ function DashboardProfissional() {
             } catch (errCli) {
               console.error(
                 "Erro ao buscar dados complementares do cliente:",
-                errCli,
+                errCli
               );
             }
           }
@@ -125,6 +131,13 @@ function DashboardProfissional() {
       console.error("Erro detalhado:", error);
       toast.error("Falha ao atualizar o status do pedido.");
     }
+  };
+
+  const handleConfirmarAcao = () => {
+    if (confirmModal.pedidoId && confirmModal.action) {
+      atualizarStatus(confirmModal.pedidoId, confirmModal.action);
+    }
+    setConfirmModal({ isOpen: false, pedidoId: null, action: null });
   };
 
   const traduzirStatus = (status) => {
@@ -466,13 +479,25 @@ function DashboardProfissional() {
                         <>
                           <button
                             className="btn-action accept"
-                            onClick={() => atualizarStatus(p.id, "AGUARDANDO")}
+                            onClick={() =>
+                              setConfirmModal({
+                                isOpen: true,
+                                pedidoId: p.id,
+                                action: "AGUARDANDO",
+                              })
+                            }
                           >
                             Aceitar
                           </button>
                           <button
                             className="btn-action decline"
-                            onClick={() => atualizarStatus(p.id, "REJEITADO")}
+                            onClick={() =>
+                              setConfirmModal({
+                                isOpen: true,
+                                pedidoId: p.id,
+                                action: "REJEITADO",
+                              })
+                            }
                           >
                             Recusar
                           </button>
@@ -646,7 +671,11 @@ function DashboardProfissional() {
                       className="btn-action accept"
                       style={{ flex: 1, padding: "12px" }}
                       onClick={() =>
-                        atualizarStatus(pedidoDetalhado.id, "AGUARDANDO")
+                        setConfirmModal({
+                          isOpen: true,
+                          pedidoId: pedidoDetalhado.id,
+                          action: "AGUARDANDO",
+                        })
                       }
                     >
                       Aceitar Serviço
@@ -655,7 +684,11 @@ function DashboardProfissional() {
                       className="btn-action decline"
                       style={{ flex: 1, padding: "12px" }}
                       onClick={() =>
-                        atualizarStatus(pedidoDetalhado.id, "REJEITADO")
+                        setConfirmModal({
+                          isOpen: true,
+                          pedidoId: pedidoDetalhado.id,
+                          action: "REJEITADO",
+                        })
                       }
                     >
                       Recusar
@@ -691,6 +724,66 @@ function DashboardProfissional() {
           </div>
         </div>
       )}
+
+      {confirmModal.isOpen && (
+        <div
+          className="modal-overlay"
+          onClick={() =>
+            setConfirmModal({ isOpen: false, pedidoId: null, action: null })
+          }
+          style={{ zIndex: 9999 }}
+        >
+          <div
+            className="modal-container"
+            style={{ maxWidth: "400px", padding: "30px", textAlign: "center" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ marginBottom: "20px" }}>
+              {confirmModal.action === "AGUARDANDO" ? (
+                <i
+                  className="bi bi-check-circle"
+                  style={{ fontSize: "40px", color: "#10b981" }}
+                ></i>
+              ) : (
+                <i
+                  className="bi bi-exclamation-triangle"
+                  style={{ fontSize: "40px", color: "#ef4444" }}
+                ></i>
+              )}
+            </div>
+
+            <h3 className="modal-title" style={{ margin: "0 0 10px 0", color: "#0f172a", fontSize: "20px" }}>
+              Tem certeza que deseja {confirmModal.action === "AGUARDANDO" ? "aceitar" : "recusar"} este serviço?
+            </h3>
+            
+            <p style={{ color: "#64748b", fontSize: "14px", lineHeight: "1.5", marginBottom: "25px" }}>
+              {confirmModal.action === "AGUARDANDO"
+                ? "Ao aceitar, você se compromete com este serviço e terá acesso aos dados de contato do cliente."
+                : "Se você recusar, a demanda será removida da sua lista e não será possível acessá-la novamente."}
+            </p>
+
+            <div className="modal-actions-row">
+              <button
+                className="btn-config"
+                onClick={() =>
+                  setConfirmModal({ isOpen: false, pedidoId: null, action: null })
+                }
+                style={{ flex: 1 }}
+              >
+                Cancelar
+              </button>
+              <button
+                className={`btn-action ${confirmModal.action === "AGUARDANDO" ? "accept" : "decline"}`}
+                onClick={handleConfirmarAcao}
+                style={{ flex: 1 }}
+              >
+                Sim, {confirmModal.action === "AGUARDANDO" ? "Aceitar" : "Recusar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
