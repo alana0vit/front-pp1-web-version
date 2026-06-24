@@ -11,15 +11,15 @@ function DashboardProfissional() {
   const [loading, setLoading] = useState(true);
   const [abaAtiva, setAbaAtiva] = useState("ATIVAS");
   const [pedidoDetalhado, setPedidoDetalhado] = useState(null);
-  const [buscaTexto, setBuscaTexto] = useState("");
+  const [buscaTexto, setBuscaTexto] = useState('');
   const [statusFiltro, setStatusFiltro] = useState("TODOS");
-
   const [dadosPerfil, setDadosPerfil] = useState(null);
 
-  const [confirmModal, setConfirmModal] = useState({
-    isOpen: false,
+  const [confirmacao, setConfirmacao] = useState({
+    visivel: false,
     pedidoId: null,
-    action: null,
+    novoStatus: null,
+    tituloAcao: ""
   });
 
   const userStorage = localStorage.getItem("@ConectaPro:user");
@@ -36,8 +36,7 @@ function DashboardProfissional() {
 
       const meusPedidos = response.data
         .filter((d) => {
-          const idProf =
-            d.professional?.id || d.professionalId?.id || d.professionalId;
+          const idProf = d.professional?.id || d.professionalId?.id || d.professionalId;
           return Number(idProf) === Number(profesionalId);
         })
         .sort((a, b) => b.id - a.id);
@@ -61,165 +60,90 @@ function DashboardProfissional() {
     buscarPedidos();
   }, [profesionalId]);
 
-  const atualizarStatus = async (pedidoId, novoStatus) => {
+  const processarAtualizacaoStatus = async (pedidoId, novoStatus) => {
     try {
       const payload = { status: novoStatus };
       await api.patch(`/api/demand/${pedidoId}/status`, payload);
 
-      if (
-        novoStatus === "IN_WAITING" ||
-        novoStatus === "AGUARDANDO" ||
-        novoStatus === "3"
-      )
-        toast.success(
-          "Serviço aceito! Buscando dados de contato do cliente..."
-        );
-      else if (
-        novoStatus === "CLOSED" ||
-        novoStatus === "FECHADO" ||
-        novoStatus === "0"
-      )
+      if (novoStatus === "AGURADANDO" || novoStatus === "3")
+        toast.success("Serviço aceito! Dados de contato liberados.");
+      else if (novoStatus === "CLOSED" || novoStatus === "0") 
         toast.info("Serviço finalizado.");
-      else if (
-        novoStatus === "REJECTED" ||
-        novoStatus === "REJEITADO" ||
-        novoStatus === "2"
-      )
+      else if (novoStatus === "REJEITADO" || novoStatus === "2")
         toast.warn("Serviço recusado.");
 
       const listaAtualizada = await buscarPedidos();
-
+      
       if (pedidoDetalhado && listaAtualizada) {
-        const pedidoFresquinho = listaAtualizada.find((p) => p.id === pedidoId);
-
+        const pedidoFresquinho = listaAtualizada.find(p => p.id === pedidoId);
         if (pedidoFresquinho) {
-          const idDoCliente =
-            pedidoFresquinho.client?.id ||
-            pedidoFresquinho.clientId?.id ||
-            pedidoFresquinho.clientId;
-
-          if (
-            idDoCliente &&
-            (!pedidoFresquinho.client?.phone ||
-              !pedidoFresquinho.client?.name ||
-              pedidoFresquinho.client?.name === "Cliente")
-          ) {
-            try {
-              const resCliente = await api.get(`/api/user/${idDoCliente}`);
-
-              pedidoFresquinho.client = {
-                ...pedidoFresquinho.client,
-                id: resCliente.data.id,
-                name: resCliente.data.name,
-                phone: resCliente.data.phone,
-                email: resCliente.data.email,
-              };
-            } catch (errCli) {
-              console.error(
-                "Erro ao buscar dados complementares do cliente:",
-                errCli
-              );
-            }
-          }
-
           setPedidoDetalhado({ ...pedidoFresquinho });
         } else {
           setPedidoDetalhado(null);
         }
       }
     } catch (error) {
-      console.error("Erro detalhado:", error);
+      console.error("Erro ao atualizar o status:", error);
       toast.error("Falha ao atualizar o status do pedido.");
     }
   };
 
-  const handleConfirmarAcao = () => {
-    if (confirmModal.pedidoId && confirmModal.action) {
-      atualizarStatus(confirmModal.pedidoId, confirmModal.action);
-    }
-    setConfirmModal({ isOpen: false, pedidoId: null, action: null });
+  const solicitarConfirmacao = (e, pedidoId, novoStatus, acaoTexto) => {
+    e.stopPropagation(); 
+    setConfirmacao({
+      visivel: true,
+      pedidoId,
+      novoStatus,
+      tituloAcao: acaoTexto
+    });
+  };
+
+  const executarAcaoConfirmada = () => {
+    processarAtualizacaoStatus(confirmacao.pedidoId, confirmacao.novoStatus);
+    setConfirmacao({ visivel: false, pedidoId: null, novoStatus: null, tituloAcao: "" });
   };
 
   const traduzirStatus = (status) => {
-    const s = String(status || "").toUpperCase();
+    const s = String(status || '').toUpperCase();
     if (s === "OPENED" || s === "ABERTO" || s === "1") return "Novo";
-    if (s === "IN_WAITING" || s === "AGUARDANDO" || s === "3")
-      return "Em Andamento";
+    if (s === "IN_WAITING" || s === "AGURADANDO" || s === "3") return "Em Andamento";
     if (s === "CLOSED" || s === "FECHADO" || s === "0") return "Finalizado";
     if (s === "REJECTED" || s === "REJEITADO" || s === "2") return "Recusado";
     return status;
   };
 
   const pedidosFiltrados = pedidos.filter((p) => {
-    const s = String(p.demandStatus || "").toUpperCase();
-    const matchesTexto = p.title
-      .toLowerCase()
-      .includes(buscaTexto.toLowerCase());
+    const s = String(p.demandStatus || '').toUpperCase();
+    const matchesTexto = p.title.toLowerCase().includes(buscaTexto.toLowerCase());
 
     if (!matchesTexto) return false;
 
     if (statusFiltro !== "TODOS") {
-      if (
-        statusFiltro === "NOVO" &&
-        !(s === "OPENED" || s === "ABERTO" || s === "1")
-      )
-        return false;
-      if (
-        statusFiltro === "ANDAMENTO" &&
-        !(s === "IN_WAITING" || s === "AGUARDANDO" || s === "3")
-      )
-        return false;
-      if (
-        statusFiltro === "FINALIZADO" &&
-        !(s === "CLOSED" || s === "FECHADO" || s === "0")
-      )
-        return false;
-      if (
-        statusFiltro === "RECUSADO" &&
-        !(s === "REJECTED" || s === "REJEITADO" || s === "2")
-      )
-        return false;
+      if (statusFiltro === "NOVO" && !(s === "OPENED" || s === "ABERTO" || s === "1")) return false;
+      if (statusFiltro === "ANDAMENTO" && !(s === "IN_WAITING" || s === "AGURADANDO" || s === "3")) return false;
+      if (statusFiltro === "FINALIZADO" && !(s === "CLOSED" || s === "FECHADO" || s === "0")) return false;
+      if (statusFiltro === "RECUSADO" && !(s === "REJECTED" || s === "REJEITADO" || s === "2")) return false;
     }
 
     if (abaAtiva === "ATIVAS") {
-      return (
-        s === "OPENED" ||
-        s === "ABERTO" ||
-        s === "1" ||
-        s === "IN_WAITING" ||
-        s === "AGUARDANDO" ||
-        s === "3"
-      );
+      return s === "OPENED" || s === "ABERTO" || s === "1" || 
+             s === "IN_WAITING" || s === "AGURADANDO" || s === "3";
     }
     if (abaAtiva === "HISTORICO") {
-      return (
-        s === "CLOSED" ||
-        s === "FECHADO" ||
-        s === "0" ||
-        s === "REJECTED" ||
-        s === "REJEITADO" ||
-        s === "2"
-      );
+      return s === "CLOSED" || s === "FECHADO" || s === "0" || 
+             s === "REJECTED" || s === "REJEITADO" || s === "2";
     }
     return true;
   });
 
   const contagem = (statusAlvo) => {
     return pedidos.filter((p) => {
-      const s = String(p.demandStatus || "").toUpperCase();
-      if (statusAlvo === "OPENED")
-        return s === "OPENED" || s === "ABERTO" || s === "1";
-      if (statusAlvo === "IN_WAITING")
-        return s === "IN_WAITING" || s === "AGUARDANDO" || s === "3";
+      const s = String(p.demandStatus || '').toUpperCase();
+      if (statusAlvo === "OPENED") return s === "OPENED" || s === "ABERTO" || s === "1";
+      if (statusAlvo === "IN_WAITING") return s === "IN_WAITING" || s === "AGURADANDO" || s === "3";
       if (statusAlvo === "HISTORICO") {
-        return (
-          s === "CLOSED" ||
-          s === "FECHADO" ||
-          s === "0" ||
-          s === "REJECTED" ||
-          s === "REJEITADO" ||
-          s === "2"
-        );
+        return s === "CLOSED" || s === "FECHADO" || s === "0" || 
+               s === "REJECTED" || s === "REJEITADO" || s === "2";
       }
       return s === String(statusAlvo).toUpperCase();
     }).length;
@@ -231,46 +155,19 @@ function DashboardProfissional() {
         <header className="dash-prof-header">
           <div className="welcome-box">
             <h1>Painel de Controle</h1>
-            <p>
-              Olá, <strong>{usuarioLogado?.name}</strong>. Veja como está sua
-              agenda.
-            </p>
-
+            <p>Olá, <strong>{usuarioLogado?.name}</strong>. Veja como está sua agenda.</p>
+            
             {dadosPerfil && (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  marginTop: "10px",
-                  background: "#fff",
-                  padding: "6px 14px",
-                  borderRadius: "50px",
-                  width: "fit-content",
-                  boxShadow: "0 2px 5px rgba(0,0,0,0.05)",
-                }}
-              >
-                <i
-                  className="bi bi-star-fill"
-                  style={{ color: dadosPerfil.rating ? "#ffc107" : "#ccc" }}
-                ></i>
-                <span
-                  style={{ fontSize: "14px", color: "#333", fontWeight: "700" }}
-                >
-                  Sua Reputação:{" "}
-                  {dadosPerfil.rating !== null &&
-                  dadosPerfil.rating !== undefined
-                    ? dadosPerfil.rating.toFixed(1)
-                    : "Sem avaliação"}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px', background: '#fff', padding: '6px 14px', borderRadius: '50px', width: 'fit-content', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
+                <i className="bi bi-star-fill" style={{ color: dadosPerfil.rating ? '#ffc107' : '#ccc' }}></i>
+                <span style={{ fontSize: '14px', color: '#333', fontWeight: '700' }}>
+                  Sua Reputação: {dadosPerfil.rating !== null && dadosPerfil.rating !== undefined ? dadosPerfil.rating.toFixed(1) : "Sem avaliação"}
                 </span>
               </div>
             )}
           </div>
-          <button
-            className="btn-config"
-            onClick={() => navigate("/editar-perfil")}
-          >
-            <i className="bi bi-gear-wide-connected"></i> Editar Perfil
+          <button className="btn-config" onClick={() => navigate("/editar-perfil")}>
+            <i className="bi bi-gear-wide-connected"></i> Ajustes
           </button>
         </header>
 
@@ -290,44 +187,16 @@ function DashboardProfissional() {
         </section>
 
         <section className="list-section">
-          <div
-            className="list-header"
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              flexWrap: "wrap",
-              gap: "15px",
-            }}
-          >
+          <div className="list-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
             <h2>Fluxo de Demandas</h2>
-
-            <div
-              style={{
-                display: "flex",
-                gap: "10px",
-                alignItems: "center",
-                flex: 1,
-                maxWidth: "550px",
-                marginLeft: "auto",
-              }}
-            >
-              <select
+            
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flex: 1, maxWidth: '550px', marginLeft: 'auto' }}>
+              <select 
                 value={statusFiltro}
                 onChange={(e) => setStatusFiltro(e.target.value)}
-                style={{
-                  padding: "8px 12px",
-                  borderRadius: "50px",
-                  border: "1px solid #ddd",
-                  fontSize: "14px",
-                  outline: "none",
-                  background: "#fff",
-                  cursor: "pointer",
-                  color: "#333",
-                  fontWeight: "600",
-                }}
+                style={{ padding: '8px 12px', borderRadius: '50px', border: '1px solid #ddd', fontSize: '14px', outline: 'none', background: '#fff', cursor: 'pointer', color: '#333', fontWeight: '600' }}
               >
-                <option value="TODOS">Todos os Status</option>
+                <option value="TODOS">🎯 Todos os Status</option>
                 {abaAtiva === "ATIVAS" ? (
                   <>
                     <option value="NOVO">🔵 Novos</option>
@@ -341,68 +210,28 @@ function DashboardProfissional() {
                 )}
               </select>
 
-              <div style={{ position: "relative", width: "100%" }}>
-                <i
-                  className="bi bi-search"
-                  style={{
-                    position: "absolute",
-                    left: "12px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    color: "#888",
-                  }}
-                ></i>
-                <input
-                  type="text"
-                  placeholder="Filtrar por título..."
+              <div style={{ position: 'relative', width: '100%' }}>
+                <i className="bi bi-search" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }}></i>
+                <input 
+                  type="text" 
+                  placeholder="Filtrar por título..." 
                   value={buscaTexto}
                   onChange={(e) => setBuscaTexto(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "8px 12px 8px 35px",
-                    borderRadius: "50px",
-                    border: "1px solid #ddd",
-                    fontSize: "14px",
-                    outline: "none",
-                    background: "#fff",
-                  }}
+                  style={{ width: '100%', padding: '8px 12px 8px 35px', borderRadius: '50px', border: '1px solid #ddd', fontSize: '14px', outline: 'none', background: '#fff' }}
                 />
               </div>
 
-              <button
-                className="btn-refresh"
-                style={{
-                  height: "38px",
-                  width: "42px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-                onClick={buscarPedidos}
-                disabled={loading}
-              >
+              <button className="btn-refresh" style={{ height: '38px', width: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={buscarPedidos} disabled={loading}>
                 <i className="bi bi-arrow-clockwise"></i>
               </button>
             </div>
           </div>
 
           <div className="tabs-container">
-            <button
-              className={`tab-btn ${abaAtiva === "ATIVAS" ? "active" : ""}`}
-              onClick={() => {
-                setAbaAtiva("ATIVAS");
-                setStatusFiltro("TODOS");
-              }}
-            >
+            <button className={`tab-btn ${abaAtiva === "ATIVAS" ? "active" : ""}`} onClick={() => { setAbaAtiva("ATIVAS"); setStatusFiltro("TODOS"); }}>
               Solicitações Ativas
             </button>
-            <button
-              className={`tab-btn ${abaAtiva === "HISTORICO" ? "active" : ""}`}
-              onClick={() => {
-                setAbaAtiva("HISTORICO");
-                setStatusFiltro("TODOS");
-              }}
-            >
+            <button className={`tab-btn ${abaAtiva === "HISTORICO" ? "active" : ""}`} onClick={() => { setABAAtiva("HISTORICO"); setStatusFiltro("TODOS"); }}>
               Histórico
             </button>
           </div>
@@ -417,107 +246,39 @@ function DashboardProfissional() {
           ) : (
             <div className="requests-grid">
               {pedidosFiltrados.map((p) => {
-                const sAtual = String(p.demandStatus || "").toUpperCase();
-                const estiloStatus =
-                  sAtual === "1" || sAtual === "ABERTO" || sAtual === "OPENED"
-                    ? "opened"
-                    : sAtual === "3" ||
-                        sAtual === "AGUARDANDO" ||
-                        sAtual === "IN_WAITING"
-                      ? "in_waiting"
-                      : sAtual === "0" ||
-                          sAtual === "FECHADO" ||
-                          sAtual === "CLOSED"
-                        ? "closed"
-                        : "rejected";
+                const sAtual = String(p.demandStatus || '').toUpperCase();
+                const estiloStatus = sAtual === '1' || sAtual === 'ABERTO' || sAtual === 'OPENED' ? 'opened' : sAtual === '3' || sAtual === 'AGURADANDO' || sAtual === 'IN_WAITING' ? 'in_waiting' : sAtual === '0' || sAtual === 'FECHADO' || sAtual === 'CLOSED' ? 'closed' : 'rejected';
 
                 return (
                   <div
                     key={p.id}
                     className={`request-card status-${estiloStatus}`}
-                    style={{ cursor: "pointer" }}
-                    onClick={() => setPedidoDetalhado(p)}
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => setPedidoDetalhado(p)} 
                   >
                     <div className="card-body">
                       <span className={`status-badge-real ${estiloStatus}`}>
                         {traduzirStatus(p.demandStatus)}
                       </span>
-                      <h4 style={{ marginTop: "15px" }}>{p.title}</h4>
-                      <p className="client-name">
-                        <i className="bi bi-person"></i>{" "}
-                        {p.client?.name || "Cliente"}
-                      </p>
-
+                      <h4 style={{ marginTop: '15px' }}>{p.title}</h4>
+                      <p className="client-name"><i className="bi bi-person"></i> {p.client?.name || "Cliente"}</p>
+                      
                       {p.address && (
-                        <p className="client-address">
-                          <i className="bi bi-geo-alt"></i>{" "}
-                          {p.address.neighborhood}, {p.address.city}
-                        </p>
+                        <p className="client-address"><i className="bi bi-geo-alt"></i> {p.address.neighborhood}, {p.address.city}</p>
                       )}
-
-                      <p
-                        style={{
-                          fontSize: "13px",
-                          color: "#666",
-                          marginTop: "8px",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                        }}
-                      >
-                        {p.description}
-                      </p>
                     </div>
 
-                    <div
-                      className="card-footer"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {(sAtual === "OPENED" ||
-                        sAtual === "ABERTO" ||
-                        sAtual === "1") && (
+                    <div className="card-footer" onClick={(e) => e.stopPropagation()}>
+                      {(sAtual === "OPENED" || sAtual === "ABERTO" || sAtual === "1") && (
                         <>
-                          <button
-                            className="btn-action accept"
-                            onClick={() =>
-                              setConfirmModal({
-                                isOpen: true,
-                                pedidoId: p.id,
-                                action: "AGUARDANDO",
-                              })
-                            }
-                          >
-                            Aceitar
-                          </button>
-                          <button
-                            className="btn-action decline"
-                            onClick={() =>
-                              setConfirmModal({
-                                isOpen: true,
-                                pedidoId: p.id,
-                                action: "REJEITADO",
-                              })
-                            }
-                          >
-                            Recusar
-                          </button>
+                          <button className="btn-action accept" onClick={(e) => solicitarConfirmacao(e, p.id, "AGURADANDO", "aceitar esta solicitação de serviço")}>Aceitar</button>
+                          <button className="btn-action decline" onClick={(e) => solicitarConfirmacao(e, p.id, "REJEITADO", "recusar esta solicitação de serviço")}>Recusar</button>
                         </>
                       )}
-                      {(sAtual === "IN_WAITING" ||
-                        sAtual === "AGUARDANDO" ||
-                        sAtual === "3") && (
+                      {(sAtual === "IN_WAITING" || sAtual === "AGURADANDO" || sAtual === "3") && (
                         <>
-                          <DetalhesSolicitacao
-                            demanda={p}
-                            modo="PROFISSIONAL"
-                          />
-                          <button
-                            className="btn-action finish"
-                            onClick={() => atualizarStatus(p.id, "FECHADO")}
-                            style={{ width: "100%", marginTop: "10px" }}
-                          >
-                            Finalizar Serviço
-                          </button>
+                          <DetalhesSolicitacao demanda={p} modo="PROFISSIONAL" />
+                          <button className="btn-action finish" onClick={(e) => solicitarConfirmacao(e, p.id, "FECHADO", "finalizar este serviço de vez")} style={{ width: "100%", marginTop: "10px" }}>Finalizar Serviço</button>
                         </>
                       )}
                     </div>
@@ -531,259 +292,67 @@ function DashboardProfissional() {
 
       {pedidoDetalhado && (
         <div className="modal-overlay" onClick={() => setPedidoDetalhado(null)}>
-          <div
-            className="modal-container"
-            style={{ maxWidth: "550px" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "15px",
-                borderBottom: "1px solid #eee",
-                paddingBottom: "10px",
-              }}
-            >
-              <h3 className="modal-title" style={{ margin: 0, color: "#111" }}>
-                Descrição Completa da Demanda
-              </h3>
-              <button
-                className="btn-cancelar"
-                style={{ padding: "5px 10px", borderRadius: "50%" }}
-                onClick={() => setPedidoDetalhado(null)}
-              >
-                X
-              </button>
+          <div className="modal-container" style={{ maxWidth: '550px' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
+              <h3 className="modal-title" style={{ margin: 0, color: '#111' }}>Descrição Completa da Demanda</h3>
+              <button className="btn-cancelar" style={{ padding: '5px 10px', borderRadius: '50%' }} onClick={() => setPedidoDetalhado(null)}>X</button>
             </div>
-
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "15px" }}
-            >
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               <div>
-                <label
-                  style={{ fontSize: "11px", fontWeight: "700", color: "#888" }}
-                >
-                  SERVIÇO SOLICITADO
-                </label>
-                <p
-                  style={{
-                    fontSize: "18px",
-                    fontWeight: "700",
-                    color: "#111",
-                    margin: "2px 0 0 0",
-                  }}
-                >
-                  {pedidoDetalhado.title}
-                </p>
-              </div>
-
-              <div style={{ display: "flex", gap: "20px" }}>
-                <div>
-                  <label
-                    style={{
-                      fontSize: "11px",
-                      fontWeight: "700",
-                      color: "#888",
-                    }}
-                  >
-                    CLIENTE
-                  </label>
-                  <p
-                    style={{
-                      fontSize: "14px",
-                      color: "#111",
-                      margin: "2px 0 0 0",
-                    }}
-                  >
-                    <strong>
-                      {pedidoDetalhado.client?.name || "Não Informado"}
-                    </strong>
-                  </p>
-                </div>
-                {pedidoDetalhado.address && (
-                  <div>
-                    <label
-                      style={{
-                        fontSize: "11px",
-                        fontWeight: "700",
-                        color: "#888",
-                      }}
-                    >
-                      LOCALIDADE
-                    </label>
-                    <p
-                      style={{
-                        fontSize: "14px",
-                        color: "#111",
-                        margin: "2px 0 0 0",
-                      }}
-                    >
-                      {pedidoDetalhado.address.street},{" "}
-                      {pedidoDetalhado.address.number} -{" "}
-                      {pedidoDetalhado.address.neighborhood} (
-                      {pedidoDetalhado.address.city})
-                    </p>
-                  </div>
-                )}
+                <label style={{ fontSize: '11px', fontWeight: '700', color: '#888' }}>SERVIÇO SOLICITADO</label>
+                <p style={{ fontSize: '18px', fontWeight: '700', color: '#111', margin: '2px 0 0 0' }}>{pedidoDetalhado.title}</p>
               </div>
 
               <div>
-                <label
-                  style={{ fontSize: "11px", fontWeight: "700", color: "#888" }}
-                >
-                  DESCRIÇÃO COMPLETA DO PROBLEMA
-                </label>
-                <div
-                  style={{
-                    fontSize: "14px",
-                    color: "#222",
-                    background: "#f8f9fa",
-                    padding: "15px",
-                    borderRadius: "10px",
-                    marginTop: "4px",
-                    lineHeight: "1.6",
-                    whiteSpace: "pre-wrap",
-                    border: "1px solid #eee",
-                  }}
-                >
+                <label style={{ fontSize: '11px', fontWeight: '700', color: '#888' }}>DESCRIÇÃO COMPLETA DO PROBLEMA</label>
+                <div style={{ fontSize: '14px', color: '#222', background: '#f8f9fa', padding: '15px', borderRadius: '10px', marginTop: '4px', lineHeight: '1.6' }}>
                   {pedidoDetalhado.description}
                 </div>
               </div>
 
-              <div
-                style={{
-                  marginTop: "10px",
-                  borderTop: "1px solid #eee",
-                  paddingTop: "15px",
-                  display: "flex",
-                  gap: "10px",
-                }}
-              >
-                {String(pedidoDetalhado.demandStatus).toUpperCase() ===
-                  "ABERTO" ||
-                String(pedidoDetalhado.demandStatus).toUpperCase() ===
-                  "OPENED" ||
-                String(pedidoDetalhado.demandStatus).toUpperCase() === "1" ? (
-                  <>
-                    <button
-                      className="btn-action accept"
-                      style={{ flex: 1, padding: "12px" }}
-                      onClick={() =>
-                        setConfirmModal({
-                          isOpen: true,
-                          pedidoId: pedidoDetalhado.id,
-                          action: "AGUARDANDO",
-                        })
-                      }
-                    >
-                      Aceitar Serviço
-                    </button>
-                    <button
-                      className="btn-action decline"
-                      style={{ flex: 1, padding: "12px" }}
-                      onClick={() =>
-                        setConfirmModal({
-                          isOpen: true,
-                          pedidoId: pedidoDetalhado.id,
-                          action: "REJEITADO",
-                        })
-                      }
-                    >
-                      Recusar
-                    </button>
-                  </>
-                ) : String(pedidoDetalhado.demandStatus).toUpperCase() ===
-                    "AGUARDANDO" ||
-                  String(pedidoDetalhado.demandStatus).toUpperCase() ===
-                    "IN_WAITING" ||
-                  String(pedidoDetalhado.demandStatus).toUpperCase() === "3" ? (
-                  <div style={{ width: "100%" }}>
-                    <DetalhesSolicitacao
-                      demanda={pedidoDetalhado}
-                      modo="PROFISSIONAL"
-                    />
-                    <button
-                      className="btn-action finish"
-                      onClick={() =>
-                        atualizarStatus(pedidoDetalhado.id, "FECHADO")
-                      }
-                      style={{
-                        width: "100%",
-                        marginTop: "10px",
-                        padding: "12px",
-                      }}
-                    >
-                      Finalizar Serviço
-                    </button>
+              <div style={{ marginTop: '10px', borderTop: '1px solid #eee', paddingTop: '15px' }}>
+                {(String(pedidoDetalhado.demandStatus).toUpperCase() === 'ABERTO' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'OPENED' || String(pedidoDetalhado.demandStatus).toUpperCase() === '1') && (
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button className="btn-action accept" style={{ flex: 1 }} onClick={(e) => { setPedidoDetalhado(null); solicitarConfirmacao(e, pedidoDetalhado.id, "AGURADANDO", "aceitar esta solicitação de serviço"); }}>Aceitar Serviço</button>
+                    <button className="btn-action decline" style={{ flex: 1 }} onClick={(e) => { setPedidoDetalhado(null); solicitarConfirmacao(e, pedidoDetalhado.id, "REJEITADO", "recusar esta solicitação de serviço"); }}>Recusar</button>
                   </div>
-                ) : null}
+                )}
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {confirmModal.isOpen && (
-        <div
-          className="modal-overlay"
-          onClick={() =>
-            setConfirmModal({ isOpen: false, pedidoId: null, action: null })
-          }
-          style={{ zIndex: 9999 }}
-        >
-          <div
-            className="modal-container"
-            style={{ maxWidth: "400px", padding: "30px", textAlign: "center" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ marginBottom: "20px" }}>
-              {confirmModal.action === "AGUARDANDO" ? (
-                <i
-                  className="bi bi-check-circle"
-                  style={{ fontSize: "40px", color: "#10b981" }}
-                ></i>
-              ) : (
-                <i
-                  className="bi bi-exclamation-triangle"
-                  style={{ fontSize: "40px", color: "#ef4444" }}
-                ></i>
-              )}
+      {confirmacao.visivel && (
+        <div className="modal-overlay" style={{ zIndex: 1100 }}>
+          <div className="modal-container" style={{ maxWidth: '400px', padding: '24px', textAlign: 'center' }}>
+            <div style={{ fontSize: '40px', color: '#ffc107', marginBottom: '10px' }}>
+              <i className="bi bi-exclamation-triangle-fill"></i>
             </div>
-
-            <h3 className="modal-title" style={{ margin: "0 0 10px 0", color: "#0f172a", fontSize: "20px" }}>
-              Tem certeza que deseja {confirmModal.action === "AGUARDANDO" ? "aceitar" : "recusar"} este serviço?
-            </h3>
-            
-            <p style={{ color: "#64748b", fontSize: "14px", lineHeight: "1.5", marginBottom: "25px" }}>
-              {confirmModal.action === "AGUARDANDO"
-                ? "Ao aceitar, você se compromete com este serviço e terá acesso aos dados de contato do cliente."
-                : "Se você recusar, a demanda será removida da sua lista e não será possível acessá-la novamente."}
+            <h3 style={{ margin: '0 0 10px 0', fontSize: '18px', color: '#111', fontWeight: '700' }}>Confirmar Ação</h3>
+            <p style={{ fontSize: '14px', color: '#555', lineHeight: '1.5', margin: '0 0 20px 0' }}>
+              Você tem certeza de que deseja <strong>{confirmacao.tituloAcao}</strong>? Essa operação alterará o andamento do chamado.
             </p>
-
-            <div className="modal-actions-row">
-              <button
-                className="btn-config"
-                onClick={() =>
-                  setConfirmModal({ isOpen: false, pedidoId: null, action: null })
-                }
-                style={{ flex: 1 }}
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+              <button 
+                className="btn-cancelar" 
+                style={{ padding: '10px 20px', borderRadius: '8px', fontWeight: '600', border: '1px solid #ddd', background: '#fff', cursor: 'pointer' }}
+                onClick={() => setConfirmacao({ visivel: false, pedidoId: null, novoStatus: null, tituloAcao: "" })}
               >
                 Cancelar
               </button>
-              <button
-                className={`btn-action ${confirmModal.action === "AGUARDANDO" ? "accept" : "decline"}`}
-                onClick={handleConfirmarAcao}
-                style={{ flex: 1 }}
+              <button 
+                className="btn-confirmar" 
+                style={{ padding: '10px 20px', borderRadius: '8px', fontWeight: '700', background: '#0066ff', color: '#fff', border: 'none', cursor: 'pointer' }}
+                onClick={executarAcaoConfirmada}
               >
-                Sim, {confirmModal.action === "AGUARDANDO" ? "Aceitar" : "Recusar"}
+                Sim, Continuar
               </button>
             </div>
           </div>
         </div>
       )}
-
     </div>
   );
 }
