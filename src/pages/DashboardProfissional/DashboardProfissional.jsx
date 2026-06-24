@@ -63,13 +63,15 @@ function DashboardProfissional() {
   const processarAtualizacaoStatus = async (pedidoId, novoStatus) => {
     try {
       const payload = { status: novoStatus };
+      
+      console.log(`📤 Enviando PATCH para o id ${pedidoId} com payload:`, payload);
       await api.patch(`/api/demand/${pedidoId}/status`, payload);
 
-      if (novoStatus === "AGURADANDO" || novoStatus === "3")
+      if (novoStatus === "AGUARDANDO" || novoStatus === "AGURADANDO" || novoStatus === "3")
         toast.success("Serviço aceito! Dados de contato liberados.");
-      else if (novoStatus === "CLOSED" || novoStatus === "0") 
+      else if (novoStatus === "FECHADO" || novoStatus === "0" || novoStatus === "CLOSED") 
         toast.info("Serviço finalizado.");
-      else if (novoStatus === "REJEITADO" || novoStatus === "2")
+      else if (novoStatus === "REJEITADO" || novoStatus === "2" || novoStatus === "REJECTED")
         toast.warn("Serviço recusado.");
 
       const listaAtualizada = await buscarPedidos();
@@ -84,7 +86,8 @@ function DashboardProfissional() {
       }
     } catch (error) {
       console.error("Erro ao atualizar o status:", error);
-      toast.error("Falha ao atualizar o status do pedido.");
+      const msgErro = error.response?.data?.message || error.response?.data || "Falha ao atualizar o status do pedido.";
+      toast.error(`Erro: ${msgErro}`);
     }
   };
 
@@ -106,7 +109,7 @@ function DashboardProfissional() {
   const traduzirStatus = (status) => {
     const s = String(status || '').toUpperCase();
     if (s === "OPENED" || s === "ABERTO" || s === "1") return "Novo";
-    if (s === "IN_WAITING" || s === "AGURADANDO" || s === "3") return "Em Andamento";
+    if (s === "IN_WAITING" || s === "AGURADANDO" || s === "AGUARDANDO" || s === "3") return "Em Andamento";
     if (s === "CLOSED" || s === "FECHADO" || s === "0") return "Finalizado";
     if (s === "REJECTED" || s === "REJEITADO" || s === "2") return "Recusado";
     return status;
@@ -120,14 +123,14 @@ function DashboardProfissional() {
 
     if (statusFiltro !== "TODOS") {
       if (statusFiltro === "NOVO" && !(s === "OPENED" || s === "ABERTO" || s === "1")) return false;
-      if (statusFiltro === "ANDAMENTO" && !(s === "IN_WAITING" || s === "AGURADANDO" || s === "3")) return false;
+      if (statusFiltro === "ANDAMENTO" && !(s === "IN_WAITING" || s === "AGURADANDO" || s === "AGUARDANDO" || s === "3")) return false;
       if (statusFiltro === "FINALIZADO" && !(s === "CLOSED" || s === "FECHADO" || s === "0")) return false;
       if (statusFiltro === "RECUSADO" && !(s === "REJECTED" || s === "REJEITADO" || s === "2")) return false;
     }
 
     if (abaAtiva === "ATIVAS") {
       return s === "OPENED" || s === "ABERTO" || s === "1" || 
-             s === "IN_WAITING" || s === "AGURADANDO" || s === "3";
+             s === "IN_WAITING" || s === "AGURADANDO" || s === "AGUARDANDO" || s === "3";
     }
     if (abaAtiva === "HISTORICO") {
       return s === "CLOSED" || s === "FECHADO" || s === "0" || 
@@ -140,7 +143,7 @@ function DashboardProfissional() {
     return pedidos.filter((p) => {
       const s = String(p.demandStatus || '').toUpperCase();
       if (statusAlvo === "OPENED") return s === "OPENED" || s === "ABERTO" || s === "1";
-      if (statusAlvo === "IN_WAITING") return s === "IN_WAITING" || s === "AGURADANDO" || s === "3";
+      if (statusAlvo === "IN_WAITING") return s === "IN_WAITING" || s === "AGURADANDO" || s === "AGUARDANDO" || s === "3";
       if (statusAlvo === "HISTORICO") {
         return s === "CLOSED" || s === "FECHADO" || s === "0" || 
                s === "REJECTED" || s === "REJEITADO" || s === "2";
@@ -231,7 +234,7 @@ function DashboardProfissional() {
             <button className={`tab-btn ${abaAtiva === "ATIVAS" ? "active" : ""}`} onClick={() => { setAbaAtiva("ATIVAS"); setStatusFiltro("TODOS"); }}>
               Solicitações Ativas
             </button>
-            <button className={`tab-btn ${abaAtiva === "HISTORICO" ? "active" : ""}`} onClick={() => { setABAAtiva("HISTORICO"); setStatusFiltro("TODOS"); }}>
+            <button className={`tab-btn ${abaAtiva === "HISTORICO" ? "active" : ""}`} onClick={() => { setAbaAtiva("HISTORICO"); setStatusFiltro("TODOS"); }}>
               Histórico
             </button>
           </div>
@@ -247,7 +250,7 @@ function DashboardProfissional() {
             <div className="requests-grid">
               {pedidosFiltrados.map((p) => {
                 const sAtual = String(p.demandStatus || '').toUpperCase();
-                const estiloStatus = sAtual === '1' || sAtual === 'ABERTO' || sAtual === 'OPENED' ? 'opened' : sAtual === '3' || sAtual === 'AGURADANDO' || sAtual === 'IN_WAITING' ? 'in_waiting' : sAtual === '0' || sAtual === 'FECHADO' || sAtual === 'CLOSED' ? 'closed' : 'rejected';
+                const estiloStatus = sAtual === '1' || sAtual === 'ABERTO' || sAtual === 'OPENED' ? 'opened' : sAtual === '3' || sAtual === 'AGURADANDO' || sAtual === 'AGUARDANDO' || sAtual === 'IN_WAITING' ? 'in_waiting' : sAtual === '0' || sAtual === 'FECHADO' || sAtual === 'CLOSED' ? 'closed' : 'rejected';
 
                 return (
                   <div
@@ -271,11 +274,11 @@ function DashboardProfissional() {
                     <div className="card-footer" onClick={(e) => e.stopPropagation()}>
                       {(sAtual === "OPENED" || sAtual === "ABERTO" || sAtual === "1") && (
                         <>
-                          <button className="btn-action accept" onClick={(e) => solicitarConfirmacao(e, p.id, "AGURADANDO", "aceitar esta solicitação de serviço")}>Aceitar</button>
+                          <button className="btn-action accept" onClick={(e) => solicitarConfirmacao(e, p.id, "AGUARDANDO", "aceitar esta solicitação de serviço")}>Aceitar</button>
                           <button className="btn-action decline" onClick={(e) => solicitarConfirmacao(e, p.id, "REJEITADO", "recusar esta solicitação de serviço")}>Recusar</button>
                         </>
                       )}
-                      {(sAtual === "IN_WAITING" || sAtual === "AGURADANDO" || sAtual === "3") && (
+                      {(sAtual === "IN_WAITING" || sAtual === "AGURADANDO" || sAtual === "AGUARDANDO" || sAtual === "3") && (
                         <>
                           <DetalhesSolicitacao demanda={p} modo="PROFISSIONAL" />
                           <button className="btn-action finish" onClick={(e) => solicitarConfirmacao(e, p.id, "FECHADO", "finalizar este serviço de vez")} style={{ width: "100%", marginTop: "10px" }}>Finalizar Serviço</button>
@@ -314,7 +317,7 @@ function DashboardProfissional() {
               <div style={{ marginTop: '10px', borderTop: '1px solid #eee', paddingTop: '15px' }}>
                 {(String(pedidoDetalhado.demandStatus).toUpperCase() === 'ABERTO' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'OPENED' || String(pedidoDetalhado.demandStatus).toUpperCase() === '1') && (
                   <div style={{ display: 'flex', gap: '10px' }}>
-                    <button className="btn-action accept" style={{ flex: 1 }} onClick={(e) => { setPedidoDetalhado(null); solicitarConfirmacao(e, pedidoDetalhado.id, "AGURADANDO", "aceitar esta solicitação de serviço"); }}>Aceitar Serviço</button>
+                    <button className="btn-action accept" style={{ flex: 1 }} onClick={(e) => { setPedidoDetalhado(null); solicitarConfirmacao(e, pedidoDetalhado.id, "AGUARDANDO", "aceitar esta solicitação de serviço"); }}>Aceitar Serviço</button>
                     <button className="btn-action decline" style={{ flex: 1 }} onClick={(e) => { setPedidoDetalhado(null); solicitarConfirmacao(e, pedidoDetalhado.id, "REJEITADO", "recusar esta solicitação de serviço"); }}>Recusar</button>
                   </div>
                 )}
