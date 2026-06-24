@@ -111,20 +111,30 @@ function ListaProf() {
     }
   };
 
-  const profissionaisFiltrados = profissionais.filter((prof) => {
-    if (filtroEstrelas === "4PLUS")
-      return (
-        prof.rating !== null && prof.rating !== undefined && prof.rating >= 4.0
-      );
-    if (filtroEstrelas === "3PLUS")
-      return (
-        prof.rating !== null && prof.rating !== undefined && prof.rating >= 3.0
-      );
-    if (filtroEstrelas === "NEW")
-      return prof.rating === null || prof.rating === undefined;
+  const profissionaisFiltrados = profissionais
+    .filter((prof) => {
+      const matchesTexto = prof.name.toLowerCase().includes(termoBusca.toLowerCase());
+      
+      if (!matchesTexto) return false;
 
-    return true;
-  });
+      if (filtroEstrelas === "4PLUS") {
+        return prof.rating !== null && prof.rating !== undefined && prof.rating >= 4.0;
+      }
+      if (filtroEstrelas === "3PLUS") {
+        return prof.rating !== null && prof.rating !== undefined && prof.rating >= 3.0;
+      }
+      if (filtroEstrelas === "NEW") {
+        return prof.rating === null || prof.rating === undefined;
+      }
+
+      return true;
+    })
+    .sort((a, b) => {
+      const notaA = a.rating !== null && a.rating !== undefined ? a.rating : -1;
+      const notaB = b.rating !== null && b.rating !== undefined ? b.rating : -1;
+      
+      return notaB - notaA; 
+    });
 
   const coresTopo = ["#e6f0ff", "#e6ffe6", "#fff0e6", "#f0e6ff"];
 
@@ -256,11 +266,6 @@ function ListaProf() {
           ) : (
             <div className="grade-profissionais">
               {profissionaisFiltrados.map((prof, index) => {
-                const notaExibida =
-                  prof.rating !== undefined && prof.rating !== null
-                    ? prof.rating.toFixed(1)
-                    : "5.0";
-
                 return (
                   <div key={prof.id} className="cartao-profissional-moderno">
                     <div
