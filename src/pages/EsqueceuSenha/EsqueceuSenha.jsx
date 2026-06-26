@@ -1,36 +1,38 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import './EsqueceuSenha.css';
 
-function EsqueceuSenha() {
+const EsqueceuSenha = () => {
   const navigate = useNavigate();
 
   return (
     <div className="esqueceu-senha-container">
       <div className="esqueceu-senha-card">
-        <button className="btn-voltar" onClick={() => navigate('/login')}>
-          <i className="bi bi-arrow-left"></i> Voltar
-        </button>
-        <h2 className="serif-font">Recuperar Senha</h2>
-        <p className="subtitle">Digite seu e-mail abaixo. Enviaremos um link para você definir uma nova senha.</p>
+        <h2>Recuperar Senha</h2>
+        <p>Digite seu e-mail abaixo. Enviaremos um link para você definir uma nova senha.</p>
 
-        <form className="esqueceu-senha-form" onSubmit={(e) => e.preventDefault()}>
+        <form onSubmit={(e) => e.preventDefault()}>
           <div className="input-group">
-            <label>E-mail cadastrado</label>
-            <input type="email" placeholder="exemplo@email.com" required />
+            <label>E-mail</label>
+            <input
+              type="email"
+              placeholder="seu@email.com"
+              required
+            />
           </div>
 
-          <div className="botoes-acao">
-            <button type="button" className="btn-cancelar" onClick={() => navigate('/login')}>
-              Cancelar
-            </button>
-            <button type="submit" className="btn-salvar">
-              Enviar Link de Recuperação
-            </button>
-          </div>
+          <button type="submit" className="btn-esqueceu-submit">
+            Enviar Link de Recuperação
+          </button>
         </form>
+
+        <div className="esqueceu-senha-footer">
+          <span>
+            Lembrou da senha? <Link to="/login">Voltar para o login</Link>
+          </span>
+        </div>
       </div>
     </div>
   );
-}
+};
 
 export default EsqueceuSenha;

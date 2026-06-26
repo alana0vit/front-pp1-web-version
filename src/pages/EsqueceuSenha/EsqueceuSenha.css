@@ -1,105 +1,85 @@
 .esqueceu-senha-container {
-    padding: 80px 20px;
-    background-color: #f4f7fe;
-    min-height: 80vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: 'Inter', sans-serif;
+    min-height: 80vh;
+    background-color: #f8f9fa;
+    padding: 2rem;
 }
 
 .esqueceu-senha-card {
     background: white;
-    padding: 40px;
-    border-radius: 25px; 
-    box-shadow: 0 15px 40px rgba(0,0,0,0.06);
+    padding: 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+    max-width: 400px;
     width: 100%;
-    max-width: 550px;
-}
-
-.btn-voltar {
-    background: none;
-    border: none;
-    color: #0066ff;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 25px;
-    font-size: 14px;
-}
-
-.serif-font { 
-    font-size: 32px; 
-    margin-bottom: 8px; 
-    color: #1a1a1a;
-    font-family: 'Georgia', serif;
-}
-
-.subtitle { color: #777; margin-bottom: 35px; font-size: 15px; }
-
-.input-group { margin-bottom: 22px; display: flex; flex-direction: column; }
-.input-group label { font-weight: bold; margin-bottom: 10px; color: #444; font-size: 14px; }
-.input-group input {
-    padding: 14px;
-    border: 1.5px solid #eee;
-    border-radius: 12px;
-    font-size: 16px;
-    background: #fdfdfd;
-    transition: 0.3s;
-}
-
-.input-group input:focus {
-    border-color: #0066ff;
-    outline: none;
-    background: white;
-}
-
-.botoes-acao { display: flex; gap: 15px; margin-top: 35px; }
-
-.btn-salvar {
-    flex: 2;
-    background: #0066ff;
-    color: white;
-    border: none;
-    padding: 16px;
-    border-radius: 50px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.btn-salvar:hover { background: #0052cc; transform: translateY(-2px); }
-
-.btn-cancelar {
-    flex: 1;
-    background: #f0f0f0;
-    color: #555;
-    border: none;
-    padding: 16px;
-    border-radius: 50px;
-    font-weight: bold;
-    cursor: pointer;
-}
-.esqueceu-senha-card {
-  position: relative; 
-}
-
-.esqueceu-senha-card .btn-voltar {
-  position: absolute;
-  top: 30px;
-  left: 30px;
-  background: none;
-  border: none;
-  color: #007bff;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+    animation: fadeIn 0.3s ease-out;
 }
 
 .esqueceu-senha-card h2 {
-  margin-top: 40px; 
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.esqueceu-senha-card p {
+    color: #6c757d;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.input-group {
+    margin-bottom: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.input-group label {
+    font-weight: 500;
+    color: #495057;
+    font-size: 0.9rem;
+}
+
+.btn-esqueceu-submit {
+    width: 100%;
+    padding: 1rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-esqueceu-submit:hover {
+    background-color: #0056b3;
+}
+
+.esqueceu-senha-footer {
+    margin-top: 2rem;
+    text-align: center;
+    font-size: 0.95rem;
+    color: #6c757d;
+}
+
+.esqueceu-senha-footer a {
+    color: #007bff;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
