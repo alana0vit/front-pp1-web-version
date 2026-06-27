@@ -1,11 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 import api from '../services/api';
 import './HistoricoAvaliacoes.css';
 
+const ITENS_POR_PAGINA = 10;
+
 function HistoricoAvaliacoes({ profissionalId, profissionalNome, onClose }) {
   const [avaliacoes, setAvaliacoes] = useState([]);
   const [carregando, setCarregando] = useState(true);
+  const [filtroEstrelas, setFiltroEstrelas] = useState('TODAS');
+  const [paginaAtual, setPaginaAtual] = useState(1);
 
   useEffect(() => {
     if (!profissionalId) return;
@@ -27,6 +31,20 @@ function HistoricoAvaliacoes({ profissionalId, profissionalNome, onClose }) {
   const media = avaliacoes.length > 0
     ? (avaliacoes.reduce((sum, a) => sum + (a.points || 0), 0) / avaliacoes.length).toFixed(1)
     : null;
+
+  const avaliacoesFiltradas = useMemo(() => {
+    if (filtroEstrelas === 'TODAS') return avaliacoes;
+    const notaAlvo = Number(filtroEstrelas);
+    return avaliacoes.filter((a) => a.points === notaAlvo);
+  }, [avaliacoes, filtroEstrelas]);
+
+  const avaliacoesVisiveis = avaliacoesFiltradas.slice(0, paginaAtual * ITENS_POR_PAGINA);
+  const temMais = avaliacoesVisiveis.length < avaliacoesFiltradas.length;
+
+  const handleFiltroChange = (valor) => {
+    setFiltroEstrelas(valor);
+    setPaginaAtual(1);
+  };
 
   return (
     <div className="historico-overlay" onClick={onClose}>
@@ -51,6 +69,24 @@ function HistoricoAvaliacoes({ profissionalId, profissionalNome, onClose }) {
           </div>
         )}
 
+        {avaliacoes.length > 0 && (
+          <div className="historico-filtro-row">
+            <label htmlFor="filtro-estrelas-historico">Filtrar por nota</label>
+            <select
+              id="filtro-estrelas-historico"
+              value={filtroEstrelas}
+              onChange={(e) => handleFiltroChange(e.target.value)}
+            >
+              <option value="TODAS">Todas as notas</option>
+              <option value="5">5 estrelas</option>
+              <option value="4">4 estrelas</option>
+              <option value="3">3 estrelas</option>
+              <option value="2">2 estrelas</option>
+              <option value="1">1 estrela</option>
+            </select>
+          </div>
+        )}
+
         <div className="historico-lista">
           {carregando ? (
             <div className="historico-estado">
@@ -62,36 +98,52 @@ function HistoricoAvaliacoes({ profissionalId, profissionalNome, onClose }) {
               <i className="bi bi-chat-square"></i>
               <p>Este profissional ainda não recebeu avaliações.</p>
             </div>
+          ) : avaliacoesFiltradas.length === 0 ? (
+            <div className="historico-estado">
+              <i className="bi bi-filter-circle"></i>
+              <p>Nenhuma avaliação encontrada com esse filtro.</p>
+            </div>
           ) : (
-            avaliacoes.map((av, i) => (
-              <div key={av.id ?? i} className="historico-item">
-                <div className="historico-item-header">
-                  <span>
-                    {av.anonymous
-                      ? <span className="historico-anonimo">Avaliador anônimo</span>
-                      : <span className="historico-avaliador">{av.evaluatingPerson?.name || 'Cliente'}</span>
-                    }
-                  </span>
-                  <div className="historico-stars">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                      <i key={s} className={`bi bi-star-fill ${s > av.points ? 'vazia' : ''}`}></i>
-                    ))}
+            <>
+              {avaliacoesVisiveis.map((av, i) => (
+                <div key={av.id ?? i} className="historico-item">
+                  <div className="historico-item-header">
+                    <span>
+                      {av.anonymous
+                        ? <span className="historico-anonimo">Avaliador anônimo</span>
+                        : <span className="historico-avaliador">{av.evaluatingPerson?.name || 'Cliente'}</span>
+                      }
+                    </span>
+                    <div className="historico-stars">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <i key={s} className={`bi bi-star-fill ${s > av.points ? 'vazia' : ''}`}></i>
+                      ))}
+                    </div>
                   </div>
+
+                  {av.description && (
+                    <p className="historico-comentario">{av.description}</p>
+                  )}
+
+                  {av.photos && av.photos.length > 0 && (
+                    <div className="historico-fotos">
+                      {av.photos.map((foto, j) => (
+                        <img key={j} src={foto} alt={`Foto ${j + 1}`} />
+                      ))}
+                    </div>
+                  )}
                 </div>
+              ))}
 
-                {av.description && (
-                  <p className="historico-comentario">{av.description}</p>
-                )}
-
-                {av.photos && av.photos.length > 0 && (
-                  <div className="historico-fotos">
-                    {av.photos.map((foto, j) => (
-                      <img key={j} src={foto} alt={`Foto ${j + 1}`} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))
+              {temMais && (
+                <button
+                  className="historico-btn-carregar-mais"
+                  onClick={() => setPaginaAtual((p) => p + 1)}
+                >
+                  Carregar mais avaliações
+                </button>
+              )}
+            </>
           )}
         </div>
 

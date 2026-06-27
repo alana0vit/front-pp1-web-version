@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import imagemBusca from "../../assets/ImgLista1.jpg";
 import api from "../../services/api";
 import HistoricoAvaliacoes from "../../components/HistoricoAvaliacoes";
 import "./ListaProf.css";
+
+const INTERVALO_REFRESH = 30_000;
 
 function ListaProf() {
   const navigate = useNavigate();
@@ -22,7 +24,13 @@ function ListaProf() {
   const [raioKm, setRaioKm] = useState(20);
   const [modalAvaliacoes, setModalAvaliacoes] = useState(null);
 
+  // Guarda os últimos filtros usados para o refresh automático repetir a mesma busca,
+  // em vez de resetar para a listagem completa sem filtro.
+  const ultimosFiltrosRef = useRef({});
+
   const buscarProfissionais = async (filtros = {}) => {
+    ultimosFiltrosRef.current = filtros;
+
     try {
       let response;
       const temFiltros = Object.values(filtros).some(
@@ -54,6 +62,15 @@ function ListaProf() {
       .get("/api/category")
       .then((res) => setCategorias(res.data))
       .catch((err) => console.error(err));
+  }, []);
+
+  // Atualiza a lista periodicamente (em background) para refletir notas e
+  // avaliações novas, repetindo o último filtro usado pelo usuário.
+  useEffect(() => {
+    const id = setInterval(() => {
+      buscarProfissionais(ultimosFiltrosRef.current);
+    }, INTERVALO_REFRESH);
+    return () => clearInterval(id);
   }, []);
 
   const lidarComBusca = (e) => {
@@ -296,9 +313,15 @@ function ListaProf() {
                       </div>
 
                       <h3 className="nome-profissional">{prof.name}</h3>
-                      <p className="especialidade-cartao">
-                        {prof.phone || "Telefone não informado"}
-                      </p>
+                      {prof.categories && prof.categories.length > 0 ? (
+                        <p className="especialidade-cartao">
+                          {prof.categories.map((c) => c.name).join(" • ")}
+                        </p>
+                      ) : (
+                        <p className="especialidade-cartao especialidade-vazia">
+                          Especialidade não informada
+                        </p>
+                      )}
 
                       <div className="avaliacao-profissional">
                         <i
@@ -343,7 +366,10 @@ function ListaProf() {
         <HistoricoAvaliacoes
           profissionalId={modalAvaliacoes.id}
           profissionalNome={modalAvaliacoes.nome}
-          onClose={() => setModalAvaliacoes(null)}
+          onClose={() => {
+            setModalAvaliacoes(null);
+            buscarProfissionais(ultimosFiltrosRef.current);
+          }}
         />
       )}
     </div>

@@ -79,6 +79,50 @@
   margin-top: 2px;
 }
 
+.historico-filtro-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.historico-filtro-row label {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.historico-filtro-row select {
+  flex: 1;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  font-size: 13px;
+  color: #334155;
+  background: #fff;
+  cursor: pointer;
+}
+
+.historico-btn-carregar-mais {
+  align-self: center;
+  margin-top: 4px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.historico-btn-carregar-mais:hover {
+  background: #f1f5f9;
+}
+
 .historico-lista {
   overflow-y: auto;
   flex: 1;
