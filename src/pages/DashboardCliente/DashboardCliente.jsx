@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
 import DetalhesSolicitacao from '../DetalhesSolicitacao/DetalhesSolicitacao';
-import { traduzirStatus, getStatusClass } from '../../utils/statusUtils';
+import { traduzirStatusCliente, getStatusClass } from '../../utils/statusUtils';
 import DemandInfoBadges from '../../components/DemandInfoBadges';
 import './DashboardCliente.css';
 
@@ -283,7 +283,7 @@ function DashboardCliente() {
                       <div className="row-item-top-flex">
                         <h4>{pedido.title}</h4>
                         <span className={`status-pill-badge pill-${getStatusClass(pedido.demandStatus)}`}>
-                          {traduzirStatus(pedido.demandStatus)}
+                          {traduzirStatusCliente(pedido.demandStatus)}
                         </span>
                       </div>
 
@@ -361,7 +361,7 @@ function DashboardCliente() {
                 <label>Status Atual</label>
                 <div style={{ marginTop: '6px' }}>
                   <span className={`status-pill-badge pill-${getStatusClass(pedidoDetalhado.demandStatus)}`}>
-                    {traduzirStatus(pedidoDetalhado.demandStatus)}
+                    {traduzirStatusCliente(pedidoDetalhado.demandStatus)}
                   </span>
                 </div>
               </div>
