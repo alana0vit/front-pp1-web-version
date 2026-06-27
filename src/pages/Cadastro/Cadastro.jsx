@@ -17,11 +17,30 @@ const Cadastro = () => {
   
   const navigate = useNavigate();
 
-  const { register, handleSubmit, reset, control, watch, formState: { errors } } = useForm({
+  const { register, handleSubmit, reset, control, watch, setValue, formState: { errors } } = useForm({
     mode: "onChange"
   });
 
   const senhaAtual = watch("password");
+
+  const buscarEnderecoPorCep = async (cep) => {
+    const cepLimpo = String(cep).replace(/\D/g, '');
+    if (cepLimpo.length !== 8) return;
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+      const dados = await res.json();
+      if (dados.erro) {
+        toast.error('CEP não encontrado. Preencha o endereço manualmente.');
+        return;
+      }
+      setValue('street', dados.logradouro || '');
+      setValue('neighborhood', dados.bairro || '');
+      setValue('city', dados.localidade || '');
+      setValue('state', dados.uf || '');
+    } catch {
+      toast.error('Não foi possível buscar o CEP. Verifique sua conexão.');
+    }
+  };
 
   useEffect(() => {
     const buscarCategorias = async () => {
@@ -287,7 +306,7 @@ const Cadastro = () => {
                   control={control}
                   rules={{ required: true }}
                   render={({ field }) => (
-                    <IMaskInput {...field} mask="00000-000" onAccept={(value) => field.onChange(value)} placeholder="00000-000" />
+                    <IMaskInput {...field} mask="00000-000" onAccept={(value) => field.onChange(value)} placeholder="00000-000" onBlur={(e) => buscarEnderecoPorCep(e.target.value)} />
                   )}
                 />
               </div>

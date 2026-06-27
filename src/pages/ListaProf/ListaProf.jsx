@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import imagemBusca from "../../assets/ImgLista1.jpg";
 import api from "../../services/api";
+import HistoricoAvaliacoes from "../../components/HistoricoAvaliacoes";
 import "./ListaProf.css";
 
 function ListaProf() {
@@ -18,6 +19,8 @@ function ListaProf() {
   const reassignDemandId = location.state?.reassignDemandId || null;
 
   const [mostrarPopUpLocalizacao, setMostrarPopUpLocalizacao] = useState(false);
+  const [raioKm, setRaioKm] = useState(20);
+  const [modalAvaliacoes, setModalAvaliacoes] = useState(null);
 
   const buscarProfissionais = async (filtros = {}) => {
     try {
@@ -63,28 +66,23 @@ function ListaProf() {
 
   const pegarLocalizacao = () => {
     if (!navigator.geolocation) {
-      alert("A geolocalização não é suportada pelo seu navegador.");
+      toast.error("A geolocalização não é suportada pelo seu navegador.");
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-
         buscarProfissionais({
           name: termoBusca,
           categoryId: categoriaSelecionada || undefined,
-          latitude: lat,
-          longitude: lng,
-          radiusKm: 20,
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+          radiusKm: raioKm,
         });
       },
       (error) => {
         console.error("Erro ao obter localização:", error);
-        alert(
-          "Não foi possível obter sua localização. Verifique as permissões do navegador.",
-        );
+        toast.error("Não foi possível obter sua localização. Verifique as permissões do navegador.");
       },
     );
   };
@@ -215,31 +213,46 @@ function ListaProf() {
                   <option value="NEW">⭐ Apenas Novos (Sem Nota)</option>
                 </select>
 
-                <div
-                  className="container-btn-localizacao"
-                  style={{ position: "relative", display: "inline-block" }}
-                  onMouseEnter={() => setMostrarPopUpLocalizacao(true)}
-                  onMouseLeave={() => setMostrarPopUpLocalizacao(false)}
-                >
-                  <button
-                    type="button"
-                    className="btn-localizacao"
-                    onClick={pegarLocalizacao}
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <select
+                    className="select-categoria"
+                    value={raioKm}
+                    onChange={(e) => setRaioKm(Number(e.target.value))}
+                    title="Raio de busca"
+                    style={{ minWidth: "90px" }}
                   >
-                    📍 Perto de mim
-                  </button>
+                    <option value={5}>5 km</option>
+                    <option value={10}>10 km</option>
+                    <option value={20}>20 km</option>
+                    <option value={50}>50 km</option>
+                  </select>
 
-                  {mostrarPopUpLocalizacao && (
-                    <div className="pop-up-informativo-localizacao">
-                      <div className="seta-pop-up"></div>
-                      <p>
-                        <strong>Busca por Geolocalização:</strong> Filtra
-                        automaticamente os prestadores parceiros localizados num
-                        raio máximo de <strong>20km</strong> com base nas
-                        coordenadas GPS do seu dispositivo.
-                      </p>
-                    </div>
-                  )}
+                  <div
+                    className="container-btn-localizacao"
+                    style={{ position: "relative", display: "inline-block" }}
+                    onMouseEnter={() => setMostrarPopUpLocalizacao(true)}
+                    onMouseLeave={() => setMostrarPopUpLocalizacao(false)}
+                  >
+                    <button
+                      type="button"
+                      className="btn-localizacao"
+                      onClick={pegarLocalizacao}
+                    >
+                      📍 Perto de mim
+                    </button>
+
+                    {mostrarPopUpLocalizacao && (
+                      <div className="pop-up-informativo-localizacao">
+                        <div className="seta-pop-up"></div>
+                        <p>
+                          <strong>Busca por Geolocalização:</strong> Filtra
+                          automaticamente os prestadores parceiros localizados num
+                          raio máximo de <strong>{raioKm} km</strong> com base nas
+                          coordenadas GPS do seu dispositivo.
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -293,19 +306,20 @@ function ListaProf() {
                           style={{ color: prof.rating ? "#ffc107" : "#ccc" }}
                         ></i>
                         {prof.rating !== null && prof.rating !== undefined ? (
-                          <>
-                            <strong>{prof.rating.toFixed(1)}</strong>
-                            <span className="total-avaliacoes">(Avaliado)</span>
-                          </>
+                          <strong>{prof.rating.toFixed(1)}</strong>
                         ) : (
-                          <span
-                            className="total-avaliacoes"
-                            style={{ fontWeight: "600", color: "#888" }}
-                          >
+                          <span className="total-avaliacoes" style={{ fontWeight: "600", color: "#888" }}>
                             Sem avaliação
                           </span>
                         )}
                       </div>
+
+                      <button
+                        className="btn-ver-avaliacoes"
+                        onClick={() => setModalAvaliacoes({ id: prof.id, nome: prof.name })}
+                      >
+                        <i className="bi bi-chat-square-text"></i> Ver avaliações
+                      </button>
 
                       <button
                         className="btn-ponto-cartao"
@@ -315,9 +329,7 @@ function ListaProf() {
                         }}
                         onClick={() => lidarComSelecaoProfissional(prof.id)}
                       >
-                        {reassignDemandId
-                          ? "Reatribuir a Este"
-                          : "Solicitar Serviço"}
+                        {reassignDemandId ? "Reatribuir a Este" : "Solicitar Serviço"}
                       </button>
                     </div>
                   </div>
@@ -327,6 +339,13 @@ function ListaProf() {
           )}
         </div>
       </section>
+      {modalAvaliacoes && (
+        <HistoricoAvaliacoes
+          profissionalId={modalAvaliacoes.id}
+          profissionalNome={modalAvaliacoes.nome}
+          onClose={() => setModalAvaliacoes(null)}
+        />
+      )}
     </div>
   );
 }

@@ -7,6 +7,8 @@ import { traduzirStatus, getStatusClass } from "../../utils/statusUtils";
 import DemandInfoBadges from "../../components/DemandInfoBadges";
 import "./DashboardProfissional.css";
 
+const INTERVALO_REFRESH = 30_000;
+
 function DashboardProfissional() {
   const navigate = useNavigate();
   const [pedidos, setPedidos] = useState([]);
@@ -29,11 +31,11 @@ function DashboardProfissional() {
     userStorage && userStorage !== "undefined" ? JSON.parse(userStorage) : null;
   const profesionalId = usuarioLogado?.id;
 
-  const buscarPedidos = async () => {
+  const buscarPedidos = async (silencioso = false) => {
     if (!profesionalId) return null;
 
     try {
-      setLoading(true);
+      if (!silencioso) setLoading(true);
       const response = await api.get("/api/demand/user");
 
       const meusPedidos = response.data
@@ -51,16 +53,22 @@ function DashboardProfissional() {
       return meusPedidos;
     } catch (err) {
       console.error("Erro ao carregar demandas ou reputação:", err);
-      toast.error("Erro ao carregar as solicitações.");
+      if (!silencioso) toast.error("Erro ao carregar as solicitações.");
       return null;
     } finally {
-      setLoading(false);
+      if (!silencioso) setLoading(false);
     }
   };
 
   useEffect(() => {
     buscarPedidos();
   }, [profesionalId]);
+
+  useEffect(() => {
+    if (!profesionalId) return;
+    const id = setInterval(() => buscarPedidos(true), INTERVALO_REFRESH);
+    return () => clearInterval(id);
+  }, []);
 
   const processarAtualizacaoStatus = async (pedidoId, novoStatus) => {
     try {

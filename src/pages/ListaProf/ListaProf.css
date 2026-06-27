@@ -179,6 +179,29 @@
 .avaliacao-profissional i { color: #ffcc00; }
 .total-avaliacoes { color: #999; font-size: 13px; }
 
+.btn-ver-avaliacoes {
+  width: 100%;
+  padding: 8px;
+  border-radius: 50px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #3b82f6;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 8px;
+  transition: 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-ver-avaliacoes:hover {
+  background: #eff6ff;
+  border-color: #3b82f6;
+}
+
 .btn-ponto-cartao {
   width: 100%;
   padding: 12px;

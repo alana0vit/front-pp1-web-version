@@ -69,6 +69,25 @@ function EditarPerfil() {
     if (userId) carregarDadosDoPerfil();
   }, [userId, reset]);
 
+  const buscarEnderecoPorCep = async (cep) => {
+    const cepLimpo = String(cep).replace(/\D/g, '');
+    if (cepLimpo.length !== 8) return;
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+      const dados = await res.json();
+      if (dados.erro) {
+        toast.error('CEP não encontrado. Preencha o endereço manualmente.');
+        return;
+      }
+      setValue('street', dados.logradouro || '');
+      setValue('neighborhood', dados.bairro || '');
+      setValue('city', dados.localidade || '');
+      setValue('state', dados.uf || '');
+    } catch {
+      toast.error('Não foi possível buscar o CEP. Verifique sua conexão.');
+    }
+  };
+
   const alternarVisibilidadeSenha = () => {
     setMostrarSenha(!mostrarSenha);
   };
@@ -190,7 +209,7 @@ function EditarPerfil() {
                     <div className="input-group">
                       <label>CEP</label>
                       <div className="input-wrapper">
-                        <input type="text" {...register("zipCode", { required: true })} />
+                        <input type="text" {...register("zipCode", { required: true })} onBlur={(e) => buscarEnderecoPorCep(e.target.value)} />
                       </div>
                     </div>
 

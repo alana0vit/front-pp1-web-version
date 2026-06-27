@@ -7,6 +7,8 @@ import { traduzirStatus, getStatusClass } from '../../utils/statusUtils';
 import DemandInfoBadges from '../../components/DemandInfoBadges';
 import './DashboardCliente.css';
 
+const INTERVALO_REFRESH = 30_000;
+
 function DashboardCliente() {
   const navigate = useNavigate();
   const [pedidos, setPedidos] = useState([]);
@@ -29,11 +31,11 @@ function DashboardCliente() {
   const usuarioLogado = userStorage && userStorage !== "undefined" ? JSON.parse(userStorage) : null;
   const clienteId = usuarioLogado?.id;
 
-  const buscarMeusPedidos = async () => {
+  const buscarMeusPedidos = async (silencioso = false) => {
     if (!clienteId) return;
 
     try {
-      setLoading(true);
+      if (!silencioso) setLoading(true);
       const response = await api.get('/api/demand/user');
 
       const dadosSeguros = Array.isArray(response.data) ? response.data : [];
@@ -48,9 +50,9 @@ function DashboardCliente() {
       setPedidos(meusPedidos);
     } catch (err) {
       console.error("Erro ao carregar demandas:", err);
-      toast.error("Erro ao carregar os seus serviços.");
+      if (!silencioso) toast.error("Erro ao carregar os seus serviços.");
     } finally {
-      setLoading(false);
+      if (!silencioso) setLoading(false);
     }
   };
 
@@ -75,6 +77,12 @@ function DashboardCliente() {
     buscarMeusPedidos();
     buscarAvaliacoes();
   }, [clienteId]);
+
+  useEffect(() => {
+    if (!clienteId) return;
+    const id = setInterval(() => buscarMeusPedidos(true), INTERVALO_REFRESH);
+    return () => clearInterval(id);
+  }, []);
 
   const enviarAvaliacaoSistema = async (e) => {
     e.preventDefault();
