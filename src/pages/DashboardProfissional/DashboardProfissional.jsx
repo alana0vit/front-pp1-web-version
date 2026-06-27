@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import api from "../../services/api";
 import DetalhesSolicitacao from "../DetalhesSolicitacao/DetalhesSolicitacao";
 import { traduzirStatus, getStatusClass } from "../../utils/statusUtils";
+import DemandInfoBadges from "../../components/DemandInfoBadges";
 import "./DashboardProfissional.css";
 
 function DashboardProfissional() {
@@ -232,10 +233,7 @@ function DashboardProfissional() {
                       </span>
                       <h4 style={{ marginTop: '15px' }}>{p.title}</h4>
                       <p className="client-name"><i className="bi bi-person"></i> {p.clientId?.name || "Cliente"}</p>
-
-                      {p.addressId && (
-                        <p className="client-address"><i className="bi bi-geo-alt"></i> {p.addressId.neighborhood}, {p.addressId.city}</p>
-                      )}
+                      <DemandInfoBadges demanda={p} />
                     </div>
 
                     <div className="card-footer" onClick={(e) => e.stopPropagation()}>
@@ -272,6 +270,7 @@ function DashboardProfissional() {
               <div>
                 <label style={{ fontSize: '11px', fontWeight: '700', color: '#888' }}>SERVIÇO SOLICITADO</label>
                 <p style={{ fontSize: '18px', fontWeight: '700', color: '#111', margin: '2px 0 0 0' }}>{pedidoDetalhado.title}</p>
+                <DemandInfoBadges demanda={pedidoDetalhado} />
               </div>
 
               <div>

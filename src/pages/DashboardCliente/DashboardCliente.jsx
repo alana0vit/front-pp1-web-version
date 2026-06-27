@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import api from '../../services/api';
 import DetalhesSolicitacao from '../DetalhesSolicitacao/DetalhesSolicitacao';
 import { traduzirStatus, getStatusClass } from '../../utils/statusUtils';
+import DemandInfoBadges from '../../components/DemandInfoBadges';
 import './DashboardCliente.css';
 
 function DashboardCliente() {
@@ -293,6 +294,8 @@ function DashboardCliente() {
                         {pedido.description}
                       </p>
 
+                      <DemandInfoBadges demanda={pedido} />
+
                       <div className="row-item-footer-actions" onClick={(e) => e.stopPropagation()}>
                         <span className="btn-trigger-view-more" onClick={() => setPedidoDetalhado(pedido)}>
                           <i className="bi bi-eye"></i> Ver mais detalhes
@@ -343,6 +346,7 @@ function DashboardCliente() {
               <div className="meta-field-group">
                 <label>Título do Chamado</label>
                 <p className="field-title-highlight">{pedidoDetalhado.title}</p>
+                <DemandInfoBadges demanda={pedidoDetalhado} />
               </div>
 
               <div className="meta-field-group">
