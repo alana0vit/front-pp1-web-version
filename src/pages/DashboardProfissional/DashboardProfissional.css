@@ -160,7 +160,7 @@
   flex-grow: 1;
 }
 
-.badge-status {
+.status-badge-real {
   display: inline-block;
   padding: 6px 12px;
   border-radius: 20px;
@@ -168,11 +168,13 @@
   font-weight: 700;
   margin-bottom: 12px;
   letter-spacing: 0.5px;
-  align-self: flex-start; 
+  align-self: flex-start;
 }
 
-.request-card.status-opened .badge-status { background: #eff6ff; color: #2563eb; }
-.request-card.status-in_waiting .badge-status { background: #fffbeb; color: #d97706; }
+.status-badge-real.opened { background: #eff6ff; color: #2563eb; }
+.status-badge-real.in_waiting { background: #fffbeb; color: #d97706; }
+.status-badge-real.closed { background: #f0fdf4; color: #16a34a; }
+.status-badge-real.rejected { background: #fef2f2; color: #dc2626; }
 
 .card-body h4 {
   margin: 0 0 15px 0;

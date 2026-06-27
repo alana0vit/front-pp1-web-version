@@ -458,7 +458,7 @@
 }
 
 .pill-opened { background-color: #e6f0ff; color: #0066ff; }
-.pill-waiting { background-color: #fff9db; color: #f59f00; }
+.pill-in_waiting { background-color: #fff9db; color: #f59f00; }
 .pill-closed { background-color: #ebfbee; color: #2b8a3e; }
 .pill-rejected { background-color: #fff5f5; color: #c92a2a; }
 

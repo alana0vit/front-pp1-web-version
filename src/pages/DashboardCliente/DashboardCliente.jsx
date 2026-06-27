@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
 import DetalhesSolicitacao from '../DetalhesSolicitacao/DetalhesSolicitacao';
+import { traduzirStatus, getStatusClass } from '../../utils/statusUtils';
 import './DashboardCliente.css';
 
 function DashboardCliente() {
@@ -38,7 +39,7 @@ function DashboardCliente() {
 
       const meusPedidos = dadosSeguros
         .filter(d => {
-          const idCli = d.client?.id || d.clientId?.id || d.clientId;
+          const idCli = d.clientId?.id || d.clientId;
           return Number(idCli) === Number(clienteId);
         })
         .sort((a, b) => (b.id || 0) - (a.id || 0));
@@ -68,19 +69,11 @@ function DashboardCliente() {
       console.error("Erro ao carregar avaliações:", err);
     }
   };
+
   useEffect(() => {
     buscarMeusPedidos();
     buscarAvaliacoes();
   }, [clienteId]);
-
-  const traduzirStatus = (status) => {
-    const s = String(status || '').toUpperCase();
-    if (s === 'ABERTO' || s === '1' || s === 'OPENED') return 'Aguardando Resposta';
-    if (s === 'AGUARDANDO' || s === '3' || s === 'IN_WAITING') return 'Em Andamento';
-    if (s === 'FECHADO' || s === '0' || s === 'CLOSED') return 'Concluída';
-    if (s === 'REJEITADO' || s === '2' || s === 'REJECTED') return 'Recusada';
-    return s;
-  };
 
   const enviarAvaliacaoSistema = async (e) => {
     e.preventDefault();
@@ -136,31 +129,14 @@ function DashboardCliente() {
 
     if (!matchesTexto) return false;
 
-    if (abaAtiva === 'ATIVAS') {
-      return status === 'ABERTO' || status === '1' || status === 'OPENED' ||
-        status === 'AGUARDANDO' || status === '3' || status === 'IN_WAITING';
-    }
-    if (abaAtiva === 'HISTORICO') {
-      return status === 'FECHADO' || status === '0' || status === 'CLOSED' ||
-        status === 'REJEITADO' || status === '2' || status === 'REJECTED';
-    }
+    if (abaAtiva === 'ATIVAS') return status === 'ABERTO' || status === 'AGUARDANDO';
+    if (abaAtiva === 'HISTORICO') return status === 'FECHADO' || status === 'REJEITADO';
     return true;
   });
 
-  const emAndamento = pedidos.filter(p => {
-    const s = String(p.demandStatus || '').toUpperCase();
-    return s === 'AGUARDANDO' || s === '3' || s === 'IN_WAITING';
-  }).length;
-
-  const aguardando = pedidos.filter(p => {
-    const s = String(p.demandStatus || '').toUpperCase();
-    return s === 'ABERTO' || s === '1' || s === 'OPENED';
-  }).length;
-
-  const concluidos = pedidos.filter(p => {
-    const s = String(p.demandStatus || '').toUpperCase();
-    return s === 'FECHADO' || s === '0' || s === 'CLOSED';
-  }).length;
+  const emAndamento = pedidos.filter(p => String(p.demandStatus || '').toUpperCase() === 'AGUARDANDO').length;
+  const aguardando = pedidos.filter(p => String(p.demandStatus || '').toUpperCase() === 'ABERTO').length;
+  const concluidos = pedidos.filter(p => String(p.demandStatus || '').toUpperCase() === 'FECHADO').length;
 
   return (
     <div className="premium-dashboard-wrapper">
@@ -192,10 +168,7 @@ function DashboardCliente() {
           <div className="status-cards-vertical-stack">
             <div
               className={`premium-status-card card-blue-theme ${abaAtiva === 'ATIVAS' && cardSelecionado === 'ANDAMENTO' ? 'active-card' : ''}`}
-              onClick={() => {
-                setAbaAtiva('ATIVAS');
-                setCardSelecionado('ANDAMENTO');
-              }}
+              onClick={() => { setAbaAtiva('ATIVAS'); setCardSelecionado('ANDAMENTO'); }}
             >
               <span className="status-counter-number">{emAndamento}</span>
               <div className="status-meta-info">
@@ -207,10 +180,7 @@ function DashboardCliente() {
 
             <div
               className={`premium-status-card card-amber-theme ${abaAtiva === 'ATIVAS' && cardSelecionado === 'AGUARDANDO' ? 'active-card' : ''}`}
-              onClick={() => {
-                setAbaAtiva('ATIVAS');
-                setCardSelecionado('AGUARDANDO');
-              }}
+              onClick={() => { setAbaAtiva('ATIVAS'); setCardSelecionado('AGUARDANDO'); }}
             >
               <span className="status-counter-number">{aguardando}</span>
               <div className="status-meta-info">
@@ -222,10 +192,7 @@ function DashboardCliente() {
 
             <div
               className={`premium-status-card card-green-theme ${abaAtiva === 'HISTORICO' ? 'active-card' : ''}`}
-              onClick={() => {
-                setAbaAtiva('HISTORICO');
-                setCardSelecionado('FINALIZADOS');
-              }}
+              onClick={() => { setAbaAtiva('HISTORICO'); setCardSelecionado('FINALIZADOS'); }}
             >
               <span className="status-counter-number">{concluidos}</span>
               <div className="status-meta-info">
@@ -268,19 +235,13 @@ function DashboardCliente() {
             <div className="premium-tabs-bar">
               <button
                 className={`tab-link-item ${abaAtiva === 'ATIVAS' ? 'is-active' : ''}`}
-                onClick={() => {
-                  setAbaAtiva('ATIVAS');
-                  setCardSelecionado('ANDAMENTO');
-                }}
+                onClick={() => { setAbaAtiva('ATIVAS'); setCardSelecionado('ANDAMENTO'); }}
               >
                 Chamados Ativos
               </button>
               <button
                 className={`tab-link-item ${abaAtiva === 'HISTORICO' ? 'is-active' : ''}`}
-                onClick={() => {
-                  setAbaAtiva('HISTORICO');
-                  setCardSelecionado('FINALIZADOS');
-                }}
+                onClick={() => { setAbaAtiva('HISTORICO'); setCardSelecionado('FINALIZADOS'); }}
               >
                 Histórico e Rejeitados
               </button>
@@ -302,8 +263,7 @@ function DashboardCliente() {
             ) : (
               <div className="premium-dynamic-list-container">
                 {pedidosFiltrados.map(pedido => {
-                  const statusAtual = String(pedido.demandStatus || '').toUpperCase();
-                  const notaAvaliacao = avaliacoes[pedido.id];  // undefined se não avaliado, número se avaliado
+                  const notaAvaliacao = avaliacoes[pedido.id];
 
                   return (
                     <div
@@ -313,7 +273,7 @@ function DashboardCliente() {
                     >
                       <div className="row-item-top-flex">
                         <h4>{pedido.title}</h4>
-                        <span className={`status-pill-badge ${statusAtual === '1' || statusAtual === 'ABERTO' || statusAtual === 'OPENED' ? 'pill-opened' : statusAtual === '3' || statusAtual === 'AGUARDANDO' || statusAtual === 'IN_WAITING' ? 'pill-waiting' : statusAtual === '0' || statusAtual === 'FECHADO' || statusAtual === 'CLOSED' ? 'pill-closed' : 'pill-rejected'}`}>
+                        <span className={`status-pill-badge pill-${getStatusClass(pedido.demandStatus)}`}>
                           {traduzirStatus(pedido.demandStatus)}
                         </span>
                       </div>
@@ -338,7 +298,7 @@ function DashboardCliente() {
                           <i className="bi bi-eye"></i> Ver mais detalhes
                         </span>
 
-                        {(statusAtual === 'FECHADO' || statusAtual === 'CLOSED' || statusAtual === '0') && (
+                        {String(pedido.demandStatus || '').toUpperCase() === 'FECHADO' && (
                           notaAvaliacao != null ? (
                             <span className="avaliacao-exibida">
                               {[1, 2, 3, 4, 5].map(star => (
@@ -388,7 +348,7 @@ function DashboardCliente() {
               <div className="meta-field-group">
                 <label>Status Atual</label>
                 <div style={{ marginTop: '6px' }}>
-                  <span className={`status-pill-badge ${String(pedidoDetalhado.demandStatus).toUpperCase() === '1' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'ABERTO' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'OPENED' ? 'pill-opened' : String(pedidoDetalhado.demandStatus).toUpperCase() === '3' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'AGUARDANDO' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'IN_WAITING' ? 'pill-waiting' : String(pedidoDetalhado.demandStatus).toUpperCase() === '0' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'FECHADO' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'CLOSED' ? 'pill-closed' : 'pill-rejected'}`}>
+                  <span className={`status-pill-badge pill-${getStatusClass(pedidoDetalhado.demandStatus)}`}>
                     {traduzirStatus(pedidoDetalhado.demandStatus)}
                   </span>
                 </div>
@@ -414,7 +374,7 @@ function DashboardCliente() {
               </div>
 
               <div className="modal-sheet-footer-actions">
-                {(String(pedidoDetalhado.demandStatus).toUpperCase() === 'OPENED' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'ABERTO' || String(pedidoDetalhado.demandStatus).toUpperCase() === '1') && (
+                {String(pedidoDetalhado.demandStatus || '').toUpperCase() === 'ABERTO' && (
                   <button
                     className="btn-modal-submit-primary"
                     onClick={() => {
@@ -426,7 +386,7 @@ function DashboardCliente() {
                   </button>
                 )}
 
-                {(String(pedidoDetalhado.demandStatus).toUpperCase() === 'REJECTED' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'REJEITADO' || String(pedidoDetalhado.demandStatus).toUpperCase() === '2') && (
+                {String(pedidoDetalhado.demandStatus || '').toUpperCase() === 'REJEITADO' && (
                   <button
                     className="btn-modal-submit-success"
                     onClick={() => {
@@ -438,7 +398,7 @@ function DashboardCliente() {
                   </button>
                 )}
 
-                {(String(pedidoDetalhado.demandStatus).toUpperCase() === 'IN_WAITING' || String(pedidoDetalhado.demandStatus).toUpperCase() === 'AGUARDANDO' || String(pedidoDetalhado.demandStatus).toUpperCase() === '3') && (
+                {String(pedidoDetalhado.demandStatus || '').toUpperCase() === 'AGUARDANDO' && (
                   <DetalhesSolicitacao demanda={pedidoDetalhado} modo="CLIENTE" />
                 )}
               </div>

@@ -50,12 +50,13 @@ function EditarDemanda() {
     try {
       setSalvando(true);
 
-      const payload = {
-        title: title.trim(),
-        description: description.trim()
-      };
+      const formData = new FormData();
+      formData.append('title', title.trim());
+      formData.append('description', description.trim());
 
-      await api.put(`/api/demand/${id}`, payload);
+      await api.patch(`/api/demand/${id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
 
       toast.success("Solicitação atualizada com sucesso!");
       navigate("/dashboard-cliente");
