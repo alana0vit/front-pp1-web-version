@@ -1,0 +1,59 @@
+.demand-info-badges {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.demand-category-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 50px;
+  letter-spacing: 0.3px;
+  align-self: flex-start;
+}
+
+.demand-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.demand-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: #475569;
+  font-weight: 500;
+}
+
+.demand-meta-item i {
+  color: #3b82f6;
+  font-size: 13px;
+}
+
+.demand-meta-item.empty {
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.demand-address-line {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: #475569;
+  font-weight: 500;
+}
+
+.demand-address-line i {
+  color: #3b82f6;
+}

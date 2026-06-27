@@ -20,8 +20,7 @@ const Login = () => {
       const response = await api.post('/auth/login', data);
       const { token, id, name, userType } = response.data;
 
-      localStorage.setItem('@ConectaPro:token', token);
-      localStorage.setItem('@ConectaPro:user', JSON.stringify({ id, name, userType }));
+      localStorage.setItem('@ConectaPro:user', JSON.stringify({ id, name, userType, token }));
       
       toast.success(`Bem-vindo(a) de volta, ${name}!`);
 

@@ -10,11 +10,7 @@ const Header = () => {
     const user = userStorage ? JSON.parse(userStorage) : null;
 
     const fazerLogout = () => {
-        // Limpa a sessão do navegador
-        localStorage.removeItem('@ConectaPro:token');
         localStorage.removeItem('@ConectaPro:user');
-        
-        // Redireciona para a Home pública
         navigate('/');
     };
 
