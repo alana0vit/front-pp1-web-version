@@ -90,3 +90,22 @@
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(0, 123, 255, 0.3);
 }
+
+@media (max-width: 480px) {
+    .faq-container {
+        margin: 1.5rem auto;
+        padding: 0 1rem;
+    }
+
+    .faq-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .faq-item {
+        padding: 1rem;
+    }
+
+    .faq-pergunta h3 {
+        font-size: 0.95rem;
+    }
+}

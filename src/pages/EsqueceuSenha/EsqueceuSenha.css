@@ -83,3 +83,13 @@
         transform: translateY(0);
     }
 }
+
+@media (max-width: 480px) {
+    .esqueceu-senha-container {
+        padding: 1rem;
+    }
+
+    .esqueceu-senha-card {
+        padding: 1.5rem;
+    }
+}

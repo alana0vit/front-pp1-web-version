@@ -93,3 +93,23 @@ ul {
 ul li {
     margin-bottom: 8px;
 }
+
+@media (max-width: 768px) {
+    .cartao-termos {
+        padding: 24px 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .pagina-termos {
+        padding: 20px 12px;
+    }
+
+    .cartao-termos {
+        padding: 16px;
+    }
+
+    .cabecalho-cartao h1 {
+        font-size: 1.6rem;
+    }
+}

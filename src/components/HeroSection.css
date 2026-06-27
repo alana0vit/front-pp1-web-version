@@ -68,7 +68,58 @@
 
 .hero-main-img {
   width: 100%;
-  max-width: px;
+  max-width: 520px;
   height: auto;
-  object-fit: contain; 
+  object-fit: contain;
+}
+
+@media (max-width: 992px) {
+  .hero-container {
+    padding: 0 5%;
+  }
+
+  .hero-title {
+    font-size: 60px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-container {
+    flex-direction: column;
+    padding: 60px 20px;
+    min-height: auto;
+    text-align: center;
+    gap: 40px;
+  }
+
+  .hero-title {
+    font-size: 48px;
+  }
+
+  .hero-subtitle {
+    max-width: 100%;
+    margin-bottom: 30px;
+  }
+
+  .hero-image-container {
+    width: 100%;
+  }
+
+  .hero-main-img {
+    max-width: 360px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-container {
+    padding: 40px 16px;
+  }
+
+  .hero-title {
+    font-size: 36px;
+  }
+
+  .hero-subtitle {
+    font-size: 16px;
+  }
 }
