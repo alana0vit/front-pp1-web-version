@@ -1,9 +1,15 @@
+import { useNavigate } from 'react-router-dom';
 import './TermosDeUso.css';
 
 function TermosDeUso() {
-  
+  const navigate = useNavigate();
+
   const handleVoltar = () => {
-    window.close();
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
   };
 
   return (

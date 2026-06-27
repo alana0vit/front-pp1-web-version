@@ -1,21 +1,33 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import api from '../../services/api';
 import './PerfilCliente.css';
 
 function PerfilCliente() {
   const navegar = useNavigate();
   const fileInputRef = useRef(null);
   const [imagemPerfil, setImagemPerfil] = useState(null);
+  const [usuario, setUsuario] = useState(null);
+
+  const userStorage = localStorage.getItem('@ConectaPro:user');
+  const usuarioLogado = userStorage ? JSON.parse(userStorage) : null;
+
+  useEffect(() => {
+    if (!usuarioLogado?.id) return;
+    api.get(`/api/user/${usuarioLogado.id}`)
+      .then((res) => setUsuario(res.data))
+      .catch(() => toast.error('Não foi possível carregar os dados do perfil.'));
+  }, []);
 
   const handleCliqueCamera = () => fileInputRef.current.click();
-  
+
   const handleUploadImagem = (event) => {
     const arquivo = event.target.files[0];
-    if (arquivo) {
-      const urlImagem = URL.createObjectURL(arquivo);
-      setImagemPerfil(urlImagem);
-    }
+    if (arquivo) setImagemPerfil(URL.createObjectURL(arquivo));
   };
+
+  const inicial = usuario?.name ? usuario.name.charAt(0).toUpperCase() : '?';
 
   return (
     <div className="perfil-cliente-v10">
@@ -23,15 +35,15 @@ function PerfilCliente() {
         <div className="info-topo">
           <div className="foto-wrapper">
             <div className="circulo-avatar">
-              {imagemPerfil ? <img src={imagemPerfil} alt="Perfil" /> : "M"}
+              {imagemPerfil ? <img src={imagemPerfil} alt="Perfil" /> : inicial}
             </div>
             <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*" onChange={handleUploadImagem} />
             <button className="botao-camera" onClick={handleCliqueCamera}><i className="bi bi-camera-fill"></i></button>
           </div>
           <div className="dados-usuario">
-            <span className="etiqueta-membro">Membro desde Março 2024</span>
-            <h1>Marian Lopes</h1>
-            <p>marian.lopes@email.com</p>
+            <h1>{usuario?.name || usuarioLogado?.name || '—'}</h1>
+            <p>{usuario?.email || '—'}</p>
+            {usuario?.phone && <p>{usuario.phone}</p>}
             <button className="botao-editar" onClick={() => navegar('/editar-perfil')}>Editar Perfil</button>
           </div>
         </div>

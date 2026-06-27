@@ -1,5 +1,6 @@
 import emailjs from '@emailjs/browser';
 import { useState } from 'react';
+import { toast } from 'react-toastify';
 import ilustracaoImg from '../../assets/imgfaleconosco.jpg';
 import './FaleConosco.css';
 
@@ -25,9 +26,9 @@ function FaleConosco() {
 
     setEnviando(true);
 
-    const serviceID = 'service_ok6bjoh';
-    const templateID = 'template_383q4r7';
-    const publicKey = 'kQWEpS1RUORbN98pH';
+    const serviceID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+    const templateID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
     const templateParams = {
       nome: formData.nome,
@@ -38,12 +39,12 @@ function FaleConosco() {
 
     emailjs.send(serviceID, templateID, templateParams, publicKey)
       .then(() => {
-        alert("Mensagem enviada com sucesso! Logo entraremos em contato.");
+        toast.success("Mensagem enviada com sucesso! Logo entraremos em contato.");
         setFormData({ nome: '', email: '', motivo: '', mensagem: '' });
       })
       .catch((err) => {
         console.error('ERRO:', err);
-        alert("Ocorreu um erro ao enviar. Tente novamente.");
+        toast.error("Ocorreu um erro ao enviar. Tente novamente.");
       })
       .finally(() => {
         setEnviando(false);

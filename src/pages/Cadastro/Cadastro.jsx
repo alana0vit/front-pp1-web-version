@@ -90,7 +90,6 @@ const Cadastro = () => {
         }
       };
 
-      console.log("Enviando payload de cadastro:", usuarioPayload);
       await api.post("/api/user", usuarioPayload);
       
       setMostrarModalSucesso(true);
