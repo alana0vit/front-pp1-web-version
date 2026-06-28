@@ -14,8 +14,6 @@ import FAQ from "./pages/FAQ/FAQ";
 import Home from "./pages/Home/Home";
 import ListaProf from "./pages/ListaProf/ListaProf";
 import Login from "./pages/Login/Login";
-import PerfilCliente from "./pages/PerfilCliente/PerfilCliente";
-import PerfilProfissional from "./pages/PerfilProfissional/PerfilProfissional";
 import SolicServico from "./pages/SolicServico/SolicServico";
 import TermosDeUso from "./pages/TermosDeUso/TermosDeUso";
 import DetalhesSolicitacao from "./pages/DetalhesSolicitacao/DetalhesSolicitacao";
@@ -63,12 +61,10 @@ function App() {
         <Route path="/dashboard-cliente" element={<RotaPrivadaCliente><DashboardCliente /></RotaPrivadaCliente>} />
         <Route path="/lista-profissionais" element={<RotaPrivadaCliente><ListaProf /></RotaPrivadaCliente>} />
         <Route path="/solicitar-servico" element={<RotaPrivadaCliente><SolicServico /></RotaPrivadaCliente>} />
-        <Route path="/perfil" element={<RotaPrivadaCliente><PerfilCliente /></RotaPrivadaCliente>} />
         <Route path="/detalhes-solicitacao" element={<RotaPrivadaCliente><DetalhesSolicitacao /></RotaPrivadaCliente>} />
         <Route path="/editar-demanda/:id" element={<RotaPrivadaCliente><EditarDemanda /></RotaPrivadaCliente>} />
 
         <Route path="/dashboard-profissional" element={<RotaPrivadaProfissional><DashboardProfissional /></RotaPrivadaProfissional>} />
-        <Route path="/perfil-profissional" element={<RotaPrivadaProfissional><PerfilProfissional /></RotaPrivadaProfissional>} />
 
         <Route path="/editar-perfil" element={<RotaPrivadaGeral><EditarPerfil /></RotaPrivadaGeral>} />
 
