@@ -14,6 +14,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
   background: #ffffff;
   padding: 25px 30px;
   border-radius: 16px;
@@ -370,4 +372,18 @@
 
 .modal-container .btn-config:hover {
   background-color: #e2e8f0;
+}
+
+@media (max-width: 480px) {
+  .dash-prof-bg {
+    padding: 20px 12px;
+  }
+
+  .dash-prof-header {
+    padding: 20px;
+  }
+
+  .welcome-box h1 {
+    font-size: 20px;
+  }
 }

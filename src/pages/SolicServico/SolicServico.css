@@ -146,3 +146,17 @@
   box-shadow: none;
   transform: none;
 }
+
+@media (max-width: 480px) {
+  .solic-container {
+    padding: 20px 12px;
+  }
+
+  .solic-card {
+    padding: 24px 20px;
+  }
+
+  .solic-card h2 {
+    font-size: 24px;
+  }
+}

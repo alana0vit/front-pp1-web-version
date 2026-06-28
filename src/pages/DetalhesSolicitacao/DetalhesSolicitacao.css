@@ -174,3 +174,13 @@
   color: #94a3b8;
   cursor: not-allowed;
 }
+
+@media (max-width: 480px) {
+  .grid-contatos {
+    grid-template-columns: 1fr;
+  }
+
+  .corpo-detalhes {
+    padding: 16px;
+  }
+}
