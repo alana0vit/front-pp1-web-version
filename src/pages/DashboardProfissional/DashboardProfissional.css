@@ -69,6 +69,12 @@
   align-items: flex-start;
   position: relative;
   overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.stat-card.stat-active {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
 }
 
 .stat-card::before {
@@ -133,9 +139,9 @@
 
 .requests-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 24px;
-  align-items: stretch;
+  align-items: start;
 }
 
 .request-card {
@@ -145,7 +151,6 @@
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
-  height: 100%; 
   transition: all 0.2s ease;
 }
 
@@ -159,7 +164,7 @@
   padding: 24px;
   display: flex;
   flex-direction: column;
-  flex-grow: 1;
+  min-height: 180px;
 }
 
 .status-badge-real {
@@ -192,7 +197,6 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: auto; 
 }
 
 .card-footer {
@@ -280,6 +284,22 @@
 
 .tab-btn.active { color: #3b82f6; }
 
+.tab-count {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.tab-btn.active .tab-count {
+  background: #dbeafe;
+  color: #3b82f6;
+}
+
 .tab-btn.active::after {
   content: '';
   position: absolute;
@@ -313,21 +333,19 @@
 }
 .btn-editar-demanda:hover { background-color: #e2e8f0; }
 
-/* --- ESTILOS ESPECÍFICOS DO MODAL DE CONFIRMAÇÃO --- */
 .modal-container .btn-config,
 .modal-container .btn-action {
-  padding: 12px 20px; /* Define a mesma altura e preenchimento para ambos */
+  padding: 12px 20px; 
   font-size: 14px;
   font-weight: 600;
   display: flex;
   justify-content: center;
   align-items: center;
   border-radius: 8px;
-  height: 45px; /* Força os dois a terem a mesma altura */
-  box-sizing: border-box; /* Garante que bordas e paddings não quebrem o tamanho */
+  height: 45px; 
+  box-sizing: border-box; 
 }
 
-/* Opcional: Para o botão cancelar não ficar com borda diferente do design principal */
 .modal-container .btn-config {
   background-color: #f1f5f9;
   color: #475569;
@@ -337,21 +355,19 @@
 .modal-container .btn-config:hover {
   background-color: #e2e8f0;
 }
-/* --- ESTILOS ESPECÍFICOS DO MODAL DE CONFIRMAÇÃO --- */
 
-/* Cria uma linha perfeita dividida ao meio para os botões */
 .modal-actions-row {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* Divide exatamente 50% para cada */
+  grid-template-columns: 1fr 1fr; 
   gap: 12px;
   width: 100%;
 }
 
-/* Força os dois botões a preencherem seu lado e terem a mesma altura */
+
 .modal-container .btn-config,
 .modal-container .btn-action {
   width: 100%;
-  padding: 0; /* Remove padding que pode atrapalhar o grid */
+  padding: 0; 
   height: 45px;
   font-size: 14px;
   font-weight: 600;
@@ -360,10 +376,9 @@
   align-items: center;
   border-radius: 8px;
   box-sizing: border-box;
-  margin: 0; /* Remove margens extras */
+  margin: 0; 
 }
 
-/* Estilo do botão Cancelar */
 .modal-container .btn-config {
   background-color: #f1f5f9;
   color: #475569;

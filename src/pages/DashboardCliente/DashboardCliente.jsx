@@ -13,7 +13,7 @@ function DashboardCliente() {
   const navigate = useNavigate();
   const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [abaAtiva, setAbaAtiva] = useState('ATIVAS');
+  const [abaAtiva, setAbaAtiva] = useState('PENDENTE');
   const [pedidoDetalhado, setPedidoDetalhado] = useState(null);
   const [buscaTexto, setBuscaTexto] = useState('');
 
@@ -24,8 +24,6 @@ function DashboardCliente() {
   const [enviandoAvaliacao, setEnviandoAvaliacao] = useState(false);
 
   const [avaliacoes, setAvaliacoes] = useState({});
-
-  const [cardSelecionado, setCardSelecionado] = useState('ANDAMENTO');
 
   const userStorage = localStorage.getItem('@ConectaPro:user');
   const usuarioLogado = userStorage && userStorage !== "undefined" ? JSON.parse(userStorage) : null;
@@ -138,14 +136,18 @@ function DashboardCliente() {
 
     if (!matchesTexto) return false;
 
-    if (abaAtiva === 'ATIVAS') return status === 'ABERTO' || status === 'AGUARDANDO';
-    if (abaAtiva === 'HISTORICO') return status === 'FECHADO' || status === 'REJEITADO';
+    if (abaAtiva === 'PENDENTE') return status === 'ABERTO';
+    if (abaAtiva === 'ANDAMENTO') return status === 'AGUARDANDO';
+    if (abaAtiva === 'FINALIZADO') return status === 'FECHADO' || status === 'REJEITADO';
     return true;
   });
 
+  const pendentes = pedidos.filter(p => String(p.demandStatus || '').toUpperCase() === 'ABERTO').length;
   const emAndamento = pedidos.filter(p => String(p.demandStatus || '').toUpperCase() === 'AGUARDANDO').length;
-  const aguardando = pedidos.filter(p => String(p.demandStatus || '').toUpperCase() === 'ABERTO').length;
-  const concluidos = pedidos.filter(p => String(p.demandStatus || '').toUpperCase() === 'FECHADO').length;
+  const finalizados = pedidos.filter(p => {
+    const s = String(p.demandStatus || '').toUpperCase();
+    return s === 'FECHADO' || s === 'REJEITADO';
+  }).length;
 
   return (
     <div className="premium-dashboard-wrapper">
@@ -176,8 +178,20 @@ function DashboardCliente() {
 
           <div className="status-cards-vertical-stack">
             <div
-              className={`premium-status-card card-blue-theme ${abaAtiva === 'ATIVAS' && cardSelecionado === 'ANDAMENTO' ? 'active-card' : ''}`}
-              onClick={() => { setAbaAtiva('ATIVAS'); setCardSelecionado('ANDAMENTO'); }}
+              className={`premium-status-card card-amber-theme ${abaAtiva === 'PENDENTE' ? 'active-card' : ''}`}
+              onClick={() => setAbaAtiva('PENDENTE')}
+            >
+              <span className="status-counter-number">{pendentes}</span>
+              <div className="status-meta-info">
+                <span className="status-counter-label">Aguardando Aceitação</span>
+                <span className="status-counter-subtext">Aguardando retorno do profissional</span>
+              </div>
+              <div className="status-icon-box"><i className="bi bi-clock-fill"></i></div>
+            </div>
+
+            <div
+              className={`premium-status-card card-blue-theme ${abaAtiva === 'ANDAMENTO' ? 'active-card' : ''}`}
+              onClick={() => setAbaAtiva('ANDAMENTO')}
             >
               <span className="status-counter-number">{emAndamento}</span>
               <div className="status-meta-info">
@@ -188,25 +202,13 @@ function DashboardCliente() {
             </div>
 
             <div
-              className={`premium-status-card card-amber-theme ${abaAtiva === 'ATIVAS' && cardSelecionado === 'AGUARDANDO' ? 'active-card' : ''}`}
-              onClick={() => { setAbaAtiva('ATIVAS'); setCardSelecionado('AGUARDANDO'); }}
+              className={`premium-status-card card-green-theme ${abaAtiva === 'FINALIZADO' ? 'active-card' : ''}`}
+              onClick={() => setAbaAtiva('FINALIZADO')}
             >
-              <span className="status-counter-number">{aguardando}</span>
+              <span className="status-counter-number">{finalizados}</span>
               <div className="status-meta-info">
-                <span className="status-counter-label">Aguardando Aceitação</span>
-                <span className="status-counter-subtext">Aguardando retorno do profissional</span>
-              </div>
-              <div className="status-icon-box"><i className="bi bi-clock-fill"></i></div>
-            </div>
-
-            <div
-              className={`premium-status-card card-green-theme ${abaAtiva === 'HISTORICO' ? 'active-card' : ''}`}
-              onClick={() => { setAbaAtiva('HISTORICO'); setCardSelecionado('FINALIZADOS'); }}
-            >
-              <span className="status-counter-number">{concluidos}</span>
-              <div className="status-meta-info">
-                <span className="status-counter-label">Serviços Finalizados</span>
-                <span className="status-counter-subtext">Histórico de chamados encerrados</span>
+                <span className="status-counter-label">Finalizados</span>
+                <span className="status-counter-subtext">Concluídos e recusados</span>
               </div>
               <div className="status-icon-box"><i className="bi bi-check-circle-fill"></i></div>
             </div>
@@ -243,16 +245,22 @@ function DashboardCliente() {
 
             <div className="premium-tabs-bar">
               <button
-                className={`tab-link-item ${abaAtiva === 'ATIVAS' ? 'is-active' : ''}`}
-                onClick={() => { setAbaAtiva('ATIVAS'); setCardSelecionado('ANDAMENTO'); }}
+                className={`tab-link-item ${abaAtiva === 'PENDENTE' ? 'is-active' : ''}`}
+                onClick={() => setAbaAtiva('PENDENTE')}
               >
-                Chamados Ativos
+                Pendentes <span className="tab-count">{pendentes}</span>
               </button>
               <button
-                className={`tab-link-item ${abaAtiva === 'HISTORICO' ? 'is-active' : ''}`}
-                onClick={() => { setAbaAtiva('HISTORICO'); setCardSelecionado('FINALIZADOS'); }}
+                className={`tab-link-item ${abaAtiva === 'ANDAMENTO' ? 'is-active' : ''}`}
+                onClick={() => setAbaAtiva('ANDAMENTO')}
               >
-                Histórico e Rejeitados
+                Em Andamento <span className="tab-count">{emAndamento}</span>
+              </button>
+              <button
+                className={`tab-link-item ${abaAtiva === 'FINALIZADO' ? 'is-active' : ''}`}
+                onClick={() => setAbaAtiva('FINALIZADO')}
+              >
+                Finalizados <span className="tab-count">{finalizados}</span>
               </button>
             </div>
 

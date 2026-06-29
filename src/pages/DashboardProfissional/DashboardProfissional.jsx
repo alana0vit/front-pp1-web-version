@@ -13,10 +13,9 @@ function DashboardProfissional() {
   const navigate = useNavigate();
   const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [abaAtiva, setAbaAtiva] = useState("ATIVAS");
+  const [abaAtiva, setAbaAtiva] = useState("NOVO");
   const [pedidoDetalhado, setPedidoDetalhado] = useState(null);
   const [buscaTexto, setBuscaTexto] = useState('');
-  const [statusFiltro, setStatusFiltro] = useState("TODOS");
   const [dadosPerfil, setDadosPerfil] = useState(null);
 
   const [confirmacao, setConfirmacao] = useState({
@@ -107,15 +106,9 @@ function DashboardProfissional() {
 
     if (!matchesTexto) return false;
 
-    if (statusFiltro !== "TODOS") {
-      if (statusFiltro === "NOVO" && s !== "ABERTO") return false;
-      if (statusFiltro === "ANDAMENTO" && s !== "AGUARDANDO") return false;
-      if (statusFiltro === "FINALIZADO" && s !== "FECHADO") return false;
-      if (statusFiltro === "RECUSADO" && s !== "REJEITADO") return false;
-    }
-
-    if (abaAtiva === "ATIVAS") return s === "ABERTO" || s === "AGUARDANDO";
-    if (abaAtiva === "HISTORICO") return s === "FECHADO" || s === "REJEITADO";
+    if (abaAtiva === "NOVO") return s === "ABERTO";
+    if (abaAtiva === "ANDAMENTO") return s === "AGUARDANDO";
+    if (abaAtiva === "FINALIZADO") return s === "FECHADO" || s === "REJEITADO";
     return true;
   });
 
@@ -124,7 +117,7 @@ function DashboardProfissional() {
       const s = String(p.demandStatus || '').toUpperCase();
       if (statusAlvo === "ABERTO") return s === "ABERTO";
       if (statusAlvo === "AGUARDANDO") return s === "AGUARDANDO";
-      if (statusAlvo === "HISTORICO") return s === "FECHADO" || s === "REJEITADO";
+      if (statusAlvo === "FINALIZADO") return s === "FECHADO" || s === "REJEITADO";
       return false;
     }).length;
   };
@@ -152,17 +145,29 @@ function DashboardProfissional() {
         </header>
 
         <section className="stats-cards">
-          <div className="stat-card new">
+          <div
+            className={`stat-card new ${abaAtiva === "NOVO" ? "stat-active" : ""}`}
+            onClick={() => setAbaAtiva("NOVO")}
+            style={{ cursor: "pointer" }}
+          >
             <h3>{contagem("ABERTO")}</h3>
             <span>Novas Solicitações</span>
           </div>
-          <div className="stat-card active">
+          <div
+            className={`stat-card active ${abaAtiva === "ANDAMENTO" ? "stat-active" : ""}`}
+            onClick={() => setAbaAtiva("ANDAMENTO")}
+            style={{ cursor: "pointer" }}
+          >
             <h3>{contagem("AGUARDANDO")}</h3>
             <span>Em Andamento</span>
           </div>
-          <div className="stat-card total">
-            <h3>{contagem("HISTORICO")}</h3>
-            <span>No Histórico</span>
+          <div
+            className={`stat-card total ${abaAtiva === "FINALIZADO" ? "stat-active" : ""}`}
+            onClick={() => setAbaAtiva("FINALIZADO")}
+            style={{ cursor: "pointer" }}
+          >
+            <h3>{contagem("FINALIZADO")}</h3>
+            <span>Finalizados</span>
           </div>
         </section>
 
@@ -170,26 +175,7 @@ function DashboardProfissional() {
           <div className="list-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
             <h2>Fluxo de Demandas</h2>
 
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flex: 1, maxWidth: '550px', marginLeft: 'auto' }}>
-              <select
-                value={statusFiltro}
-                onChange={(e) => setStatusFiltro(e.target.value)}
-                style={{ padding: '8px 12px', borderRadius: '50px', border: '1px solid #ddd', fontSize: '14px', outline: 'none', background: '#fff', cursor: 'pointer', color: '#333', fontWeight: '600' }}
-              >
-                <option value="TODOS">🎯 Todos os Status</option>
-                {abaAtiva === "ATIVAS" ? (
-                  <>
-                    <option value="NOVO">🔵 Novos</option>
-                    <option value="ANDAMENTO">🟠 Em Andamento</option>
-                  </>
-                ) : (
-                  <>
-                    <option value="FINALIZADO">🟢 Finalizados</option>
-                    <option value="RECUSADO">🔴 Recusados</option>
-                  </>
-                )}
-              </select>
-
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flex: 1, maxWidth: '450px', marginLeft: 'auto' }}>
               <div style={{ position: 'relative', width: '100%' }}>
                 <i className="bi bi-search" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#888' }}></i>
                 <input
@@ -208,11 +194,14 @@ function DashboardProfissional() {
           </div>
 
           <div className="tabs-container">
-            <button className={`tab-btn ${abaAtiva === "ATIVAS" ? "active" : ""}`} onClick={() => { setAbaAtiva("ATIVAS"); setStatusFiltro("TODOS"); }}>
-              Solicitações Ativas
+            <button className={`tab-btn ${abaAtiva === "NOVO" ? "active" : ""}`} onClick={() => setAbaAtiva("NOVO")}>
+              Novas <span className="tab-count">{contagem("ABERTO")}</span>
             </button>
-            <button className={`tab-btn ${abaAtiva === "HISTORICO" ? "active" : ""}`} onClick={() => { setAbaAtiva("HISTORICO"); setStatusFiltro("TODOS"); }}>
-              Histórico
+            <button className={`tab-btn ${abaAtiva === "ANDAMENTO" ? "active" : ""}`} onClick={() => setAbaAtiva("ANDAMENTO")}>
+              Em Andamento <span className="tab-count">{contagem("AGUARDANDO")}</span>
+            </button>
+            <button className={`tab-btn ${abaAtiva === "FINALIZADO" ? "active" : ""}`} onClick={() => setAbaAtiva("FINALIZADO")}>
+              Finalizadas <span className="tab-count">{contagem("FINALIZADO")}</span>
             </button>
           </div>
 
@@ -244,20 +233,25 @@ function DashboardProfissional() {
                       <DemandInfoBadges demanda={p} />
                     </div>
 
-                    <div className="card-footer" onClick={(e) => e.stopPropagation()}>
-                      {String(p.demandStatus).toUpperCase() === "ABERTO" && (
-                        <>
-                          <button className="btn-action accept" onClick={(e) => solicitarConfirmacao(e, p.id, "AGUARDANDO", "aceitar esta solicitação de serviço")}>Aceitar</button>
-                          <button className="btn-action decline" onClick={(e) => solicitarConfirmacao(e, p.id, "REJEITADO", "recusar esta solicitação de serviço")}>Recusar</button>
-                        </>
-                      )}
-                      {String(p.demandStatus).toUpperCase() === "AGUARDANDO" && (
-                        <>
-                          <DetalhesSolicitacao demanda={p} modo="PROFISSIONAL" />
-                          <button className="btn-action finish" onClick={(e) => solicitarConfirmacao(e, p.id, "FECHADO", "finalizar este serviço de vez")} style={{ width: "100%", marginTop: "10px" }}>Finalizar Serviço</button>
-                        </>
-                      )}
-                    </div>
+                    {(String(p.demandStatus).toUpperCase() === "ABERTO" || String(p.demandStatus).toUpperCase() === "AGUARDANDO") && (
+                      <div className="card-footer" onClick={(e) => e.stopPropagation()}>
+                        {String(p.demandStatus).toUpperCase() === "ABERTO" && (
+                          <>
+                            <button className="btn-action accept" onClick={(e) => solicitarConfirmacao(e, p.id, "AGUARDANDO", "aceitar esta solicitação de serviço")}>
+                              <i className="bi bi-check-lg"></i> Aceitar
+                            </button>
+                            <button className="btn-action decline" onClick={(e) => solicitarConfirmacao(e, p.id, "REJEITADO", "recusar esta solicitação de serviço")}>
+                              <i className="bi bi-x-lg"></i> Recusar
+                            </button>
+                          </>
+                        )}
+                        {String(p.demandStatus).toUpperCase() === "AGUARDANDO" && (
+                          <button className="btn-action details" style={{ width: "100%" }} onClick={() => setPedidoDetalhado(p)}>
+                            <i className="bi bi-eye"></i> Ver detalhes
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -294,6 +288,19 @@ function DashboardProfissional() {
                     <button className="btn-action accept" style={{ flex: 1 }} onClick={(e) => { setPedidoDetalhado(null); solicitarConfirmacao(e, pedidoDetalhado.id, "AGUARDANDO", "aceitar esta solicitação de serviço"); }}>Aceitar Serviço</button>
                     <button className="btn-action decline" style={{ flex: 1 }} onClick={(e) => { setPedidoDetalhado(null); solicitarConfirmacao(e, pedidoDetalhado.id, "REJEITADO", "recusar esta solicitação de serviço"); }}>Recusar</button>
                   </div>
+                )}
+
+                {String(pedidoDetalhado.demandStatus).toUpperCase() === 'AGUARDANDO' && (
+                  <>
+                    <DetalhesSolicitacao demanda={pedidoDetalhado} modo="PROFISSIONAL" />
+                    <button
+                      className="btn-action finish"
+                      style={{ width: "100%", marginTop: "12px" }}
+                      onClick={(e) => { setPedidoDetalhado(null); solicitarConfirmacao(e, pedidoDetalhado.id, "FECHADO", "finalizar este serviço de vez"); }}
+                    >
+                      <i className="bi bi-check2-circle"></i> Finalizar Serviço
+                    </button>
+                  </>
                 )}
               </div>
             </div>
