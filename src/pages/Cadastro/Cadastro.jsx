@@ -178,16 +178,24 @@ const Cadastro = () => {
 
               {tipoPerfil === "PROFESSIONAL" ? (
                 <div className="input-group w-100">
-                  <label>CNPJ / CPF</label>
-                  <Controller
-                    name="documento"
-                    control={control}
-                    rules={{ required: true }}
-                    render={({ field }) => (
-                      <IMaskInput {...field} onAccept={(value) => field.onChange(value)} placeholder="00.000.000/0000-00 ou 000.000.000-00" />
-                    )}
-                  />
-                </div>
+  <label>CNPJ / CPF</label>
+  <Controller
+    name="documento"
+    control={control}
+    rules={{ required: true }}
+    render={({ field }) => (
+      <IMaskInput
+        {...field}
+        mask={[
+          { mask: '000.000.000-00' },
+          { mask: '00.000.000/0000-00' }
+        ]}
+        onAccept={(value) => field.onChange(value)}
+        placeholder="00.000.000/0000-00 ou 000.000.000-00"
+      />
+    )}
+  />
+</div>
               ) : (
                 <div className="row">
                   <div className="input-group w-50">
