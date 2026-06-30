@@ -13,10 +13,12 @@ function SolicServico() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [addressId, setAddressId] = useState('');
-  const [categoryId, setCategoryId] = useState('');       
+  const [categoryId, setCategoryId] = useState('');
   const [suggestedValue, setSuggestedValue] = useState('');
   const [suggestedDate, setSuggestedDate] = useState('');
   const [imagem, setImagem] = useState(null);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [addresses, setAddresses] = useState([]);
   const [categorias, setCategorias] = useState([]);
@@ -26,7 +28,7 @@ function SolicServico() {
   const usuarioLogado = userStorage ? JSON.parse(userStorage) : null;
   const clientId = usuarioLogado?.id;
 
-  const hoje = new Date().toISOString().split('T')[0];                
+  const hoje = new Date().toISOString().split('T')[0];
   const maxDate = new Date();
   maxDate.setFullYear(maxDate.getFullYear() + 1);
   const maxDateStr = maxDate.toISOString().split('T')[0];
@@ -51,7 +53,7 @@ function SolicServico() {
         if (primeiraCategoria) {
           setCategoryId(primeiraCategoria.id);
         } else if (catRes.data.length > 0) {
-          setCategoryId(catRes.data[0].id);   
+          setCategoryId(catRes.data[0].id);
         }
       } catch (error) {
         console.error('Erro ao carregar dados', error);
@@ -82,6 +84,8 @@ function SolicServico() {
       }
     }
 
+    setIsSubmitting(true);
+
     const formData = new FormData();
     formData.append('title', title);
     formData.append('description', description);
@@ -102,6 +106,7 @@ function SolicServico() {
     } catch (error) {
       console.error('Erro ao criar demanda:', error);
       toast.error('Erro ao enviar solicitação.');
+      setIsSubmitting(false);
     }
   };
 
@@ -112,95 +117,118 @@ function SolicServico() {
   return (
     <div className="solic-container">
       <div className="solic-card">
-        <button className="btn-voltar-solic" onClick={() => navigate(-1)}>
-          <i className="bi bi-arrow-left"></i> Voltar
-        </button>
 
-        <h2>Solicitar Serviço</h2>
-        {profName && (
-          <p className="prof-destaque-solic">
-            Profissional: <strong>{profName}</strong>
-          </p>
-        )}
+        <div className="solic-header-text">
+          <h2>Solicitar Serviço</h2>
+          {profName ? (
+            <p>Formulário de demanda para {profName}.</p>
+          ) : (
+            <p>Mantenha seus dados atualizados.</p>
+          )}
+        </div>
 
         <form onSubmit={onSubmit} className="solic-form">
-          <div className="input-group">
-            <label>Título da demanda*</label>
-            <input
-              type="text"
-              placeholder="Ex: Conserto de torneira"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
+          <div className="form-grid-layout">
+
+            {/* Coluna Esquerda */}
+            <div className="form-column">
+              <div className="input-group">
+                <label>Título da demanda*</label>
+                <input
+                  type="text"
+                  placeholder="Ex: Conserto de torneira"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              <div className="input-group">
+                <label>Categoria (definida pelo profissional)</label>
+                <select value={categoryId} disabled>
+                  {categorias.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="input-group">
+                <label>Descrição *</label>
+                <textarea
+                  rows="6"
+                  placeholder="Descreva o serviço detalhadamente..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  disabled={isSubmitting}
+                />
+              </div>
+            </div>
+
+            {/* Coluna Direita (Empilhada) */}
+            <div className="form-column">
+              <div className="input-group">
+                <label>Endereço *</label>
+                <select value={addressId} onChange={(e) => setAddressId(e.target.value)} disabled={isSubmitting}>
+                  {addresses.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.street}, {a.number} - {a.neighborhood}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="input-group">
+                <label>Valor máximo (R$)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="Opcional"
+                  value={suggestedValue}
+                  onChange={(e) => setSuggestedValue(e.target.value)}
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              <div className="input-group">
+                <label>Data sugerida</label>
+                <input
+                  type="date"
+                  value={suggestedDate}
+                  min={hoje}
+                  max={maxDateStr}
+                  onChange={(e) => setSuggestedDate(e.target.value)}
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              <div className="input-group upload-group">
+                <label>Anexar Imagem (opcional)</label>
+                <input
+                  type="file"
+                  id="imagemDemanda"
+                  accept="image/*"
+                  onChange={(e) => setImagem(e.target.files[0])}
+                  disabled={isSubmitting}
+                />
+              </div>
+            </div>
+
           </div>
 
-          <div className="input-group">
-            <label>Descrição *</label>
-            <textarea
-              rows="5"
-              placeholder="Descreva o serviço detalhadamente..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
+          {/* Linha Divisória */}
+          <div className="form-divider"></div>
 
-          <div className="input-group">
-            <label>Endereço *</label>
-            <select value={addressId} onChange={(e) => setAddressId(e.target.value)}>
-              {addresses.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.street}, {a.number} - {a.neighborhood}
-                </option>
-              ))}
-            </select>
+          <div className="btn-container">
+            <button
+              type="submit"
+              className="btn-enviar-solic"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Enviando...' : 'Enviar Solicitação'}
+            </button>
           </div>
-
-          <div className="input-group">
-            <label>Categoria (definida pelo profissional)</label>
-            <select value={categoryId} disabled>
-              {categorias.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="input-group">
-            <label>Valor máximo (R$)</label>
-            <input
-              type="number"
-              step="0.01"
-              placeholder="Opcional"
-              value={suggestedValue}
-              onChange={(e) => setSuggestedValue(e.target.value)}
-            />
-          </div>
-
-          <div className="input-group">
-            <label>Data sugerida</label>
-            <input
-              type="date"
-              value={suggestedDate}
-              min={hoje}             
-              max={maxDateStr}       
-              onChange={(e) => setSuggestedDate(e.target.value)}
-            />
-          </div>
-
-          <div className="input-group">
-            <label>Imagem (opcional)</label>
-            <input
-              type="file"
-              id="imagemDemanda"
-              accept="image/*"
-              onChange={(e) => setImagem(e.target.files[0])}
-            />
-          </div>
-
-          <button type="submit" className="btn-enviar-solic">
-            Enviar Solicitação
-          </button>
         </form>
       </div>
     </div>

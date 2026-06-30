@@ -1,162 +1,172 @@
+/* Container de Fundo */
 .solic-container {
-  background-color: #f8f9fa;
+  background-color: #f8fafc;
   min-height: calc(100vh - 80px);
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 40px 20px;
-  font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
+/* Card Branco Central */
 .solic-card {
   background: #ffffff;
   width: 100%;
-  max-width: 650px;
-  padding: 40px;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
-  border: 1px solid #eeeeee;
-  position: relative;
+  max-width: 900px;
+  padding: 48px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  border: 1px solid #e2e8f0;
 }
 
-.btn-voltar-solic {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: #f1f1f1;
-  color: #444;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 50px;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  margin-bottom: 25px;
-  transition: all 0.2s ease;
+/* Títulos Centralizados */
+.solic-header-text {
+  text-align: center;
+  margin-bottom: 40px;
 }
 
-.btn-voltar-solic:hover {
-  background: #e0e0e0;
-  color: #111;
-  transform: translateX(-3px);
-}
-
-.btn-voltar-solic i {
-  color: #0066ff;
-  font-size: 16px;
-}
-
-.solic-card h2 {
-  font-family: "Georgia", "Times New Roman", serif;
-  font-size: 32px;
-  font-weight: 800;
-  color: #111111;
+.solic-header-text h2 {
+  font-family: 'Inter', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a202c;
   margin-bottom: 8px;
 }
 
-.prof-destaque-solic {
-  font-size: 15px;
-  color: #555555;
-  background-color: #e3efff;
-  padding: 12px 18px;
-  border-radius: 10px;
-  border-left: 4px solid #0066ff;
+.solic-header-text p {
+  font-size: 14px;
+  color: #718096;
+  margin: 0;
+}
+
+/* Formulário e Colunas */
+.solic-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-grid-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  /* Aumentei o gap para a linha respirar melhor entre as colunas */
+  position: relative;
+  /* Necessário para a linha vertical funcionar */
   margin-bottom: 30px;
 }
 
-.prof-destaque-solic strong {
-  color: #0052cc;
+/* A LINHA VERTICAL NO MEIO DAS DUAS COLUNAS */
+.form-grid-layout::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background-color: #e2e8f0;
+  /* Mesma cor da borda do card */
+  transform: translateX(-50%);
 }
 
-.solic-form {
+.form-column {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-.solic-form .input-group {
+/* Inputs, Labels e Textareas */
+.input-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
   width: 100%;
 }
 
-.solic-form .input-group label {
-  font-size: 14px;
-  font-weight: 700;
-  color: #333333;
+.input-group label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #718096;
 }
 
-.solic-form .input-group input,
-.solic-form .input-group textarea,
-.solic-form .input-group select {
+.input-group input,
+.input-group textarea,
+.input-group select {
   width: 100%;
   padding: 12px 16px;
-  border: 1px solid #dddddd;
-  border-radius: 10px;
-  font-size: 15px;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-size: 14px;
   font-family: inherit;
   background-color: #ffffff;
-  color: #111111;
+  color: #2d3748;
   outline: none;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
 }
 
-.solic-form .input-group textarea {
+.input-group textarea {
   resize: vertical;
-  min-height: 120px;
+  min-height: 145px;
 }
 
-.solic-form .input-group input:focus,
-.solic-form .input-group textarea:focus,
-.solic-form .input-group select:focus {
+.input-group input:focus,
+.input-group textarea:focus,
+.input-group select:focus {
   border-color: #0066ff;
-  box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.1);
-  background-color: #ffffff;
 }
 
+.input-group input:disabled,
+.input-group textarea:disabled,
+.input-group select:disabled {
+  background-color: #f7fafc;
+  color: #a0aec0;
+  cursor: not-allowed;
+}
+
+/* Container do Botão Centralizado */
+.btn-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding-top: 10px;
+}
+
+/* Estilo do botão Salvar Alterações */
 .btn-enviar-solic {
   background-color: #0066ff;
   color: #ffffff;
   border: none;
-  padding: 16px;
-  border-radius: 50px;
-  font-weight: bold;
-  font-size: 16px;
+  padding: 12px 32px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  transition: all 0.3s ease;
-  margin-top: 10px;
-  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.15);
+  transition: background-color 0.2s ease;
 }
 
 .btn-enviar-solic:hover:not(:disabled) {
   background-color: #0052cc;
-  transform: scale(1.02);
-  box-shadow: 0 6px 20px rgba(0, 102, 255, 0.25);
 }
 
 .btn-enviar-solic:disabled {
-  background-color: #cccccc;
-  color: #888888;
+  background-color: #a0aec0;
   cursor: not-allowed;
-  box-shadow: none;
-  transform: none;
 }
 
-@media (max-width: 480px) {
-  .solic-container {
-    padding: 20px 12px;
+/* Responsividade para telas menores */
+@media (max-width: 768px) {
+  .form-grid-layout {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  /* Remove a linha divisória no celular pois as colunas vão empilhar */
+  .form-grid-layout::after {
+    display: none;
   }
 
   .solic-card {
-    padding: 24px 20px;
-  }
-
-  .solic-card h2 {
-    font-size: 24px;
+    padding: 30px 20px;
   }
 }
