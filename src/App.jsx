@@ -18,6 +18,7 @@ import SolicServico from "./pages/SolicServico/SolicServico";
 import TermosDeUso from "./pages/TermosDeUso/TermosDeUso";
 import DetalhesSolicitacao from "./pages/DetalhesSolicitacao/DetalhesSolicitacao";
 import EditarDemanda from "./pages/EditarDemanda/EditarDemanda";
+import RedefinicaoSenha from "./pages/RedefinicaoSenha/RedefinicaoSenha";
 
 const RotaPrivadaCliente = ({ children }) => {
   const userStorage = localStorage.getItem("@ConectaPro:user");
@@ -57,6 +58,7 @@ function App() {
         <Route path="/fale-conosco" element={<FaleConosco />} />
         <Route path="/esqueceu-senha" element={<EsqueceuSenha />} />
         <Route path="/termos-de-uso" element={<TermosDeUso />} />
+        <Route path="/reset-password" element={<RedefinicaoSenha />} />
 
         <Route path="/dashboard-cliente" element={<RotaPrivadaCliente><DashboardCliente /></RotaPrivadaCliente>} />
         <Route path="/lista-profissionais" element={<RotaPrivadaCliente><ListaProf /></RotaPrivadaCliente>} />

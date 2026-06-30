@@ -1,0 +1,159 @@
+.redefinicao-senha-container {
+    background-color: #f8fafc;
+    min-height: calc(100vh - 80px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.redefinicao-senha-card {
+    background: #ffffff;
+    width: 100%;
+    max-width: 480px;
+    padding: 48px 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    border: 1px solid #e2e8f0;
+}
+
+.redefinicao-header-text {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.redefinicao-header-text h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 8px;
+    margin-top: 0;
+}
+
+.redefinicao-header-text p {
+    font-size: 14px;
+    color: #718096;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.redefinicao-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.input-group label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #718096;
+}
+
+.password-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-input-wrapper input {
+    width: 100%;
+    padding: 12px 40px 12px 16px;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    background-color: #ffffff;
+    color: #2d3748;
+    outline: none;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+}
+
+.password-input-wrapper input:focus {
+    border-color: #0066ff;
+}
+
+.password-input-wrapper input:disabled {
+    background-color: #f7fafc;
+    color: #a0aec0;
+    cursor: not-allowed;
+}
+
+.btn-toggle-password {
+    position: absolute;
+    right: 12px;
+    background: transparent;
+    border: none;
+    color: #a0aec0;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+}
+
+.btn-toggle-password:hover {
+    color: #4a5568;
+}
+
+.password-input-wrapper input.input-error-border {
+    border-color: #e53e3e;
+    background-color: #fff5f5;
+}
+
+.password-input-wrapper input.input-error-border:focus {
+    box-shadow: 0 0 0 1px #e53e3e;
+}
+
+.error-text-live {
+    font-size: 12px;
+    color: #e53e3e;
+    font-weight: 500;
+    margin-top: -2px;
+}
+
+.btn-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 12px;
+}
+
+.btn-redefinir-submit {
+    width: 100%;
+    background-color: #0066ff;
+    color: #ffffff;
+    border: none;
+    padding: 14px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.btn-redefinir-submit:hover:not(:disabled) {
+    background-color: #0052cc;
+}
+
+.btn-redefinir-submit:disabled {
+    background-color: #a0aec0;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+@media (max-width: 480px) {
+    .redefinicao-senha-card {
+        padding: 32px 24px;
+    }
+}
