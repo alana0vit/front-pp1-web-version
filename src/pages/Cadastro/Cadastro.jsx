@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { IMaskInput } from "react-imask";
 import { Link, useNavigate } from "react-router-dom";
@@ -12,9 +12,11 @@ const Cadastro = () => {
   const [mostrarModalSucesso, setMostrarModalSucesso] = useState(false);
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false);
-  
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+  const [fotoFile, setFotoFile] = useState(null);
+  const [fotoPreview, setFotoPreview] = useState(null);
+  const fotoInputRef = useRef(null);
+
   const navigate = useNavigate();
 
   const { register, handleSubmit, reset, control, watch, setValue, formState: { errors } } = useForm({
@@ -56,7 +58,6 @@ const Cadastro = () => {
 
   const onSubmit = async (data) => {
     if (isSubmitting) return;
-
     setIsSubmitting(true);
 
     try {
@@ -90,18 +91,41 @@ const Cadastro = () => {
         }
       };
 
-      await api.post("/api/user", usuarioPayload);
-      
+      const response = await api.post("/api/user", usuarioPayload);
+
+      // Se selecionou foto, faz login automático para obter o token e então faz o upload
+      if (fotoFile && response.data?.id) {
+        try {
+          const loginRes = await api.post("/auth/login", {
+            email: data.email,
+            password: data.password,
+          });
+
+          if (loginRes.data?.token) {
+            const formData = new FormData();
+            formData.append('foto', fotoFile);
+            await api.post(`/api/user/${response.data.id}/photo`, formData, {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+                'Authorization': `Bearer ${loginRes.data.token}`,
+              },
+            });
+          }
+        } catch (fotoErr) {
+          console.error('Erro ao enviar foto:', fotoErr);
+          // Não bloqueia o cadastro — foto pode ser adicionada depois no EditarPerfil
+        }
+      }
+
       setMostrarModalSucesso(true);
 
       setTimeout(() => {
         navigate("/login");
       }, 3000);
-      
+
       reset();
     } catch (error) {
       setIsSubmitting(false);
-
       const mensagemErro = error.response?.data?.message || "Erro no cadastro. Verifique os dados.";
       toast.error(mensagemErro);
     }
@@ -131,7 +155,7 @@ const Cadastro = () => {
 
   return (
     <div className="cadastro-container">
-      
+
       {mostrarModalSucesso && (
         <div className="modal-overlay">
           <div className="modal-sucesso">
@@ -144,11 +168,35 @@ const Cadastro = () => {
 
       <div className="form-card">
         <div className="form-header">
+          <div className="cadastro-avatar-wrapper" onClick={() => fotoInputRef.current.click()} title="Clique para adicionar uma foto">
+            {fotoPreview ? (
+              <img src={fotoPreview} alt="Foto de perfil" className="cadastro-avatar-img" />
+            ) : (
+              <div className="cadastro-avatar-placeholder">
+                <i className="bi bi-camera-fill"></i>
+              </div>
+            )}
+            <div className="cadastro-avatar-overlay">
+              <i className="bi bi-camera-fill"></i>
+            </div>
+          </div>
+          <input
+            ref={fotoInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={(e) => {
+              const file = e.target.files[0];
+              if (!file) return;
+              setFotoFile(file);
+              setFotoPreview(URL.createObjectURL(file));
+            }}
+          />
           <div className="header-titles">
             <h2 className="title-serif">{tipoPerfil === "CLIENT" ? "Cadastro de Cliente" : "Cadastro de Profissional"}</h2>
             <p className="subtitle">
-              {tipoPerfil === "CLIENT" 
-                ? "Crie sua conta para encontrar e contratar os melhores profissionais." 
+              {tipoPerfil === "CLIENT"
+                ? "Crie sua conta para encontrar e contratar os melhores profissionais."
                 : "Junte-se à nossa rede e conecte-se com clientes que precisam do seu talento."}
             </p>
           </div>
@@ -156,9 +204,9 @@ const Cadastro = () => {
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="form-columns">
-            
+
             <div className="form-left">
-              
+
               <div className="input-group w-100">
                 <label>Nome Completo</label>
                 <input {...register("name", { required: true })} placeholder="Digite seu nome completo" />
@@ -178,24 +226,24 @@ const Cadastro = () => {
 
               {tipoPerfil === "PROFESSIONAL" ? (
                 <div className="input-group w-100">
-  <label>CNPJ / CPF</label>
-  <Controller
-    name="documento"
-    control={control}
-    rules={{ required: true }}
-    render={({ field }) => (
-      <IMaskInput
-        {...field}
-        mask={[
-          { mask: '000.000.000-00' },
-          { mask: '00.000.000/0000-00' }
-        ]}
-        onAccept={(value) => field.onChange(value)}
-        placeholder="00.000.000/0000-00 ou 000.000.000-00"
-      />
-    )}
-  />
-</div>
+                  <label>CNPJ / CPF</label>
+                  <Controller
+                    name="documento"
+                    control={control}
+                    rules={{ required: true }}
+                    render={({ field }) => (
+                      <IMaskInput
+                        {...field}
+                        mask={[
+                          { mask: '000.000.000-00' },
+                          { mask: '00.000.000/0000-00' }
+                        ]}
+                        onAccept={(value) => field.onChange(value)}
+                        placeholder="00.000.000/0000-00 ou 000.000.000-00"
+                      />
+                    )}
+                  />
+                </div>
               ) : (
                 <div className="row">
                   <div className="input-group w-50">
@@ -217,23 +265,23 @@ const Cadastro = () => {
               )}
 
               {tipoPerfil === "PROFESSIONAL" ? (
-                 <div className="row">
-                   <div className="input-group w-50">
-                     <label>Telefone / WhatsApp</label>
-                     <Controller
-                       name="phone"
-                       control={control}
-                       rules={{ required: true }}
-                       render={({ field }) => (
-                         <IMaskInput {...field} mask="(00) 00000-0000" onAccept={(value) => field.onChange(value)} placeholder="(00) 00000-0000" />
-                       )}
-                     />
-                   </div>
-                   <div className="input-group w-50">
-                     <label>Data de Nascimento</label>
-                     <input type="date" className="input-date-placeholder" {...register("birthDate", { required: true })} />
-                   </div>
-                 </div>
+                <div className="row">
+                  <div className="input-group w-50">
+                    <label>Telefone / WhatsApp</label>
+                    <Controller
+                      name="phone"
+                      control={control}
+                      rules={{ required: true }}
+                      render={({ field }) => (
+                        <IMaskInput {...field} mask="(00) 00000-0000" onAccept={(value) => field.onChange(value)} placeholder="(00) 00000-0000" />
+                      )}
+                    />
+                  </div>
+                  <div className="input-group w-50">
+                    <label>Data de Nascimento</label>
+                    <input type="date" className="input-date-placeholder" {...register("birthDate", { required: true })} />
+                  </div>
+                </div>
               ) : (
                 <div className="input-group w-100">
                   <label>Telefone</label>
@@ -252,16 +300,16 @@ const Cadastro = () => {
                 <div className="input-group w-50">
                   <label>Senha</label>
                   <div className="password-wrapper">
-                    <input 
-                      type={mostrarSenha ? "text" : "password"} 
+                    <input
+                      type={mostrarSenha ? "text" : "password"}
                       className={errors.password ? "input-error" : ""}
-                      {...register("password", { 
-                        required: "A senha é obrigatória", 
-                        minLength: { value: 6, message: "Mínimo 6 dígitos" } 
-                      })} 
-                      placeholder="••••••" 
+                      {...register("password", {
+                        required: "A senha é obrigatória",
+                        minLength: { value: 6, message: "Mínimo 6 dígitos" }
+                      })}
+                      placeholder="••••••"
                     />
-                    <i 
+                    <i
                       className={`bi ${mostrarSenha ? "bi-eye-slash" : "bi-eye"} password-icon`}
                       onClick={() => setMostrarSenha(!mostrarSenha)}
                     ></i>
@@ -272,16 +320,16 @@ const Cadastro = () => {
                 <div className="input-group w-50">
                   <label>Confirmar Senha</label>
                   <div className="password-wrapper">
-                    <input 
-                      type={mostrarConfirmarSenha ? "text" : "password"} 
+                    <input
+                      type={mostrarConfirmarSenha ? "text" : "password"}
                       className={errors.confirmarPassword ? "input-error" : ""}
                       placeholder="••••••"
-                      {...register("confirmarPassword", { 
+                      {...register("confirmarPassword", {
                         required: "A confirmação é obrigatória",
                         validate: (value) => value === senhaAtual || "As senhas não conferem"
-                      })} 
+                      })}
                     />
-                    <i 
+                    <i
                       className={`bi ${mostrarConfirmarSenha ? "bi-eye-slash" : "bi-eye"} password-icon`}
                       onClick={() => setMostrarConfirmarSenha(!mostrarConfirmarSenha)}
                     ></i>
@@ -293,7 +341,7 @@ const Cadastro = () => {
             </div>
 
             <div className="form-right">
-              
+
               {tipoPerfil === "PROFESSIONAL" && (
                 <div className="input-group w-100">
                   <label>Especialidade</label>
@@ -376,10 +424,10 @@ const Cadastro = () => {
 
               <div className="terms-container">
                 <div className="checkbox-group">
-                  <input 
-                    type="checkbox" 
-                    id="termos" 
-                    {...register("aceitouTermos", { required: "Você precisa aceitar os termos de uso" })} 
+                  <input
+                    type="checkbox"
+                    id="termos"
+                    {...register("aceitouTermos", { required: "Você precisa aceitar os termos de uso" })}
                   />
                   <label htmlFor="termos">
                     Eu li e aceito os <Link to="/termos-de-uso" target="_blank">Termos de Uso</Link>
@@ -395,9 +443,9 @@ const Cadastro = () => {
             </div>
           </div>
 
-          <button 
-            type="submit" 
-            className="btn-submit-centered" 
+          <button
+            type="submit"
+            className="btn-submit-centered"
             disabled={isSubmitting}
           >
             {isSubmitting ? (
