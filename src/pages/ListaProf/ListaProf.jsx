@@ -59,8 +59,20 @@ function ListaProf() {
       .catch((err) => console.error(err));
   }, []);
 
+  // --- NOVO USEEFFECT (AUTO-FILTRO DO JÃO PEDRO) ---
+  // Este useEffect vigia as mudanças nos filtros.
+  // Quando a categoria, as estrelas, o raio ou o GPS mudarem, ele dispara a busca automaticamente.
+  // IMPORTANTE: 'termoBusca' (o texto digitado) foi excluído propositalmente para não fazer uma chamada
+  // à API a cada letra digitada, o que derrubaria o servidor. A busca por texto ainda depende do botão/Enter.
+  useEffect(() => {
+    // Chamamos o lidarComBusca sem evento (undefined), e ele usa os estados atuais.
+    lidarComBusca();
+  }, [categoriaSelecionada, filtroEstrelas, raioKm, usandoLocalizacao]);
+  // ------------------------------------
+
   useEffect(() => {
     const id = setInterval(() => {
+      // Na atualização periódica, usamos os últimos filtros que foram usados ativamente.
       buscarProfissionais(ultimosFiltrosRef.current);
     }, INTERVALO_REFRESH);
     return () => clearInterval(id);
@@ -71,18 +83,40 @@ function ListaProf() {
   }, [termoBusca, categoriaSelecionada, filtroEstrelas, raioKm, usandoLocalizacao]);
 
   const lidarComBusca = (e) => {
-    if (e) e.preventDefault();
+    // Previne o comportamento padrão do form (recarregar a página) se a função for chamada por ele.
+    if (e && e.preventDefault) e.preventDefault();
+
     if (usandoLocalizacao) {
-      navigator.geolocation.getCurrentPosition((pos) => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((pos) => {
+          buscarProfissionais({
+            name: termoBusca,
+            categoryId: categoriaSelecionada || undefined,
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+            radiusKm: raioKm,
+          });
+        }, (error) => {
+          console.error("Erro geolocalização:", error);
+          toast.error("Não foi possível obter sua localização. Busca realizada sem GPS.");
+          // Se der erro, busca sem localização para não quebrar a tela.
+          buscarProfissionais({
+            name: termoBusca,
+            categoryId: categoriaSelecionada || undefined,
+          });
+          setUsandoLocalizacao(false); // Desativa o visual do GPS
+        },
+          { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
+      } else {
+        toast.error("A geolocalização não é suportada pelo seu navegador.");
         buscarProfissionais({
           name: termoBusca,
           categoryId: categoriaSelecionada || undefined,
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-          radiusKm: raioKm,
         });
-      });
+        setUsandoLocalizacao(false);
+      }
     } else {
+      // Busca normal por texto e categoria.
       buscarProfissionais({
         name: termoBusca,
         categoryId: categoriaSelecionada || undefined,
@@ -93,10 +127,7 @@ function ListaProf() {
   const alternarLocalizacao = () => {
     if (usandoLocalizacao) {
       setUsandoLocalizacao(false);
-      buscarProfissionais({
-        name: termoBusca,
-        categoryId: categoriaSelecionada || undefined,
-      });
+      // A busca automática é disparada pelo useEffect quando 'usandoLocalizacao' muda.
     } else {
       if (!navigator.geolocation) {
         toast.error("A geolocalização não é suportada pelo seu navegador.");
@@ -106,18 +137,14 @@ function ListaProf() {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           setUsandoLocalizacao(true);
-          buscarProfissionais({
-            name: termoBusca,
-            categoryId: categoriaSelecionada || undefined,
-            latitude: pos.coords.latitude,
-            longitude: pos.coords.longitude,
-            radiusKm: raioKm,
-          });
+          // A busca será disparada pelo useEffect quando o estado 'usandoLocalizacao' for atualizado.
         },
         (error) => {
           console.error("Erro ao obter localização:", error);
-          toast.error("Não foi possível obter sua localização. Verifique as permissões.");
+          toast.error("Não foi possível obter sua localização. Verifique as permissões do seu navegador.");
+          setUsandoLocalizacao(false);
         },
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
       );
     }
   };
@@ -199,7 +226,8 @@ function ListaProf() {
       )}
 
       <section className="topo-busca-dividido">
-        <div className="conteudo-topo-busca">
+        {/* Adicionada a classe 'container-alinhado' para alinhamento perfeito com o grid */}
+        <div className="container-alinhado conteudo-topo-busca">
           <div className="lado-esquerdo-busca">
             <h1 className="titulo-principal-lista">
               Encontre o<br />
@@ -235,7 +263,12 @@ function ListaProf() {
 
             <div className="grupo-filtro">
               <label>Categoria</label>
-              <select className="select-sidebar" value={categoriaSelecionada} onChange={(e) => setCategoriaSelecionada(e.target.value)}>
+              <select
+                className="select-sidebar"
+                value={categoriaSelecionada}
+                // O onChange apenas altera o estado. O useEffect vigia essa mudança e dispara a busca.
+                onChange={(e) => setCategoriaSelecionada(e.target.value)}
+              >
                 <option value="">Todas categorias</option>
                 {categorias.map((cat) => (
                   <option key={cat.id} value={cat.id}>{cat.name}</option>
@@ -247,19 +280,44 @@ function ListaProf() {
               <label>Avaliação</label>
               <div className="filtro-estrelas-radio">
                 <label className="radio-label">
-                  <input type="radio" name="rating" value="TODOS" checked={filtroEstrelas === "TODOS"} onChange={(e) => setFiltroEstrelas(e.target.value)} />
+                  <input
+                    type="radio"
+                    name="rating"
+                    value="TODOS"
+                    checked={filtroEstrelas === "TODOS"}
+                    // O onChange apenas altera o estado. O useEffect vigia essa mudança e dispara a busca.
+                    onChange={(e) => setFiltroEstrelas(e.target.value)}
+                  />
                   Qualquer nota
                 </label>
                 <label className="radio-label">
-                  <input type="radio" name="rating" value="5" checked={filtroEstrelas === "5"} onChange={(e) => setFiltroEstrelas(e.target.value)} />
+                  <input
+                    type="radio"
+                    name="rating"
+                    value="5"
+                    checked={filtroEstrelas === "5"}
+                    onChange={(e) => setFiltroEstrelas(e.target.value)}
+                  />
                   5 {renderizarEstrelasFiltro(5)}
                 </label>
                 <label className="radio-label">
-                  <input type="radio" name="rating" value="4PLUS" checked={filtroEstrelas === "4PLUS"} onChange={(e) => setFiltroEstrelas(e.target.value)} />
+                  <input
+                    type="radio"
+                    name="rating"
+                    value="4PLUS"
+                    checked={filtroEstrelas === "4PLUS"}
+                    onChange={(e) => setFiltroEstrelas(e.target.value)}
+                  />
                   4+ {renderizarEstrelasFiltro(4)}
                 </label>
                 <label className="radio-label">
-                  <input type="radio" name="rating" value="3PLUS" checked={filtroEstrelas === "3PLUS"} onChange={(e) => setFiltroEstrelas(e.target.value)} />
+                  <input
+                    type="radio"
+                    name="rating"
+                    value="3PLUS"
+                    checked={filtroEstrelas === "3PLUS"}
+                    onChange={(e) => setFiltroEstrelas(e.target.value)}
+                  />
                   3+ {renderizarEstrelasFiltro(3)}
                 </label>
               </div>
@@ -267,7 +325,12 @@ function ListaProf() {
 
             <div className="grupo-filtro">
               <label>Localização</label>
-              <select className="select-sidebar" value={raioKm} onChange={(e) => { setRaioKm(Number(e.target.value)); if (usandoLocalizacao) lidarComBusca(); }}>
+              <select
+                className="select-sidebar"
+                value={raioKm}
+                // O onChange apenas altera o estado. O useEffect vigia essa mudança e dispara a busca.
+                onChange={(e) => setRaioKm(Number(e.target.value))}
+              >
                 <option value={5}>Até 5 km</option>
                 <option value={10}>Até 10 km</option>
                 <option value={20}>Até 20 km</option>
@@ -313,6 +376,7 @@ function ListaProf() {
                               <img
                                 src={fotoUrl}
                                 alt={prof.name}
+                                // Evento de clique adicionado para abrir o modal grandão com a foto
                                 onClick={() => setFotoExpandida(fotoUrl)}
                                 style={{ cursor: "pointer" }}
                                 onError={(e) => {
@@ -425,14 +489,17 @@ function ListaProf() {
           profissionalNome={modalAvaliacoes.nome}
           onClose={() => {
             setModalAvaliacoes(null);
-            buscarProfissionais(ultimosFiltrosRef.current);
+            // Ao fechar, podemos opcionalmente re-buscar os profissionais caso a avaliação altere a nota
+            // buscarProfissionais(ultimosFiltrosRef.current);
           }}
         />
       )}
 
+      {/* Estrutura do Modal para exibição da foto grandona na tela */}
       {fotoExpandida && (
+        // O overlay fecha o modal se você clicar no fundo escuro
         <div className="modal-foto-overlay" onClick={() => setFotoExpandida(null)}>
-          <div className="modal-foto-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-foto-content" onClick={(e) => e.stopPropagation()}> {/* Impede que clique na foto feche o modal */}
             <button className="btn-fechar-foto" onClick={() => setFotoExpandida(null)}>
               <i className="bi bi-x-lg"></i>
             </button>

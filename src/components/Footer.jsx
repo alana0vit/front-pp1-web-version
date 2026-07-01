@@ -14,7 +14,7 @@ function Footer() {
             style={{ height: "90px", marginBottom: "15px" }}
           />
           <p className="footer-description">
-            Conectando talentos a oportunidades de forma rápida, segura e inteligente.
+            Conectando talentos a oportunidades
           </p>
           <div className="footer-socials">
             <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i className="bi bi-youtube"></i></a>
