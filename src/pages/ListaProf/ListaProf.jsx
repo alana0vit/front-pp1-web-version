@@ -5,6 +5,7 @@ import imagemBusca from "../../assets/ImgLista1.jpg";
 import api from "../../services/api";
 import HistoricoAvaliacoes from "../../components/HistoricoAvaliacoes";
 import "./ListaProf.css";
+import { getImageUrl } from "../../utils/imageUtils";
 
 const INTERVALO_REFRESH = 30_000;
 
@@ -307,10 +308,21 @@ function ListaProf() {
 
                     <div className="corpo-cartao">
                       <div className="avatar-profissional-sobreposto">
-                        <span>
-                          {prof.name ? prof.name.charAt(0).toUpperCase() : "U"}
-                        </span>
-                      </div>
+  {getImageUrl(prof.photo) ? (
+    <img
+      src={getImageUrl(prof.photo)}
+      alt={prof.name}
+      style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+      onError={(e) => {
+        e.target.style.display = 'none';
+        e.target.nextSibling.style.display = 'flex';
+      }}
+    />
+  ) : null}
+  <span style={{ display: getImageUrl(prof.photo) ? 'none' : 'flex' }}>
+    {prof.name ? prof.name.charAt(0).toUpperCase() : "U"}
+  </span>
+</div>
 
                       <h3 className="nome-profissional">{prof.name}</h3>
                       {prof.categories && prof.categories.length > 0 ? (

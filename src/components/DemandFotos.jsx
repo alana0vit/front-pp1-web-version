@@ -1,19 +1,15 @@
+import { getImageUrl } from '../utils/imageUtils';
 import './DemandFotos.css';
 
 function DemandFotos({ demanda, modo = "galeria" }) {
-  const rawFotos = demanda?.imgUrl;
-  let fotos = [];
+  const raw = demanda?.imgUrl;
+  const nomes = Array.isArray(raw)
+    ? raw.filter(Boolean)
+    : typeof raw === 'string' && raw.trim()
+    ? [raw]
+    : [];
 
-  if (Array.isArray(rawFotos)) {
-    fotos = rawFotos.filter(Boolean);
-  } else if (typeof rawFotos === 'string' && rawFotos.trim()) {
-    fotos = [rawFotos];
-  }
-
-  if (modo === "galeria" && fotos.length > 0) {
-    console.log('[DemandFotos] imgUrl recebido:', rawFotos);
-    console.log('[DemandFotos] fotos normalizadas:', fotos);
-  }
+  const fotos = nomes.map(getImageUrl).filter(Boolean);
 
   if (fotos.length === 0) return null;
 
