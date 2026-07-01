@@ -8,6 +8,7 @@ import { getImageUrl } from "../../utils/imageUtils";
 import "./ListaProf.css";
 
 const INTERVALO_REFRESH = 30_000;
+const ITENS_POR_PAGINA = 5;
 
 function ListaProf() {
   const navigate = useNavigate();
@@ -18,10 +19,12 @@ function ListaProf() {
   const [categoriaSelecionada, setCategoriaSelecionada] = useState("");
   const [filtroEstrelas, setFiltroEstrelas] = useState("TODOS");
   const reassignDemandId = location.state?.reassignDemandId || null;
-  const [mostrarPopUpLocalizacao, setMostrarPopUpLocalizacao] = useState(false);
   const [raioKm, setRaioKm] = useState(20);
   const [modalAvaliacoes, setModalAvaliacoes] = useState(null);
   const ultimosFiltrosRef = useRef({});
+
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const [usandoLocalizacao, setUsandoLocalizacao] = useState(false);
 
   const buscarProfissionais = async (filtros = {}) => {
     ultimosFiltrosRef.current = filtros;
@@ -62,22 +65,14 @@ function ListaProf() {
     return () => clearInterval(id);
   }, []);
 
+  useEffect(() => {
+    setPaginaAtual(1);
+  }, [termoBusca, categoriaSelecionada, filtroEstrelas, raioKm, usandoLocalizacao]);
+
   const lidarComBusca = (e) => {
-    e.preventDefault();
-    buscarProfissionais({
-      name: termoBusca,
-      categoryId: categoriaSelecionada || undefined,
-    });
-  };
-
-  const pegarLocalizacao = () => {
-    if (!navigator.geolocation) {
-      toast.error("A geolocalização não é suportada pelo seu navegador.");
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
+    if (e) e.preventDefault();
+    if (usandoLocalizacao) {
+      navigator.geolocation.getCurrentPosition((pos) => {
         buscarProfissionais({
           name: termoBusca,
           categoryId: categoriaSelecionada || undefined,
@@ -85,12 +80,45 @@ function ListaProf() {
           longitude: pos.coords.longitude,
           radiusKm: raioKm,
         });
-      },
-      (error) => {
-        console.error("Erro ao obter localização:", error);
-        toast.error("Não foi possível obter sua localização. Verifique as permissões do navegador.");
-      },
-    );
+      });
+    } else {
+      buscarProfissionais({
+        name: termoBusca,
+        categoryId: categoriaSelecionada || undefined,
+      });
+    }
+  };
+
+  const alternarLocalizacao = () => {
+    if (usandoLocalizacao) {
+      setUsandoLocalizacao(false);
+      buscarProfissionais({
+        name: termoBusca,
+        categoryId: categoriaSelecionada || undefined,
+      });
+    } else {
+      if (!navigator.geolocation) {
+        toast.error("A geolocalização não é suportada pelo seu navegador.");
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setUsandoLocalizacao(true);
+          buscarProfissionais({
+            name: termoBusca,
+            categoryId: categoriaSelecionada || undefined,
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+            radiusKm: raioKm,
+          });
+        },
+        (error) => {
+          console.error("Erro ao obter localização:", error);
+          toast.error("Não foi possível obter sua localização. Verifique as permissões.");
+        },
+      );
+    }
   };
 
   const lidarComSelecaoProfissional = async (professionalId) => {
@@ -99,7 +127,7 @@ function ListaProf() {
         await api.patch(`/api/demand/${reassignDemandId}/reassign`, {
           professionalId: professionalId,
         });
-        toast.success("Demanda reatribuída com sucesso para o novo profissional!");
+        toast.success("Demanda reatribuída com sucesso!");
         navigate("/dashboard-cliente");
       } catch (error) {
         console.error("Erro ao reatribuir demanda:", error);
@@ -116,9 +144,9 @@ function ListaProf() {
     .filter((prof) => {
       const matchesTexto = prof.name.toLowerCase().includes(termoBusca.toLowerCase());
       if (!matchesTexto) return false;
+      if (filtroEstrelas === "5") return prof.rating !== null && prof.rating !== undefined && prof.rating >= 5.0;
       if (filtroEstrelas === "4PLUS") return prof.rating !== null && prof.rating !== undefined && prof.rating >= 4.0;
       if (filtroEstrelas === "3PLUS") return prof.rating !== null && prof.rating !== undefined && prof.rating >= 3.0;
-      if (filtroEstrelas === "NEW") return prof.rating === null || prof.rating === undefined;
       return true;
     })
     .sort((a, b) => {
@@ -127,7 +155,39 @@ function ListaProf() {
       return notaB - notaA;
     });
 
-  const coresTopo = ["#e6f0ff", "#e6ffe6", "#fff0e6", "#f0e6ff"];
+  const indexUltimoProfissional = paginaAtual * ITENS_POR_PAGINA;
+  const indexPrimeiroProfissional = indexUltimoProfissional - ITENS_POR_PAGINA;
+  const profissionaisPaginados = profissionaisFiltrados.slice(indexPrimeiroProfissional, indexUltimoProfissional);
+  const totalPaginas = Math.ceil(profissionaisFiltrados.length / ITENS_POR_PAGINA);
+
+  const renderizarEstrelas = (rating) => {
+    if (rating === null || rating === undefined) {
+      return <span className="total-avaliacoes">Sem avaliação</span>;
+    }
+    const notaArredondada = Math.round(rating);
+    return (
+      <div className="estrelas-container" title={`${rating.toFixed(1)} estrelas`}>
+        {[1, 2, 3, 4, 5].map((estrela) => (
+          <i
+            key={estrela}
+            className={`bi bi-star${estrela <= notaArredondada ? '-fill' : ''}`}
+            style={{ color: '#f59e0b', fontSize: '14px' }}
+          ></i>
+        ))}
+        <strong style={{ marginLeft: '6px', fontSize: '15px' }}>{rating.toFixed(1)}</strong>
+      </div>
+    );
+  };
+
+  const renderizarEstrelasFiltro = (quantidade) => {
+    return (
+      <span className="estrelas-filtro">
+        {[1, 2, 3, 4, 5].map((estrela) => (
+          <i key={estrela} className={`bi bi-star${estrela <= quantidade ? '-fill' : ''}`}></i>
+        ))}
+      </span>
+    );
+  };
 
   return (
     <div className="pagina-lista-profissionais">
@@ -148,78 +208,16 @@ function ListaProf() {
               Explore nossa rede de profissionais qualificados prontos para realizar o seu projeto.
             </p>
 
-            <div className="bloco-busca-e-filtros">
-              <form className="barra-pesquisa-lista" onSubmit={lidarComBusca}>
-                <i className="bi bi-search"></i>
-                <input
-                  type="text"
-                  placeholder="Ex: Carlos, Eletricista..."
-                  value={termoBusca}
-                  onChange={(e) => setTermoBusca(e.target.value)}
-                />
-                <button type="submit" className="btn-buscar-lista">Buscar</button>
-              </form>
-
-              <div className="filtros-linha">
-                <select
-                  className="select-categoria"
-                  value={categoriaSelecionada}
-                  onChange={(e) => setCategoriaSelecionada(e.target.value)}
-                >
-                  <option value="">Todas categorias</option>
-                  {categorias.map((cat) => (
-                    <option key={cat.id} value={cat.id}>{cat.name}</option>
-                  ))}
-                </select>
-
-                <select
-                  className="select-categoria"
-                  value={filtroEstrelas}
-                  onChange={(e) => setFiltroEstrelas(e.target.value)}
-                  style={{ border: "1px solid #0066ff", color: "#0066ff", fontWeight: "600" }}
-                >
-                  <option value="TODOS">⭐ Todas as Notas</option>
-                  <option value="4PLUS">⭐ 4.0 estrelas ou mais</option>
-                  <option value="3PLUS">⭐ 3.0 estrelas ou mais</option>
-                  <option value="NEW">⭐ Apenas Novos (Sem Nota)</option>
-                </select>
-
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <select
-                    className="select-categoria"
-                    value={raioKm}
-                    onChange={(e) => setRaioKm(Number(e.target.value))}
-                    title="Raio de busca"
-                    style={{ minWidth: "90px" }}
-                  >
-                    <option value={5}>5 km</option>
-                    <option value={10}>10 km</option>
-                    <option value={20}>20 km</option>
-                    <option value={50}>50 km</option>
-                  </select>
-
-                  <div
-                    className="container-btn-localizacao"
-                    style={{ position: "relative", display: "inline-block" }}
-                    onMouseEnter={() => setMostrarPopUpLocalizacao(true)}
-                    onMouseLeave={() => setMostrarPopUpLocalizacao(false)}
-                  >
-                    <button type="button" className="btn-localizacao" onClick={pegarLocalizacao}>
-                      📍 Perto de mim
-                    </button>
-
-                    {mostrarPopUpLocalizacao && (
-                      <div className="pop-up-informativo-localizacao">
-                        <div className="seta-pop-up"></div>
-                        <p>
-                          <strong>Busca por Geolocalização:</strong> Filtra automaticamente os prestadores parceiros localizados num raio máximo de <strong>{raioKm} km</strong> com base nas coordenadas GPS do seu dispositivo.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
+            <form className="barra-pesquisa-lista" onSubmit={lidarComBusca}>
+              <i className="bi bi-search"></i>
+              <input
+                type="text"
+                placeholder="O que você está procurando? (Ex: Eletricista)"
+                value={termoBusca}
+                onChange={(e) => setTermoBusca(e.target.value)}
+              />
+              <button type="submit" className="btn-buscar-lista">Buscar</button>
+            </form>
           </div>
 
           <div className="lado-direito-imagem">
@@ -228,89 +226,193 @@ function ListaProf() {
         </div>
       </section>
 
-      <section className="conteudo-grade-profissionais">
-        <div className="container-alinhado">
-          <h2 className="titulo-sessao">Profissionais Disponíveis</h2>
+      <section className="conteudo-principal-duas-colunas">
+        <div className="container-alinhado layout-grid-principal">
 
-          {profissionaisFiltrados.length === 0 ? (
-            <p style={{ textAlign: "center", marginTop: "2rem" }}>
-              Nenhum profissional encontrado para os filtros selecionados.
-            </p>
-          ) : (
-            <div className="grade-profissionais">
-              {profissionaisFiltrados.map((prof, index) => {
-                const fotoUrl = getImageUrl(prof.photo);
-                return (
-                  <div key={prof.id} className="cartao-profissional-moderno">
-                    <div
-                      className="topo-colorido-cartao"
-                      style={{ backgroundColor: coresTopo[index % coresTopo.length] }}
-                    ></div>
+          <aside className="sidebar-filtros">
+            <h3 className="titulo-sidebar">Filtros</h3>
 
-                    <div className="corpo-cartao">
-                      <div className="avatar-profissional-sobreposto">
-                        {fotoUrl ? (
-                          <img
-                            src={fotoUrl}
-                            alt={prof.name}
-                            className="avatar-foto"
-                            onError={(e) => {
-                              e.target.style.display = 'none';
-                              e.target.nextSibling.style.display = 'flex';
-                            }}
-                          />
-                        ) : null}
-                        <span style={{ display: fotoUrl ? 'none' : 'flex' }}>
-                          {prof.name ? prof.name.charAt(0).toUpperCase() : "U"}
-                        </span>
-                      </div>
-
-                      <h3 className="nome-profissional">{prof.name}</h3>
-
-                      {prof.categories && prof.categories.length > 0 ? (
-                        <p className="especialidade-cartao">
-                          {prof.categories.map((c) => c.name).join(" • ")}
-                        </p>
-                      ) : (
-                        <p className="especialidade-cartao especialidade-vazia">
-                          Especialidade não informada
-                        </p>
-                      )}
-
-                      <div className="avaliacao-profissional">
-                        <i className="bi bi-star-fill" style={{ color: prof.rating ? "#ffc107" : "#ccc" }}></i>
-                        {prof.rating !== null && prof.rating !== undefined ? (
-                          <strong>{prof.rating.toFixed(1)}</strong>
-                        ) : (
-                          <span className="total-avaliacoes" style={{ fontWeight: "600", color: "#888" }}>
-                            Sem avaliação
-                          </span>
-                        )}
-                      </div>
-
-                      <button
-                        className="btn-ver-avaliacoes"
-                        onClick={() => setModalAvaliacoes({ id: prof.id, nome: prof.name })}
-                      >
-                        <i className="bi bi-chat-square-text"></i> Ver avaliações
-                      </button>
-
-                      <button
-                        className="btn-ponto-cartao"
-                        style={{
-                          backgroundColor: reassignDemandId ? "#28a745" : "",
-                          borderColor: reassignDemandId ? "#28a745" : "",
-                        }}
-                        onClick={() => lidarComSelecaoProfissional(prof.id)}
-                      >
-                        {reassignDemandId ? "Reatribuir a Este" : "Solicitar Serviço"}
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="grupo-filtro">
+              <label>Categoria</label>
+              <select className="select-sidebar" value={categoriaSelecionada} onChange={(e) => setCategoriaSelecionada(e.target.value)}>
+                <option value="">Todas categorias</option>
+                {categorias.map((cat) => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                ))}
+              </select>
             </div>
-          )}
+
+            <div className="grupo-filtro">
+              <label>Avaliação</label>
+              <div className="filtro-estrelas-radio">
+                <label className="radio-label">
+                  <input type="radio" name="rating" value="TODOS" checked={filtroEstrelas === "TODOS"} onChange={(e) => setFiltroEstrelas(e.target.value)} />
+                  Qualquer nota
+                </label>
+                <label className="radio-label">
+                  <input type="radio" name="rating" value="5" checked={filtroEstrelas === "5"} onChange={(e) => setFiltroEstrelas(e.target.value)} />
+                  5 {renderizarEstrelasFiltro(5)}
+                </label>
+                <label className="radio-label">
+                  <input type="radio" name="rating" value="4PLUS" checked={filtroEstrelas === "4PLUS"} onChange={(e) => setFiltroEstrelas(e.target.value)} />
+                  4+ {renderizarEstrelasFiltro(4)}
+                </label>
+                <label className="radio-label">
+                  <input type="radio" name="rating" value="3PLUS" checked={filtroEstrelas === "3PLUS"} onChange={(e) => setFiltroEstrelas(e.target.value)} />
+                  3+ {renderizarEstrelasFiltro(3)}
+                </label>
+              </div>
+            </div>
+
+            <div className="grupo-filtro">
+              <label>Localização</label>
+              <select className="select-sidebar" value={raioKm} onChange={(e) => { setRaioKm(Number(e.target.value)); if (usandoLocalizacao) lidarComBusca(); }}>
+                <option value={5}>Até 5 km</option>
+                <option value={10}>Até 10 km</option>
+                <option value={20}>Até 20 km</option>
+                <option value={50}>Até 50 km</option>
+              </select>
+
+              <button
+                type="button"
+                className={`btn-localizacao-sidebar ${usandoLocalizacao ? 'ativo' : ''}`}
+                onClick={alternarLocalizacao}
+              >
+                <i className="bi bi-geo-alt-fill"></i> {usandoLocalizacao ? "Desativar GPS" : "Perto de mim"}
+              </button>
+            </div>
+          </aside>
+
+          <main className="area-resultados">
+            <div className="cabecalho-resultados">
+              <h2 className="titulo-sessao">
+                Profissionais Disponíveis ({profissionaisFiltrados.length})
+              </h2>
+            </div>
+
+            {profissionaisFiltrados.length === 0 ? (
+              <div className="estado-vazio">
+                <p>Nenhum profissional encontrado para os filtros selecionados.</p>
+              </div>
+            ) : (
+              <>
+                <div className="lista-horizontal-profissionais">
+                  {profissionaisPaginados.map((prof) => {
+                    const fotoUrl = getImageUrl(prof.photo);
+                    const localizacao = prof.adresses && prof.adresses.length > 0
+                      ? `${prof.adresses[0].neighborhood}, ${prof.adresses[0].city}`
+                      : "Local não informado";
+
+                    return (
+                      <div key={prof.id} className="cartao-horizontal">
+
+                        <div className="cartao-horizontal-info">
+                          <div className="avatar-horizontal">
+                            {fotoUrl ? (
+                              <img
+                                src={fotoUrl}
+                                alt={prof.name}
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.nextSibling.style.display = 'flex';
+                                }}
+                              />
+                            ) : null}
+                            <span style={{ display: fotoUrl ? 'none' : 'flex' }}>
+                              {prof.name ? prof.name.charAt(0).toUpperCase() : "U"}
+                            </span>
+                          </div>
+
+                          <div className="dados-prof-horizontal">
+                            <h3 className="nome-profissional">{prof.name}</h3>
+
+                            <p className="localizacao-prof">
+                              <i className="bi bi-geo-alt"></i> {localizacao}
+                            </p>
+
+                            {prof.categories && prof.categories.length > 0 ? (
+                              <p className="especialidade-cartao">
+                                {prof.categories.map((c) => c.name).join(" • ")}
+                              </p>
+                            ) : (
+                              <p className="especialidade-cartao especialidade-vazia">
+                                Especialidade não informada
+                              </p>
+                            )}
+
+                            <div className="avaliacao-profissional">
+                              {renderizarEstrelas(prof.rating)}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="cartao-horizontal-acoes">
+                          <button
+                            className="btn-ver-avaliacoes-horizontal"
+                            onClick={() => setModalAvaliacoes({ id: prof.id, nome: prof.name })}
+                          >
+                            <i className="bi bi-chat-square-text"></i> Avaliações
+                          </button>
+
+                          <button
+                            className="btn-ponto-cartao-horizontal"
+                            style={{
+                              backgroundColor: reassignDemandId ? "#28a745" : "",
+                              color: reassignDemandId ? "#fff" : "",
+                            }}
+                            onClick={() => lidarComSelecaoProfissional(prof.id)}
+                          >
+                            {reassignDemandId ? "Reatribuir" : "Solicitar Serviço"}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {totalPaginas > 1 && (
+                  <div className="paginacao-container">
+
+                    <button
+                      className="btn-pagina"
+                      onClick={() => {
+                        setPaginaAtual((prev) => Math.max(prev - 1, 1));
+                        window.scrollTo({ top: 400, behavior: "smooth" });
+                      }}
+                      disabled={paginaAtual === 1}
+                    >
+                      <i className="bi bi-chevron-left"></i>
+                    </button>
+
+                    {Array.from({ length: totalPaginas }, (_, i) => (
+                      <button
+                        key={i + 1}
+                        onClick={() => {
+                          setPaginaAtual(i + 1);
+                          window.scrollTo({ top: 400, behavior: "smooth" });
+                        }}
+                        className={`btn-pagina ${paginaAtual === i + 1 ? "pagina-ativa" : ""}`}
+                      >
+                        {i + 1}
+                      </button>
+                    ))}
+
+                    <button
+                      className="btn-pagina"
+                      onClick={() => {
+                        setPaginaAtual((prev) => Math.min(prev + 1, totalPaginas));
+                        window.scrollTo({ top: 400, behavior: "smooth" });
+                      }}
+                      disabled={paginaAtual === totalPaginas}
+                    >
+                      <i className="bi bi-chevron-right"></i>
+                    </button>
+
+                  </div>
+                )}
+              </>
+            )}
+          </main>
         </div>
       </section>
 

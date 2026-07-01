@@ -4,8 +4,7 @@ import './Header.css';
 
 const Header = () => {
     const navigate = useNavigate();
-    
-    // Verifica se existe alguém logado
+
     const userStorage = localStorage.getItem('@ConectaPro:user');
     const user = userStorage ? JSON.parse(userStorage) : null;
 
@@ -22,22 +21,18 @@ const Header = () => {
                 </Link>
 
                 <nav className="header-nav">
-                    {/* Link público sempre visível */}
                     <Link to="/faq" className="nav-link">FAQ</Link>
 
-                    {/* Renderização Condicional: Logado vs Deslogado */}
                     {user ? (
                         <div className="user-menu">
-                            {/* Link de Serviços exclusivo para Clientes */}
                             {user.userType === 'CLIENT' && (
                                 <Link to="/lista-profissionais" className="nav-link">
                                     Serviços
                                 </Link>
                             )}
 
-                            {/* Atalho para o Dashboard dependendo do tipo de usuário */}
-                            <Link 
-                                to={user.userType === 'CLIENT' ? "/dashboard-cliente" : "/dashboard-profissional"} 
+                            <Link
+                                to={user.userType === 'CLIENT' ? "/dashboard-cliente" : "/dashboard-profissional"}
                                 className="nav-link"
                             >
                                 Meu Painel
