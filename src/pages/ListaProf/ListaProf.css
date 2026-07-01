@@ -162,14 +162,31 @@
 }
 
 .avatar-profissional-sobreposto {
-  width: 80px; height: 80px;
+  width: 80px;
+  height: 80px;
   background: #0066ff;
   border-radius: 50%;
   border: 4px solid #fff;
   margin-top: -40px;
   margin-bottom: 15px;
-  display: flex; align-items: center; justify-content: center;
-  color: #fff; font-size: 30px; font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 30px;
+  font-weight: 800;
+  overflow: hidden;
+  position: relative;
+}
+
+.avatar-foto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .nome-profissional { font-size: 20px; font-weight: 700; margin-bottom: 4px; }

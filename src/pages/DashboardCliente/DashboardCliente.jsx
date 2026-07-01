@@ -312,6 +312,7 @@ function DashboardCliente() {
                       </p>
 
                       <DemandInfoBadges demanda={pedido} />
+                      <DemandFotos demanda={pedido} modo="indicador" />
 
                       <div className="row-item-footer-actions" onClick={(e) => e.stopPropagation()}>
                         <span className="btn-trigger-view-more" onClick={() => setPedidoDetalhado(pedido)}>
@@ -392,6 +393,7 @@ function DashboardCliente() {
                 <div className="field-box-description-content">
                   {pedidoDetalhado.description}
                 </div>
+                <DemandFotos demanda={pedidoDetalhado} modo="galeria" />
               </div>
 
               <div className="modal-sheet-footer-actions">

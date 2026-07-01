@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
+import { getImageUrl } from '../../utils/imageUtils';
 import './EditarPerfil.css';
 
 function EditarPerfil() {
@@ -12,6 +13,9 @@ function EditarPerfil() {
   const [enderecoId, setEnderecoId] = useState(null);
   const [usuarioAtual, setUsuarioAtual] = useState(null);
   const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [fotoPreview, setFotoPreview] = useState(null);
+  const [uploadingFoto, setUploadingFoto] = useState(false);
+  const fotoInputRef = useRef(null);
 
   const { register, handleSubmit, reset, setValue } = useForm();
 
@@ -24,6 +28,7 @@ function EditarPerfil() {
         const resUser = await api.get(`/api/user/${userId}`);
         const userData = resUser.data;
         setUsuarioAtual(userData);
+        setFotoPreview(getImageUrl(userData.photo));
 
         const resAddress = await api.get(`/api/user/${userId}/addresses`);
         let addressData = {};
@@ -88,6 +93,33 @@ function EditarPerfil() {
     }
   };
 
+  const handleFotoChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setFotoPreview(URL.createObjectURL(file));
+    setUploadingFoto(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('foto', file);
+      const res = await api.post(`/api/user/${userId}/photo`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      // Atualiza o estado local para que o onSubmit use o nome da foto nova
+      if (res.data?.photo) {
+        setUsuarioAtual(prev => ({ ...prev, photo: res.data.photo }));
+      }
+      toast.success('Foto de perfil atualizada!');
+    } catch (error) {
+      console.error('Erro ao fazer upload da foto:', error);
+      toast.error('Erro ao atualizar a foto de perfil.');
+      setFotoPreview(getImageUrl(usuarioAtual?.photo));
+    } finally {
+      setUploadingFoto(false);
+    }
+  };
+
   const alternarVisibilidadeSenha = () => {
     setMostrarSenha(!mostrarSenha);
   };
@@ -103,8 +135,9 @@ function EditarPerfil() {
         password: data.password,
         birthDate: dataFormatada,
         phone: data.phone,
-        userType: usuarioAtual.userType, 
+        userType: usuarioAtual.userType,
         registryId: usuarioAtual.registryId,
+        photo: usuarioAtual.photo || null,
         categoriesIds: usuarioAtual.userType === 'PROFESSIONAL' && data.categoryId ? [Number(data.categoryId)] : [],
         address: {
           street: data.street,
@@ -117,16 +150,14 @@ function EditarPerfil() {
       };
 
       await api.put(`/api/user/${userId}`, usuarioPayload);
-      
+
       if (data.name !== userStorage.name) {
         const novoUserStorage = { ...userStorage, name: data.name };
         localStorage.setItem('@ConectaPro:user', JSON.stringify(novoUserStorage));
       }
 
       toast.success("Perfil atualizado com sucesso!");
-      
       setValue('password', '');
-      
       navigate(-1);
 
     } catch (error) {
@@ -144,14 +175,39 @@ function EditarPerfil() {
       <div className="editar-perfil-wrapper">
         <div className="editar-perfil-card">
           <header className="perfil-header-info">
+            <div
+              className="perfil-avatar-wrapper"
+              onClick={() => fotoInputRef.current.click()}
+              title="Clique para alterar a foto"
+            >
+              {fotoPreview ? (
+                <img src={fotoPreview} alt="Foto de perfil" className="perfil-avatar-img" />
+              ) : (
+                <div className="perfil-avatar-placeholder">
+                  <span>{usuarioAtual?.name?.charAt(0).toUpperCase() || '?'}</span>
+                </div>
+              )}
+              <div className="perfil-avatar-overlay">
+                {uploadingFoto
+                  ? <i className="bi bi-arrow-repeat spin"></i>
+                  : <i className="bi bi-camera-fill"></i>}
+              </div>
+            </div>
+
+            <input
+              ref={fotoInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleFotoChange}
+            />
+
             <h2 className="serif-font">Editar Perfil</h2>
             <p>Mantenha seus dados atualizados.</p>
           </header>
 
           <form className="editar-perfil-form" onSubmit={handleSubmit(onSubmit)}>
-            
             <div className="form-split-layout">
-              
               <div className="form-layout-column">
                 <section className="form-section">
                   <div className="form-vertical-stack">
@@ -182,7 +238,7 @@ function EditarPerfil() {
                         <input type="date" {...register("birthDate", { required: true })} />
                       </div>
                     </div>
-                    
+
                     {usuarioAtual?.userType === 'PROFESSIONAL' && (
                       <div className="input-group">
                         <label>Especialidade</label>
@@ -205,7 +261,6 @@ function EditarPerfil() {
               <div className="form-layout-column">
                 <section className="form-section">
                   <div className="form-vertical-stack">
-                    
                     <div className="input-group">
                       <label>CEP</label>
                       <div className="input-wrapper">
@@ -253,12 +308,12 @@ function EditarPerfil() {
                     <div className="input-group">
                       <label className="label-confirm-danger">Confirme sua senha para salvar</label>
                       <div className="input-wrapper">
-                        <input 
+                        <input
                           type={mostrarSenha ? "text" : "password"}
                           className="password-input-field"
-                          placeholder="Sua senha atual" 
-                          autoComplete="new-password" 
-                          {...register("password", { required: true, minLength: 6 })} 
+                          placeholder="Sua senha atual"
+                          autoComplete="new-password"
+                          {...register("password", { required: true, minLength: 6 })}
                         />
                         <button
                           type="button"
@@ -283,11 +338,9 @@ function EditarPerfil() {
                         </button>
                       </div>
                     </div>
-
                   </div>
                 </section>
               </div>
-
             </div>
 
             <div className="form-actions">

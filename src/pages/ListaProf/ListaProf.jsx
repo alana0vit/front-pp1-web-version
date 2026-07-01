@@ -4,8 +4,8 @@ import { toast } from "react-toastify";
 import imagemBusca from "../../assets/ImgLista1.jpg";
 import api from "../../services/api";
 import HistoricoAvaliacoes from "../../components/HistoricoAvaliacoes";
-import "./ListaProf.css";
 import { getImageUrl } from "../../utils/imageUtils";
+import "./ListaProf.css";
 
 const INTERVALO_REFRESH = 30_000;
 
@@ -16,17 +16,11 @@ function ListaProf() {
   const [termoBusca, setTermoBusca] = useState("");
   const [categorias, setCategorias] = useState([]);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState("");
-
   const [filtroEstrelas, setFiltroEstrelas] = useState("TODOS");
-
   const reassignDemandId = location.state?.reassignDemandId || null;
-
   const [mostrarPopUpLocalizacao, setMostrarPopUpLocalizacao] = useState(false);
   const [raioKm, setRaioKm] = useState(20);
   const [modalAvaliacoes, setModalAvaliacoes] = useState(null);
-
-  // Guarda os últimos filtros usados para o refresh automático repetir a mesma busca,
-  // em vez de resetar para a listagem completa sem filtro.
   const ultimosFiltrosRef = useRef({});
 
   const buscarProfissionais = async (filtros = {}) => {
@@ -39,9 +33,7 @@ function ListaProf() {
       );
 
       if (temFiltros) {
-        response = await api.get("/api/user/search", {
-          params: filtros,
-        });
+        response = await api.get("/api/user/search", { params: filtros });
       } else {
         response = await api.get("/api/user");
       }
@@ -58,15 +50,11 @@ function ListaProf() {
 
   useEffect(() => {
     buscarProfissionais();
-
-    api
-      .get("/api/category")
+    api.get("/api/category")
       .then((res) => setCategorias(res.data))
       .catch((err) => console.error(err));
   }, []);
 
-  // Atualiza a lista periodicamente (em background) para refletir notas e
-  // avaliações novas, repetindo o último filtro usado pelo usuário.
   useEffect(() => {
     const id = setInterval(() => {
       buscarProfissionais(ultimosFiltrosRef.current);
@@ -111,10 +99,7 @@ function ListaProf() {
         await api.patch(`/api/demand/${reassignDemandId}/reassign`, {
           professionalId: professionalId,
         });
-
-        toast.success(
-          "Demanda reatribuída com sucesso para o novo profissional!",
-        );
+        toast.success("Demanda reatribuída com sucesso para o novo profissional!");
         navigate("/dashboard-cliente");
       } catch (error) {
         console.error("Erro ao reatribuir demanda:", error);
@@ -130,26 +115,16 @@ function ListaProf() {
   const profissionaisFiltrados = profissionais
     .filter((prof) => {
       const matchesTexto = prof.name.toLowerCase().includes(termoBusca.toLowerCase());
-      
       if (!matchesTexto) return false;
-
-      if (filtroEstrelas === "4PLUS") {
-        return prof.rating !== null && prof.rating !== undefined && prof.rating >= 4.0;
-      }
-      if (filtroEstrelas === "3PLUS") {
-        return prof.rating !== null && prof.rating !== undefined && prof.rating >= 3.0;
-      }
-      if (filtroEstrelas === "NEW") {
-        return prof.rating === null || prof.rating === undefined;
-      }
-
+      if (filtroEstrelas === "4PLUS") return prof.rating !== null && prof.rating !== undefined && prof.rating >= 4.0;
+      if (filtroEstrelas === "3PLUS") return prof.rating !== null && prof.rating !== undefined && prof.rating >= 3.0;
+      if (filtroEstrelas === "NEW") return prof.rating === null || prof.rating === undefined;
       return true;
     })
     .sort((a, b) => {
       const notaA = a.rating !== null && a.rating !== undefined ? a.rating : -1;
       const notaB = b.rating !== null && b.rating !== undefined ? b.rating : -1;
-      
-      return notaB - notaA; 
+      return notaB - notaA;
     });
 
   const coresTopo = ["#e6f0ff", "#e6ffe6", "#fff0e6", "#f0e6ff"];
@@ -157,19 +132,8 @@ function ListaProf() {
   return (
     <div className="pagina-lista-profissionais">
       {reassignDemandId && (
-        <div
-          style={{
-            background: "#d4edda",
-            color: "#155724",
-            padding: "12px",
-            textAlign: "center",
-            fontWeight: "600",
-            borderBottom: "1px solid #c3e6cb",
-          }}
-        >
-          <i className="bi bi-info-circle-fill"></i> Modo de Reatribuição Ativo:
-          Escolha um novo profissional abaixo para assumir o seu chamado
-          recusado.
+        <div style={{ background: "#d4edda", color: "#155724", padding: "12px", textAlign: "center", fontWeight: "600", borderBottom: "1px solid #c3e6cb" }}>
+          <i className="bi bi-info-circle-fill"></i> Modo de Reatribuição Ativo: Escolha um novo profissional abaixo para assumir o seu chamado recusado.
         </div>
       )}
 
@@ -178,13 +142,10 @@ function ListaProf() {
           <div className="lado-esquerdo-busca">
             <h1 className="titulo-principal-lista">
               Encontre o<br />
-              <span className="sublinhado-azul-transparente">
-                talento certo!
-              </span>
+              <span className="sublinhado-azul-transparente">talento certo!</span>
             </h1>
             <p className="subtitulo-lista-detalhado">
-              Explore nossa rede de profissionais qualificados prontos para
-              realizar o seu projeto.
+              Explore nossa rede de profissionais qualificados prontos para realizar o seu projeto.
             </p>
 
             <div className="bloco-busca-e-filtros">
@@ -196,9 +157,7 @@ function ListaProf() {
                   value={termoBusca}
                   onChange={(e) => setTermoBusca(e.target.value)}
                 />
-                <button type="submit" className="btn-buscar-lista">
-                  Buscar
-                </button>
+                <button type="submit" className="btn-buscar-lista">Buscar</button>
               </form>
 
               <div className="filtros-linha">
@@ -209,9 +168,7 @@ function ListaProf() {
                 >
                   <option value="">Todas categorias</option>
                   {categorias.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </option>
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
                   ))}
                 </select>
 
@@ -219,11 +176,7 @@ function ListaProf() {
                   className="select-categoria"
                   value={filtroEstrelas}
                   onChange={(e) => setFiltroEstrelas(e.target.value)}
-                  style={{
-                    border: "1px solid #0066ff",
-                    color: "#0066ff",
-                    fontWeight: "600",
-                  }}
+                  style={{ border: "1px solid #0066ff", color: "#0066ff", fontWeight: "600" }}
                 >
                   <option value="TODOS">⭐ Todas as Notas</option>
                   <option value="4PLUS">⭐ 4.0 estrelas ou mais</option>
@@ -251,11 +204,7 @@ function ListaProf() {
                     onMouseEnter={() => setMostrarPopUpLocalizacao(true)}
                     onMouseLeave={() => setMostrarPopUpLocalizacao(false)}
                   >
-                    <button
-                      type="button"
-                      className="btn-localizacao"
-                      onClick={pegarLocalizacao}
-                    >
+                    <button type="button" className="btn-localizacao" onClick={pegarLocalizacao}>
                       📍 Perto de mim
                     </button>
 
@@ -263,10 +212,7 @@ function ListaProf() {
                       <div className="pop-up-informativo-localizacao">
                         <div className="seta-pop-up"></div>
                         <p>
-                          <strong>Busca por Geolocalização:</strong> Filtra
-                          automaticamente os prestadores parceiros localizados num
-                          raio máximo de <strong>{raioKm} km</strong> com base nas
-                          coordenadas GPS do seu dispositivo.
+                          <strong>Busca por Geolocalização:</strong> Filtra automaticamente os prestadores parceiros localizados num raio máximo de <strong>{raioKm} km</strong> com base nas coordenadas GPS do seu dispositivo.
                         </p>
                       </div>
                     )}
@@ -277,11 +223,7 @@ function ListaProf() {
           </div>
 
           <div className="lado-direito-imagem">
-            <img
-              src={imagemBusca}
-              alt="Busca Profissionais"
-              className="imagem-hero-lista"
-            />
+            <img src={imagemBusca} alt="Busca Profissionais" className="imagem-hero-lista" />
           </div>
         </div>
       </section>
@@ -297,34 +239,34 @@ function ListaProf() {
           ) : (
             <div className="grade-profissionais">
               {profissionaisFiltrados.map((prof, index) => {
+                const fotoUrl = getImageUrl(prof.photo);
                 return (
                   <div key={prof.id} className="cartao-profissional-moderno">
                     <div
                       className="topo-colorido-cartao"
-                      style={{
-                        backgroundColor: coresTopo[index % coresTopo.length],
-                      }}
+                      style={{ backgroundColor: coresTopo[index % coresTopo.length] }}
                     ></div>
 
                     <div className="corpo-cartao">
                       <div className="avatar-profissional-sobreposto">
-  {getImageUrl(prof.photo) ? (
-    <img
-      src={getImageUrl(prof.photo)}
-      alt={prof.name}
-      style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
-      onError={(e) => {
-        e.target.style.display = 'none';
-        e.target.nextSibling.style.display = 'flex';
-      }}
-    />
-  ) : null}
-  <span style={{ display: getImageUrl(prof.photo) ? 'none' : 'flex' }}>
-    {prof.name ? prof.name.charAt(0).toUpperCase() : "U"}
-  </span>
-</div>
+                        {fotoUrl ? (
+                          <img
+                            src={fotoUrl}
+                            alt={prof.name}
+                            className="avatar-foto"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+                        <span style={{ display: fotoUrl ? 'none' : 'flex' }}>
+                          {prof.name ? prof.name.charAt(0).toUpperCase() : "U"}
+                        </span>
+                      </div>
 
                       <h3 className="nome-profissional">{prof.name}</h3>
+
                       {prof.categories && prof.categories.length > 0 ? (
                         <p className="especialidade-cartao">
                           {prof.categories.map((c) => c.name).join(" • ")}
@@ -336,10 +278,7 @@ function ListaProf() {
                       )}
 
                       <div className="avaliacao-profissional">
-                        <i
-                          className="bi bi-star-fill"
-                          style={{ color: prof.rating ? "#ffc107" : "#ccc" }}
-                        ></i>
+                        <i className="bi bi-star-fill" style={{ color: prof.rating ? "#ffc107" : "#ccc" }}></i>
                         {prof.rating !== null && prof.rating !== undefined ? (
                           <strong>{prof.rating.toFixed(1)}</strong>
                         ) : (
@@ -374,6 +313,7 @@ function ListaProf() {
           )}
         </div>
       </section>
+
       {modalAvaliacoes && (
         <HistoricoAvaliacoes
           profissionalId={modalAvaliacoes.id}

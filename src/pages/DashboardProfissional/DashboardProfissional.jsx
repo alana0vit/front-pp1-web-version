@@ -232,6 +232,7 @@ function DashboardProfissional() {
                       <h4 style={{ marginTop: '15px' }}>{p.title}</h4>
                       <p className="client-name"><i className="bi bi-person"></i> {p.clientId?.name || "Cliente"}</p>
                       <DemandInfoBadges demanda={p} />
+                      <DemandFotos demanda={p} modo="indicador" />
                     </div>
 
                     {(String(p.demandStatus).toUpperCase() === "ABERTO" || String(p.demandStatus).toUpperCase() === "AGUARDANDO") && (
@@ -281,6 +282,7 @@ function DashboardProfissional() {
                 <div style={{ fontSize: '14px', color: '#222', background: '#f8f9fa', padding: '15px', borderRadius: '10px', marginTop: '4px', lineHeight: '1.6' }}>
                   {pedidoDetalhado.description}
                 </div>
+                <DemandFotos demanda={pedidoDetalhado} modo="galeria" />
               </div>
 
               <div style={{ marginTop: '10px', borderTop: '1px solid #eee', paddingTop: '15px' }}>
