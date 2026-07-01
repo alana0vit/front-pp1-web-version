@@ -21,6 +21,7 @@ function ListaProf() {
   const reassignDemandId = location.state?.reassignDemandId || null;
   const [raioKm, setRaioKm] = useState(20);
   const [modalAvaliacoes, setModalAvaliacoes] = useState(null);
+  const [fotoExpandida, setFotoExpandida] = useState(null);
   const ultimosFiltrosRef = useRef({});
 
   const [paginaAtual, setPaginaAtual] = useState(1);
@@ -312,6 +313,8 @@ function ListaProf() {
                               <img
                                 src={fotoUrl}
                                 alt={prof.name}
+                                onClick={() => setFotoExpandida(fotoUrl)}
+                                style={{ cursor: "pointer" }}
                                 onError={(e) => {
                                   e.target.style.display = 'none';
                                   e.target.nextSibling.style.display = 'flex';
@@ -425,6 +428,17 @@ function ListaProf() {
             buscarProfissionais(ultimosFiltrosRef.current);
           }}
         />
+      )}
+
+      {fotoExpandida && (
+        <div className="modal-foto-overlay" onClick={() => setFotoExpandida(null)}>
+          <div className="modal-foto-content" onClick={(e) => e.stopPropagation()}>
+            <button className="btn-fechar-foto" onClick={() => setFotoExpandida(null)}>
+              <i className="bi bi-x-lg"></i>
+            </button>
+            <img src={fotoExpandida} alt="Foto do Profissional Expandida" className="foto-ampliada" />
+          </div>
+        </div>
       )}
     </div>
   );
