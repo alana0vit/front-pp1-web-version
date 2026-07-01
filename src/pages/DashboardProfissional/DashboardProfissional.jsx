@@ -5,6 +5,7 @@ import api from "../../services/api";
 import DetalhesSolicitacao from "../DetalhesSolicitacao/DetalhesSolicitacao";
 import { traduzirStatus, getStatusClass } from "../../utils/statusUtils";
 import DemandInfoBadges from "../../components/DemandInfoBadges";
+import DemandFotos from '../../components/DemandFotos';
 import "./DashboardProfissional.css";
 
 const INTERVALO_REFRESH = 30_000;

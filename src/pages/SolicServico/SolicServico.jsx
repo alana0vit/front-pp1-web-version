@@ -16,7 +16,8 @@ function SolicServico() {
   const [categoryId, setCategoryId] = useState('');
   const [suggestedValue, setSuggestedValue] = useState('');
   const [suggestedDate, setSuggestedDate] = useState('');
-  const [imagem, setImagem] = useState(null);
+  const [imagens, setImagens] = useState([]);
+  const [previews, setPreviews] = useState([]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -95,7 +96,9 @@ function SolicServico() {
     formData.append('professionalId', professionalId);
     if (suggestedValue) formData.append('suggestedValue', suggestedValue);
     if (suggestedDate) formData.append('suggestedDate', suggestedDate);
-    if (imagem) formData.append('imagem', imagem);
+    if (imagens.length > 0) {
+      imagens.forEach((img) => formData.append('imagens', img));
+    }
 
     try {
       await api.post('/api/demand', formData, {
@@ -166,7 +169,6 @@ function SolicServico() {
               </div>
             </div>
 
-            {/* Coluna Direita (Empilhada) */}
             <div className="form-column">
               <div className="input-group">
                 <label>Endereço *</label>
@@ -204,20 +206,48 @@ function SolicServico() {
               </div>
 
               <div className="input-group upload-group">
-                <label>Anexar Imagem (opcional)</label>
+                <label>Anexar Imagens (opcional)</label>
                 <input
                   type="file"
                   id="imagemDemanda"
                   accept="image/*"
-                  onChange={(e) => setImagem(e.target.files[0])}
+                  multiple
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files);
+                    setImagens(files);
+                    setPreviews(files.map((f) => URL.createObjectURL(f)));
+                  }}
                   disabled={isSubmitting}
                 />
+                {previews.length > 0 && (
+                  <div className="preview-imagens">
+                    {previews.map((src, i) => (
+                      <div key={i} className="preview-item">
+                        <img src={src} alt={`Preview ${i + 1}`} />
+                        <button
+                          type="button"
+                          className="preview-remove"
+                          onClick={() => {
+                            const novasImagens = imagens.filter((_, idx) => idx !== i);
+                            const novosPreviews = previews.filter((_, idx) => idx !== i);
+                            setImagens(novasImagens);
+                            setPreviews(novosPreviews);
+                          }}
+                        >×</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {previews.length > 0 && (
+                  <p className="preview-count">
+                    <i className="bi bi-images"></i> {previews.length} imagem{previews.length > 1 ? 'ns' : ''} selecionada{previews.length > 1 ? 's' : ''}
+                  </p>
+                )}
               </div>
             </div>
 
           </div>
 
-          {/* Linha Divisória */}
           <div className="form-divider"></div>
 
           <div className="btn-container">
